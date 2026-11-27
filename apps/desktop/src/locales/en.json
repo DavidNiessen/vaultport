@@ -466,7 +466,7 @@
     "securityPolicy": "Security policy",
     "setPassword": "Set a master password",
     "shellIntegration": "Shell integration",
-    "shellIntegrationHint": "Tracks working directory and commands for workspaces (OSC 7 / 133)",
+    "shellIntegrationHint": "Loads the integration script into local bash, zsh and fish, and sets SSH_CLIENT_SHELL_INTEGRATION for SSH sessions (OSC 7 / 133)",
     "shortcuts": "Shortcuts",
     "sourceCode": "Source code",
     "storedEncrypted": "Settings are stored encrypted in your vault.",

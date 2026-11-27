@@ -6,8 +6,10 @@ use super::resolve::SshPlan;
 use super::{EventSink, Input, SessionPhase};
 use crate::error::CmdResult;
 use crate::net::{self, Asker};
+use crate::prefs::TerminalPrefs;
 use ssh_engine::{CloseCategory, ShellEvent, ShellRequest};
 use tauri::Manager;
+use term_intel::scripts::ENABLE_VAR;
 use tokio::sync::mpsc;
 
 pub fn spawn(
@@ -48,11 +50,12 @@ async fn run(
         run_mosh(app, &plan, &conn, &cmd, cols, rows, input, sink).await;
         return;
     }
+    let prefs: TerminalPrefs = crate::prefs::load(app, crate::prefs::TERMINAL);
     let request = ShellRequest {
         term: plan.term_type.clone(),
         cols: u32::from(cols),
         rows: u32::from(rows),
-        env: plan.env.clone(),
+        env: shell_env(&plan.env, prefs.shell_integration),
         agent_forwarding: plan.agent_forwarding,
         command: None,
     };
@@ -65,6 +68,7 @@ async fn run(
         }
     };
     sink.status(SessionPhase::Connected);
+    super::probe::spawn(app, &conn, plan.host_id, &prefs);
     let mut rec = Recorder::start(app, plan.host_id, &plan.label, cols, rows);
     if let Some(script) = &plan.startup_script {
         let mut s = script.clone();
@@ -111,6 +115,16 @@ async fn run(
     rec.finish();
     conn.close().await;
     sink.closed(None, false);
+}
+
+/// Environment for the shell channel: the host's variables, plus the switch that activates
+/// the shell integration scripts (when the server accepts it, see `AcceptEnv`).
+fn shell_env(host_env: &[(String, String)], shell_integration: bool) -> Vec<(String, String)> {
+    let mut env = host_env.to_vec();
+    if shell_integration && !env.iter().any(|(k, _)| k == ENABLE_VAR) {
+        env.push((ENABLE_VAR.to_owned(), "1".to_owned()));
+    }
+    env
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -206,4 +220,19 @@ fn touch_host(app: &tauri::AppHandle, plan: &SshPlan) {
         }
         Ok(())
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn shell_integration_adds_the_switch_once() {
+        let host = vec![("LANG".to_owned(), "C.UTF-8".to_owned())];
+        assert_eq!(shell_env(&host, false), host);
+        let env = shell_env(&host, true);
+        assert_eq!(env.len(), 2);
+        assert_eq!(env[1], (ENABLE_VAR.to_owned(), "1".to_owned()));
+        assert_eq!(shell_env(&env, true), env);
+    }
 }

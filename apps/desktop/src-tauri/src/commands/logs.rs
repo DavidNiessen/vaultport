@@ -13,6 +13,30 @@ pub const LOG_INDEX: &str = "logIndex";
 pub const LOG_KEY_PURPOSE: &str = "session-log";
 pub const HISTORY: &str = "history";
 
+/// Name of the settings document holding the command history of `host_id` (or the history
+/// of sessions without a saved host).
+pub fn history_doc(host_id: Option<core_model::HostId>) -> String {
+    host_id.map_or_else(|| HISTORY.to_owned(), |h| format!("{HISTORY}-{h}"))
+}
+
+/// Reads, changes and stores a command history document.
+pub fn update_history(
+    v: &mut vault::Vault,
+    host_id: Option<core_model::HostId>,
+    change: impl FnOnce(&mut term_intel::history::HistoryIndex),
+) -> CmdResult<()> {
+    let name = history_doc(host_id);
+    let mut index: term_intel::history::HistoryIndex = v
+        .get_settings(&name)?
+        .and_then(|j| serde_json::from_value(j).ok())
+        .unwrap_or_default();
+    change(&mut index);
+    if let Ok(value) = serde_json::to_value(&index) {
+        v.put_settings(&name, &value, true)?;
+    }
+    Ok(())
+}
+
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct LogIndex {
     pub logs: Vec<LogMetadata>,
