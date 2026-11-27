@@ -13,7 +13,7 @@ publish.workspace = true
 default = ["fido2-hid"]
 # FIDO2 security keys over USB HID (CTAP2). Only compiled on desktop targets; on Android
 # and iOS the dependency is never pulled in, even with the feature enabled.
-fido2-hid = ["dep:ctap-hid-fido2"]
+fido2-hid = ["dep:ctap-hid-fido2", "dep:hidapi"]
 
 [dependencies]
 core-model = { path = "../core-model" }
@@ -31,6 +31,8 @@ zeroize = { version = "1", features = ["derive"] }
 
 [target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
 ctap-hid-fido2 = { version = "3.6", optional = true }
+# Same configuration as ctap-hid-fido2 uses; only needed to probe HID initialisation.
+hidapi = { version = "2.6", default-features = false, features = ["linux-static-hidraw"], optional = true }
 
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 core-foundation = "0.10"

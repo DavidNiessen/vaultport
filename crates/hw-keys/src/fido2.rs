@@ -19,6 +19,15 @@
 //! All device I/O is blocking and runs on tokio's blocking pool; operations are serialized
 //! process-wide because authenticators handle one CTAP transaction at a time.
 //!
+//! # Platform access
+//!
+//! * Linux: the user needs read/write access to the authenticator's `/dev/hidraw*` node
+//!   (systemd `uaccess` rules or libfido2's `70-u2f.rules`).
+//! * Windows ≥ 10 1903 only lets elevated processes talk to FIDO devices over raw HID;
+//!   unelevated apps must go through the Windows WebAuthn API (`webauthn.dll`), which is
+//!   not implemented here yet. Expect [`Error::NoDevice`] or an open error otherwise.
+//! * macOS: works for non-sandboxed apps; sandboxed apps need the USB device entitlement.
+//!
 //! # Limitations
 //!
 //! * `ctap-hid-fido2` copies the PIN into non-zeroized buffers internally; our copies are
@@ -83,13 +92,23 @@ pub enum DeviceSelector {
 pub async fn list_devices() -> Result<Vec<DeviceInfo>> {
     blocking(|| {
         let _guard = device_lock();
-        Ok(enumerate())
+        enumerate()
     })
     .await
 }
 
-fn enumerate() -> Vec<DeviceInfo> {
-    ctap_hid_fido2::get_fidokey_devices()
+/// `ctap-hid-fido2` panics if the HID subsystem cannot be initialised; probe it first
+/// (hidapi keeps one global context, so a successful probe makes the library's own
+/// initialisation succeed too).
+fn ensure_hid() -> Result<()> {
+    hidapi::HidApi::new()
+        .map(drop)
+        .map_err(|_| Error::Authenticator("the HID subsystem is not available".to_owned()))
+}
+
+fn enumerate() -> Result<Vec<DeviceInfo>> {
+    ensure_hid()?;
+    Ok(ctap_hid_fido2::get_fidokey_devices()
         .into_iter()
         .filter_map(|d| match d.param {
             HidParam::Path(path) => Some(DeviceInfo {
@@ -100,7 +119,7 @@ fn enumerate() -> Vec<DeviceInfo> {
             }),
             HidParam::VidPid { .. } => None,
         })
-        .collect()
+        .collect())
 }
 
 fn lib_cfg() -> LibCfg {
@@ -113,6 +132,7 @@ fn lib_cfg() -> LibCfg {
 }
 
 fn open(path: &str) -> Result<FidoKeyHid> {
+    ensure_hid()?;
     FidoKeyHidFactory::create_by_params(&[HidParam::Path(path.to_owned())], &lib_cfg())
         .map_err(|e| map_ctap_error(&e.to_string()))
 }
@@ -465,7 +485,7 @@ fn resolve_single(selector: &DeviceSelector) -> Result<String> {
     match selector {
         DeviceSelector::Path(path) => Ok(path.clone()),
         DeviceSelector::Auto => {
-            let mut devices = enumerate();
+            let mut devices = enumerate()?;
             match devices.len() {
                 0 => Err(Error::NoDevice),
                 1 => Ok(devices.remove(0).path),
@@ -485,7 +505,7 @@ fn resolve_for_credential(
     if let DeviceSelector::Path(path) = selector {
         return Ok(path.clone());
     }
-    let devices = enumerate();
+    let devices = enumerate()?;
     match devices.len() {
         0 => Err(Error::NoDevice),
         1 => Ok(devices[0].path.clone()),

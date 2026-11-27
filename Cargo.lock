@@ -933,6 +933,7 @@ dependencies = [
  "ed25519-dalek",
  "getrandom 0.3.4",
  "hex",
+ "hidapi",
  "p256",
  "security-framework",
  "security-framework-sys",
