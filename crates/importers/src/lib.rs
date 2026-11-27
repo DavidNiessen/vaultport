@@ -34,6 +34,7 @@ mod bundle;
 mod common;
 mod error;
 mod finalize;
+pub mod ssh_config;
 mod text;
 mod wire;
 
