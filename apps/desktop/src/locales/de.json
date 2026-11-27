@@ -433,6 +433,8 @@
     "aboutText": "Ein freier, quelloffener und serverloser SSH-Client. Deine Daten werden auf deinen Geräten verschlüsselt und nur mit Speicher synchronisiert, den du kontrollierst.",
     "ai": "Lokale KI",
     "allow": "Erlauben",
+    "animatedBackground": "Animierter Hintergrund",
+    "animatedBackgroundHint": "Ein langsam wanderndes Leuchten in den Farben des Schemas. Steht still, wenn dein System reduzierte Bewegung wünscht.",
     "appTheme": "Design",
     "appearance": "Darstellung",
     "ask": "Nachfragen",

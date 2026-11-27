@@ -132,7 +132,8 @@ function ThemePreview({
 
 function Appearance() {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme, preset, setPreset } = useApp();
+  const { theme, setTheme, preset, setPreset, animatedBackground, setAnimatedBackground } =
+    useApp();
   return (
     <Card title={t('settings.appearance')}>
       <Row label={t('settings.appTheme')}>
@@ -152,6 +153,16 @@ function Appearance() {
         <div className="text-muted mt-0.5 text-xs">{t('settings.presetHint')}</div>
         <PresetPicker value={preset} onChange={setPreset} />
       </div>
+      <Row
+        label={t('settings.animatedBackground')}
+        description={t('settings.animatedBackgroundHint')}
+      >
+        <Switch
+          checked={animatedBackground}
+          onCheckedChange={setAnimatedBackground}
+          label={t('settings.animatedBackground')}
+        />
+      </Row>
       <Row label={t('settings.language')}>
         <Select
           aria-label={t('settings.language')}

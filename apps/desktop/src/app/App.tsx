@@ -18,14 +18,16 @@ import { Shell } from './Shell';
 function useDocumentTheme() {
   const theme = useApp((s) => s.theme);
   const preset = useApp((s) => s.preset);
+  const animated = useApp((s) => s.animatedBackground);
   const scheme = useColorScheme(theme);
   const platform = usePlatform();
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.theme = scheme;
     root.dataset.preset = preset;
+    root.dataset.motion = animated ? 'on' : 'off';
     root.dataset.platform = platform.kind;
-  }, [scheme, preset, platform.kind]);
+  }, [scheme, preset, animated, platform.kind]);
   return scheme;
 }
 

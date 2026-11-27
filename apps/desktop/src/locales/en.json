@@ -433,6 +433,8 @@
     "aboutText": "A free, open-source and serverless SSH client. Your data is encrypted on your devices and only synced to storage you control.",
     "ai": "Local AI",
     "allow": "Allow",
+    "animatedBackground": "Animated background",
+    "animatedBackgroundHint": "A slowly moving glow in the colors of the preset. Always still when your system asks for reduced motion.",
     "appTheme": "Theme",
     "appearance": "Appearance",
     "ask": "Ask",
