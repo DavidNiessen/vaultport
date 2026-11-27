@@ -570,7 +570,7 @@ const QR_MODULES = (() => {
   margin: 0;
   padding: 6px 16px;
   border-radius: 14px;
-  background: #12181d;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
   font-family: var(--vp-font-family-mono);
   font-size: 12.5px;
@@ -769,7 +769,7 @@ const QR_MODULES = (() => {
 .ws {
   overflow: hidden;
   border-radius: 14px;
-  background: #12181d;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
 }
 
@@ -814,7 +814,7 @@ const QR_MODULES = (() => {
 .ws-term {
   overflow: hidden;
   padding: 14px 12px;
-  background: #12181d;
+  background: #15141c;
   color: #d8dcea;
   font-size: 12px;
   white-space: nowrap;
@@ -836,7 +836,7 @@ const QR_MODULES = (() => {
 .ac-input {
   padding: 10px 12px;
   border-radius: 10px;
-  background: #12181d;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
   color: #d8dcea;
   font-size: 13px;
@@ -976,7 +976,7 @@ const QR_MODULES = (() => {
   padding: 9px 12px;
   overflow: hidden;
   border-radius: 9px;
-  background: #12181d;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
   color: #7be2ee;
   font-size: 12.5px;
@@ -1032,7 +1032,7 @@ const QR_MODULES = (() => {
   padding: 10px 12px;
   overflow: hidden;
   border-radius: 10px;
-  background: #12181d;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
   color: #7be2ee;
   font-size: 12px;
@@ -1131,7 +1131,7 @@ const QR_MODULES = (() => {
   width: 210px;
   padding: 10px;
   border-radius: 30px;
-  background: #0b0f12;
+  background: #0d0c12;
   box-shadow:
     0 0 0 1px rgb(255 255 255 / 0.12),
     0 0 0 6px #1a1e2b,
@@ -1143,7 +1143,7 @@ const QR_MODULES = (() => {
   padding: 16px 12px;
   overflow: hidden;
   border-radius: 20px 20px 6px 6px;
-  background: #12181d;
+  background: #15141c;
   font-size: 10.5px;
   line-height: 1.75;
 }

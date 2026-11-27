@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 /*
- * Design tokens ("Pulse", Glacier preset). Mirrors the app (apps/desktop/src/styles/index.css):
- * cool slate surfaces, an icy aqua accent, Manrope for text, Archivo (wide) for display type
+ * Design tokens ("Pulse", Iris preset). Mirrors the app (apps/desktop/src/styles/index.css):
+ * ink surfaces, a soft lavender accent, Manrope for text, Archivo (wide) for display type
  * and JetBrains Mono for code. Dark is the default appearance.
  */
 
@@ -12,10 +12,10 @@
     'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --sc-font-display: 'Archivo Variable', 'Manrope Variable', sans-serif;
 
-  --vp-c-brand-1: #0b6b63;
-  --vp-c-brand-2: #0b7d74;
-  --vp-c-brand-3: #0b7d74;
-  --vp-c-brand-soft: rgb(11 125 116 / 0.12);
+  --vp-c-brand-1: #4a37c9;
+  --vp-c-brand-2: #5b47e0;
+  --vp-c-brand-3: #5b47e0;
+  --vp-c-brand-soft: rgb(91 71 224 / 0.1);
 
   --vp-c-bg: #ffffff;
   --vp-c-bg-alt: #f5f6f8;
@@ -35,29 +35,29 @@
 
   --vp-home-hero-name-color: var(--vp-c-text-1);
 
-  --vp-custom-block-tip-bg: rgb(11 125 116 / 0.07);
+  --vp-custom-block-tip-bg: rgb(91 71 224 / 0.07);
   --vp-custom-block-tip-border: transparent;
   --vp-custom-block-tip-text: var(--vp-c-text-1);
-  --vp-local-search-highlight-bg: rgb(11 125 116 / 0.22);
+  --vp-local-search-highlight-bg: rgb(91 71 224 / 0.2);
 
   /* Landing page tokens */
-  --sc-accent: #0b7d74;
-  --sc-accent-text: #0b6b63;
+  --sc-accent: #5b47e0;
+  --sc-accent-text: #4a37c9;
   --sc-accent-fg: #ffffff;
-  --sc-accent-rgb: 11 125 116;
-  --sc-glow-1: 70 190 200;
-  --sc-glow-2: 80 120 220;
+  --sc-accent-rgb: 91 71 224;
+  --sc-glow-1: 130 110 255;
+  --sc-glow-2: 90 140 230;
   --sc-glow-strength: 0.16;
   --sc-primary: #0b0f12;
   --sc-primary-fg: #ffffff;
-  --sc-cyan: #0b7d74;
+  --sc-cyan: #5b47e0;
   --sc-success: #15803d;
   --sc-surface: #ffffff;
   --sc-surface-2: #f5f6f8;
   --sc-chip: rgb(11 15 18 / 0.06);
   --sc-border: rgb(11 15 18 / 0.09);
   --sc-border-strong: rgb(11 15 18 / 0.16);
-  --sc-glow: rgb(11 125 116 / 0.16);
+  --sc-glow: rgb(91 71 224 / 0.16);
   --sc-grid-line: rgb(11 15 18 / 0.05);
   --sc-shadow: 0 24px 60px -24px rgb(11 15 18 / 0.25), 0 0 0 1px var(--sc-border);
   --sc-radius: 24px;
@@ -65,15 +65,15 @@
 }
 
 .dark {
-  --vp-c-brand-1: #6fe3d9;
-  --vp-c-brand-2: #93ece4;
-  --vp-c-brand-3: #6fe3d9;
-  --vp-c-brand-soft: rgb(111 227 217 / 0.14);
+  --vp-c-brand-1: #b3a6ff;
+  --vp-c-brand-2: #c6bcff;
+  --vp-c-brand-3: #b3a6ff;
+  --vp-c-brand-soft: rgb(179 166 255 / 0.14);
 
-  --vp-c-bg: #0b0f12;
-  --vp-c-bg-alt: #090c0f;
-  --vp-c-bg-soft: #12181d;
-  --vp-c-bg-elv: #141a1f;
+  --vp-c-bg: #0d0c12;
+  --vp-c-bg-alt: #0a090e;
+  --vp-c-bg-soft: #15141c;
+  --vp-c-bg-elv: #17161f;
   --vp-c-text-1: #f5f7fa;
   --vp-c-text-2: #aeb5bf;
   --vp-c-text-3: #8a929d;
@@ -82,30 +82,30 @@
   --vp-c-default-soft: rgb(255 255 255 / 0.07);
 
   --vp-button-brand-bg: #ffffff;
-  --vp-button-brand-text: #0b0f12;
-  --vp-button-brand-hover-bg: #e9edf1;
-  --vp-button-brand-hover-text: #0b0f12;
+  --vp-button-brand-text: #0d0c12;
+  --vp-button-brand-hover-bg: #ebe9f2;
+  --vp-button-brand-hover-text: #0d0c12;
   --vp-button-brand-active-bg: #ffffff;
 
-  --vp-code-block-bg: #12181d;
-  --vp-custom-block-tip-bg: rgb(111 227 217 / 0.08);
-  --vp-local-search-highlight-bg: rgb(111 227 217 / 0.25);
+  --vp-code-block-bg: #15141c;
+  --vp-custom-block-tip-bg: rgb(179 166 255 / 0.08);
+  --vp-local-search-highlight-bg: rgb(179 166 255 / 0.25);
 
-  --sc-accent: #6fe3d9;
-  --sc-accent-text: #6fe3d9;
-  --sc-accent-fg: #041312;
-  --sc-accent-rgb: 111 227 217;
+  --sc-accent: #b3a6ff;
+  --sc-accent-text: #b3a6ff;
+  --sc-accent-fg: #0f0b1f;
+  --sc-accent-rgb: 179 166 255;
   --sc-glow-strength: 0.26;
   --sc-primary: #ffffff;
-  --sc-primary-fg: #0b0f12;
-  --sc-cyan: #6fe3d9;
+  --sc-primary-fg: #0d0c12;
+  --sc-cyan: #b3a6ff;
   --sc-success: #4ade80;
-  --sc-surface: #12181d;
-  --sc-surface-2: #141a1f;
+  --sc-surface: #15141c;
+  --sc-surface-2: #17161f;
   --sc-chip: rgb(255 255 255 / 0.07);
   --sc-border: rgb(255 255 255 / 0.07);
   --sc-border-strong: rgb(255 255 255 / 0.13);
-  --sc-glow: rgb(111 227 217 / 0.22);
+  --sc-glow: rgb(179 166 255 / 0.22);
   --sc-grid-line: rgb(255 255 255 / 0.04);
   --sc-shadow: 0 40px 80px -32px rgb(0 0 0 / 0.75), 0 0 0 1px var(--sc-border);
 }

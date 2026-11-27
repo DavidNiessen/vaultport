@@ -70,15 +70,15 @@ const snippets = [
 <style scoped>
 .window {
   /* The window always shows the dark app, so it keeps the dark accent in both site themes. */
-  --sc-accent: #6fe3d9;
-  --sc-accent-text: #6fe3d9;
-  --sc-accent-rgb: 111 227 217;
-  --sc-accent-fg: #041312;
+  --sc-accent: #b3a6ff;
+  --sc-accent-text: #b3a6ff;
+  --sc-accent-rgb: 179 166 255;
+  --sc-accent-fg: #0f0b1f;
   position: relative;
   margin: 0;
   overflow: hidden;
   border-radius: 18px;
-  background: #12181d;
+  background: #15141c;
   box-shadow:
     0 0 0 1px rgb(255 255 255 / 0.09),
     0 1px 0 0 rgb(255 255 255 / 0.06) inset,
@@ -211,7 +211,7 @@ const snippets = [
 .term {
   min-width: 0;
   background:
-    radial-gradient(120% 80% at 0% 0%, rgb(var(--sc-accent-rgb) / 0.08), transparent 60%), #12181d;
+    radial-gradient(120% 80% at 0% 0%, rgb(var(--sc-accent-rgb) / 0.08), transparent 60%), #15141c;
 }
 
 .panel {
@@ -227,7 +227,7 @@ const snippets = [
   margin-bottom: 14px;
   padding: 3px;
   border-radius: 9px;
-  background: #0b0f12;
+  background: #0d0c12;
 }
 
 .ptab {
