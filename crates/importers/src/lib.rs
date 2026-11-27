@@ -12,6 +12,10 @@
 //! | MobaXterm `.mobaconf` / `.mxtsession` | [`mobaxterm`] |
 //! | SecureCRT XML export | [`securecrt`] |
 //!
+//! Entry points: [`detect_format`] sniffs raw bytes, [`import`] / [`import_auto`] decode the
+//! text (UTF-8 or UTF-16 with BOM) and run the matching parser. Each module also exposes its
+//! parser on `&str` directly.
+//!
 //! # Design
 //!
 //! * **Pure.** Parsers take `&str` / `&[u8]` and never touch the file system, the network or
@@ -35,6 +39,7 @@ mod common;
 pub mod csv;
 mod error;
 mod finalize;
+mod format;
 pub mod known_hosts;
 pub mod mobaxterm;
 pub mod putty;
@@ -48,5 +53,6 @@ pub use bundle::{
     SecretKind, WarningKind,
 };
 pub use error::ImportError;
+pub use format::{Format, detect_format, import, import_auto};
 pub use text::MAX_INPUT_BYTES;
 pub use wire::sha256_fingerprint;

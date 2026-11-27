@@ -105,7 +105,7 @@ pub fn parse_with_includes(
 /// Splits a config line into a lowercase keyword and its arguments, following OpenSSH's
 /// rules: `keyword arg...` or `keyword=arg...`, double or single quotes, backslash escapes, and
 /// comments starting at an unquoted `#` token.
-fn split_line(raw: &str) -> Result<Option<(String, Vec<String>)>, &'static str> {
+pub(crate) fn split_line(raw: &str) -> Result<Option<(String, Vec<String>)>, &'static str> {
     let s = raw.trim_matches(|c: char| c.is_whitespace());
     if s.is_empty() || s.starts_with('#') {
         return Ok(None);

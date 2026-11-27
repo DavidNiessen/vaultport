@@ -56,7 +56,7 @@ fn token(s: &str) -> Option<(&str, &str)> {
     Some(s.split_once(char::is_whitespace).unwrap_or((s, "")))
 }
 
-fn parse_line(line: &str) -> Result<KnownHost, &'static str> {
+pub(crate) fn parse_line(line: &str) -> Result<KnownHost, &'static str> {
     let (mut first, mut rest) = token(line).ok_or("empty line")?;
     let marker = if first.starts_with('@') {
         let m = match first.to_ascii_lowercase().as_str() {
