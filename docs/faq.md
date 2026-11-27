@@ -57,6 +57,10 @@ It does not read them live, but you can [import](/guide/importing) your config �
 
 No. Local AI is off by default, and when enabled it runs a small model entirely on your device. Nothing you type is sent anywhere, and generated commands are never run automatically. See [Local AI](/guide/local-ai).
 
+## Can Claude Code, Cursor or other AI agents use ssh-client?
+
+Yes, on desktop, if you allow it. Turn on **Settings → AI agents** and add ssh-client as an MCP server to your tool. Agents can list hosts and read files, and — after you approve each change in the app — run commands, write files and start tunnels. They never see your passwords or keys. Keep in mind that whatever the agent reads from your servers goes to the AI tool's model. See [AI agents (MCP)](/guide/ai-agents).
+
 ## Is autocomplete AI-based?
 
 No. Autocomplete is a deterministic engine based on your history, snippets, paths and built-in command specs. It never uses the AI model.

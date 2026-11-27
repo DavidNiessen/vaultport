@@ -40,6 +40,7 @@ const jsonLd = {
     'FIDO2 security keys, Secure Enclave and Windows Hello keys',
     'Post-quantum key exchange (mlkem768x25519-sha256)',
     'Optional on-device AI command generation, off by default',
+    'Local MCP server for AI agents with per-action approval, off by default',
   ],
 };
 
