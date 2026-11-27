@@ -5,7 +5,9 @@ coverage/
 pnpm-lock.yaml
 Cargo.lock
 LICENSE
+# Rewritten by Release Please on every release.
 CHANGELOG.md
+.release-please-manifest.json
 apps/desktop/src-tauri/gen/
 apps/desktop/src/lib/ipc/bindings.ts
 docs/.vitepress/cache/
