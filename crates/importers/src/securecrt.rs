@@ -90,23 +90,27 @@ fn name_attr(e: &BytesStart<'_>) -> String {
     e.try_get_attribute("name")
         .ok()
         .flatten()
-        .and_then(|a| a.unescape_value().ok().map(std::borrow::Cow::into_owned))
+        .and_then(|a| {
+            a.normalized_value(quick_xml::XmlVersion::Implicit1_0)
+                .ok()
+                .map(std::borrow::Cow::into_owned)
+        })
         .unwrap_or_default()
 }
 
 fn open_frame(parent: Option<&Frame>, e: &BytesStart<'_>) -> Frame {
     let in_key = matches!(parent, Some(Frame::Key(_)));
     match e.local_name().as_ref() {
-        b"key" | b"VanDyke" if in_key => Frame::Key(XKey {
+        "key" | "VanDyke" if in_key => Frame::Key(XKey {
             name: name_attr(e),
             ..XKey::default()
         }),
-        b"string" if in_key => Frame::Value {
+        "string" if in_key => Frame::Value {
             dword: false,
             name: name_attr(e),
             text: String::new(),
         },
-        b"dword" if in_key => Frame::Value {
+        "dword" if in_key => Frame::Value {
             dword: true,
             name: name_attr(e),
             text: String::new(),
@@ -148,12 +152,12 @@ fn read_tree(input: &str) -> Result<XKey, ImportError> {
                 if stack.len() > MAX_XML_DEPTH {
                     return Err(malformed("elements nested too deeply"));
                 }
-                saw_vandyke |= e.local_name().as_ref() == b"VanDyke";
+                saw_vandyke |= e.local_name().as_ref() == "VanDyke";
                 let f = open_frame(stack.last(), &e);
                 stack.push(f);
             }
             Event::Empty(e) => {
-                saw_vandyke |= e.local_name().as_ref() == b"VanDyke";
+                saw_vandyke |= e.local_name().as_ref() == "VanDyke";
                 let f = open_frame(stack.last(), &e);
                 close_frame(&mut stack, f);
             }
@@ -166,13 +170,12 @@ fn read_tree(input: &str) -> Result<XKey, ImportError> {
             }
             Event::Text(t) => {
                 if let Some(Frame::Value { text, .. }) = stack.last_mut() {
-                    let s = t.decode().map_err(|e| malformed(e.to_string()))?;
-                    text.push_str(&s);
+                    text.push_str(&t.xml10_content());
                 }
             }
             Event::CData(t) => {
                 if let Some(Frame::Value { text, .. }) = stack.last_mut() {
-                    text.push_str(&String::from_utf8_lossy(&t));
+                    text.push_str(t.as_ref());
                 }
             }
             Event::GeneralRef(r) => {
@@ -180,11 +183,11 @@ fn read_tree(input: &str) -> Result<XKey, ImportError> {
                     let c = match r.resolve_char_ref() {
                         Ok(Some(c)) => Some(c),
                         _ => match r.as_ref() {
-                            b"lt" => Some('<'),
-                            b"gt" => Some('>'),
-                            b"amp" => Some('&'),
-                            b"apos" => Some('\''),
-                            b"quot" => Some('"'),
+                            "lt" => Some('<'),
+                            "gt" => Some('>'),
+                            "amp" => Some('&'),
+                            "apos" => Some('\''),
+                            "quot" => Some('"'),
                             _ => None,
                         },
                     };

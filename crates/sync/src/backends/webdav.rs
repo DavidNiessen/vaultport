@@ -221,8 +221,8 @@ struct DavEntry {
     etag: Option<String>,
 }
 
-fn local_name(raw: &[u8]) -> &[u8] {
-    raw.rsplit(|b| *b == b':').next().unwrap_or(raw)
+fn local_name(raw: &str) -> &str {
+    raw.rsplit(':').next().unwrap_or(raw)
 }
 
 /// Parses a `207 Multi-Status` body into entries.
@@ -231,7 +231,7 @@ fn parse_multistatus(body: &[u8]) -> Result<Vec<DavEntry>, SyncError> {
     reader.config_mut().trim_text(true);
     let mut out = Vec::new();
     let mut current: Option<DavEntry> = None;
-    let mut path: Vec<Vec<u8>> = Vec::new();
+    let mut path: Vec<String> = Vec::new();
     let mut buf = Vec::new();
     loop {
         let ev = reader
@@ -240,10 +240,10 @@ fn parse_multistatus(body: &[u8]) -> Result<Vec<DavEntry>, SyncError> {
         match ev {
             Event::Start(s) => {
                 let n = local_name(s.name().as_ref()).to_ascii_lowercase();
-                if n == b"response" {
+                if n == "response" {
                     current = Some(DavEntry::default());
                 }
-                if n == b"collection"
+                if n == "collection"
                     && let Some(c) = current.as_mut()
                 {
                     c.collection = true;
@@ -252,28 +252,25 @@ fn parse_multistatus(body: &[u8]) -> Result<Vec<DavEntry>, SyncError> {
             }
             Event::Empty(s) => {
                 let n = local_name(s.name().as_ref()).to_ascii_lowercase();
-                if n == b"collection"
+                if n == "collection"
                     && let Some(c) = current.as_mut()
                 {
                     c.collection = true;
                 }
             }
             Event::Text(t) => {
-                let text = t
-                    .decode()
-                    .map_err(|e| SyncError::Backend(format!("PROPFIND response: {e}")))?;
-                append_text(current.as_mut(), path.last(), &text);
+                append_text(current.as_mut(), path.last(), &t.xml10_content());
             }
             Event::GeneralRef(r) => {
                 // Entity references are reported separately since quick-xml 0.38.
                 let resolved = match r.resolve_char_ref() {
                     Ok(Some(c)) => Some(c),
-                    _ => match &*r {
-                        b"amp" => Some('&'),
-                        b"lt" => Some('<'),
-                        b"gt" => Some('>'),
-                        b"quot" => Some('"'),
-                        b"apos" => Some('\''),
+                    _ => match r.as_ref() {
+                        "amp" => Some('&'),
+                        "lt" => Some('<'),
+                        "gt" => Some('>'),
+                        "quot" => Some('"'),
+                        "apos" => Some('\''),
                         _ => None,
                     },
                 };
@@ -284,7 +281,7 @@ fn parse_multistatus(body: &[u8]) -> Result<Vec<DavEntry>, SyncError> {
             Event::End(e) => {
                 let n = local_name(e.name().as_ref()).to_ascii_lowercase();
                 path.pop();
-                if n == b"response"
+                if n == "response"
                     && let Some(c) = current.take()
                 {
                     out.push(c);
@@ -304,14 +301,14 @@ fn parse_multistatus(body: &[u8]) -> Result<Vec<DavEntry>, SyncError> {
     Ok(out)
 }
 
-fn append_text(current: Option<&mut DavEntry>, element: Option<&Vec<u8>>, text: &str) {
+fn append_text(current: Option<&mut DavEntry>, element: Option<&String>, text: &str) {
     let (Some(c), Some(el)) = (current, element) else {
         return;
     };
-    match el.as_slice() {
-        b"href" => c.href.push_str(text),
-        b"getcontentlength" => c.size = text.trim().parse().unwrap_or(0),
-        b"getetag" => c.etag.get_or_insert_with(String::new).push_str(text),
+    match el.as_str() {
+        "href" => c.href.push_str(text),
+        "getcontentlength" => c.size = text.trim().parse().unwrap_or(0),
+        "getetag" => c.etag.get_or_insert_with(String::new).push_str(text),
         _ => {}
     }
 }
