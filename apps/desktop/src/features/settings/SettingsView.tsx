@@ -17,6 +17,7 @@ import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
+import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Kbd, Segmented, Select, Switch } from '@/components/ui/controls';
 import { Field, Input, PasswordInput } from '@/components/ui/input';
@@ -465,7 +466,7 @@ function About() {
   return (
     <Card title={t('settings.about')}>
       <div className="flex items-center gap-4">
-        <img src="/logo.svg" alt="" className="size-14" />
+        <Logo className="size-14" />
         <div>
           <div className="text-[15px] font-semibold">Vaultport</div>
           <div className="text-muted text-[13px]">

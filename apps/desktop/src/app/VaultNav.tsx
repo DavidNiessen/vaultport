@@ -12,6 +12,7 @@ import {
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Logo } from '@/components/Logo';
 import { Tooltip } from '@/components/ui/controls';
 import { cn } from '@/lib/cn';
 import { useForwards, useHosts, useKeys, useKnownHosts, useSnippets } from '@/lib/queries';
@@ -43,7 +44,7 @@ function VaultBadge({ name, compact }: { name: string; compact: boolean }) {
     return (
       <Tooltip content={`${name} · ${t('nav.unlocked')}`} side="right">
         <div className="relative mb-3">
-          <img src="/logo.svg" alt={name} className="size-8" />
+          <Logo title={name} className="size-8" />
           <span
             className="bg-success ring-sidebar absolute -right-0.5 -bottom-0.5 size-2.5 rounded-full ring-2"
             aria-hidden
@@ -53,11 +54,11 @@ function VaultBadge({ name, compact }: { name: string; compact: boolean }) {
     );
   }
   return (
-    <div className="mb-4 flex items-center gap-2.5 px-2">
-      <img src="/logo.svg" alt="" className="size-8 shrink-0" />
+    <div className="bg-text/[0.06] mb-5 flex items-center gap-2.5 rounded-[14px] p-2.5">
+      <Logo className="size-8" />
       <div className="min-w-0">
-        <div className="truncate text-[13px] leading-tight font-semibold">{name}</div>
-        <div className="text-muted mt-0.5 flex items-center gap-1.5 text-[11px] leading-tight">
+        <div className="truncate text-[14px] leading-tight font-extrabold">{name}</div>
+        <div className="text-muted mt-0.5 flex items-center gap-1.5 text-[11.5px] leading-tight font-semibold">
           <span className="bg-success size-1.5 rounded-full" aria-hidden />
           {t('nav.unlocked')}
         </div>
@@ -81,11 +82,11 @@ export function VaultNav({
   const counts = useSectionCounts();
   const itemClass = (active: boolean) =>
     cn(
-      'group relative flex h-8 items-center gap-2.5 rounded-[7px] text-[13px] font-medium transition-colors duration-150 pointer-coarse:h-11 [&>svg]:size-4 [&>svg]:shrink-0',
-      compact ? 'w-9 justify-center pointer-coarse:w-11' : 'px-2.5',
+      'group relative flex h-9 items-center gap-3 rounded-[10px] text-[14px] font-bold transition-colors duration-150 pointer-coarse:h-11 [&>svg]:size-[18px] [&>svg]:shrink-0',
+      compact ? 'w-10 justify-center pointer-coarse:w-11' : 'px-3',
       active
-        ? 'bg-surface-3 text-text shadow-[0_0_0_1px_var(--border)] [&>svg]:text-accent-text'
-        : 'text-muted hover:bg-surface-2 hover:text-text',
+        ? 'bg-text/[0.08] text-text [&>svg]:text-accent-text'
+        : 'text-text/80 hover:bg-text/[0.05] hover:text-text',
     );
   const item = (id: VaultSection, icon: ReactNode, label: string) => {
     const active = section === id;
@@ -99,15 +100,12 @@ export function VaultNav({
         onClick={() => setSection(id)}
         className={itemClass(active)}
       >
-        {active && !compact ? (
-          <span className="bg-accent absolute top-1.5 bottom-1.5 -left-2.5 w-[3px] rounded-r-full" />
-        ) : null}
         {icon}
         {compact ? null : (
           <>
             <span className="min-w-0 flex-1 truncate text-left">{label}</span>
             {count ? (
-              <span className="text-subtle font-mono text-[11px] tabular-nums">{count}</span>
+              <span className="text-subtle text-[12px] font-bold tabular-nums">{count}</span>
             ) : null}
           </>
         )}
@@ -136,13 +134,13 @@ export function VaultNav({
     <nav
       aria-label={t('nav.label')}
       className={cn(
-        'border-border bg-sidebar flex shrink-0 flex-col gap-0.5 border-r pt-4 pb-3',
-        compact ? 'w-[60px] items-center' : 'w-56 px-2.5',
+        'border-border bg-sidebar/70 flex shrink-0 flex-col gap-1 border-r pt-3 pb-3',
+        compact ? 'w-[64px] items-center' : 'w-60 px-3',
       )}
     >
       <VaultBadge name={vaultName} compact={compact} />
       {!compact ? (
-        <div className="text-subtle mb-1 px-2.5 text-[11px] font-semibold tracking-[0.08em] uppercase">
+        <div className="text-subtle mb-1 px-3 text-[11px] font-extrabold tracking-[0.1em] uppercase">
           {t('nav.vault')}
         </div>
       ) : null}
