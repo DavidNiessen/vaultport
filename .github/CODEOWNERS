@@ -1,0 +1,9 @@
+# Default owners for everything in the repository.
+* @davidniessen
+
+# Security-critical areas require maintainer review.
+/crates/vault/        @davidniessen
+/crates/ssh-engine/   @davidniessen
+/crates/hw-keys/      @davidniessen
+/crates/sync/         @davidniessen
+/.github/workflows/   @davidniessen

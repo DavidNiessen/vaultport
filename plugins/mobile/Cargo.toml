@@ -1,0 +1,23 @@
+[package]
+name = "tauri-plugin-vaultport-mobile"
+description = "Native mobile services for Vaultport: secure key storage, background keep-alive, screen privacy and hardware-backed SSH keys"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+links = "tauri-plugin-vaultport-mobile"
+exclude = ["/android/build", "/android/.gradle", "/ios/.build"]
+
+[dependencies]
+tauri = { version = "2", default-features = false }
+serde = { version = "1", features = ["derive"] }
+thiserror = "2"
+
+[build-dependencies]
+tauri-plugin = { version = "2", features = ["build"] }
+
+[lints]
+workspace = true

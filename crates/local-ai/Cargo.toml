@@ -1,0 +1,46 @@
+[package]
+name = "local-ai"
+description = "Optional, fully on-device natural-language to shell command generation (pinned GGUF models, llama.cpp)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[features]
+default = ["llama"]
+# On-device inference through llama.cpp (built from source with cmake + a C/C++ compiler).
+llama = ["dep:llama-cpp-2"]
+# Apple GPU acceleration (macOS / iOS).
+metal = ["llama", "llama-cpp-2/metal"]
+# Vulkan GPU acceleration (Linux / Windows / Android); requires the Vulkan SDK at build time.
+vulkan = ["llama", "llama-cpp-2/vulkan"]
+
+[dependencies]
+fs4 = { version = "1", default-features = false, features = ["sync"] }
+futures-util = { version = "0.3", default-features = false, features = ["std"] }
+hex = "0.4"
+llama-cpp-2 = { version = "0.1.161", default-features = false, optional = true }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "http2", "stream"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror = "2"
+tokio = { version = "1", features = ["fs", "io-util", "rt", "sync", "time", "macros"] }
+tokio-util = { version = "0.7", default-features = false }
+tracing = "0.1"
+url = "2"
+
+# Android: link llama.cpp against the shared C++ runtime (libc++_shared.so must be bundled).
+[target.'cfg(target_os = "android")'.dependencies]
+llama-cpp-2 = { version = "0.1.161", default-features = false, optional = true, features = ["android-shared-stdcxx"] }
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+wiremock = "0.6"
+
+[lints]
+workspace = true

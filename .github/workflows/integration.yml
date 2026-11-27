@@ -1,0 +1,46 @@
+name: Integration
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    paths:
+      - crates/ssh-engine/**
+      - crates/sftp-engine/**
+      - crates/telnet-proto/**
+      - crates/mosh-proto/**
+      - docker/test-servers/**
+      - Cargo.lock
+      - .github/workflows/integration.yml
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  protocols:
+    name: SSH / SFTP against OpenSSH (docker)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - name: Build test server image
+        run: docker build -t vaultport-test-sshd:1 docker/test-servers/sshd
+      - name: SSH engine integration tests
+        run: cargo test -p ssh-engine --features integration -- --test-threads=1
+      - name: SFTP engine integration tests
+        run: cargo test -p sftp-engine --features integration,watch -- --test-threads=1
+      - name: Telnet and Mosh protocol tests
+        run: cargo test -p telnet-proto -p mosh-proto

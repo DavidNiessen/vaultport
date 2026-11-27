@@ -10,6 +10,7 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   {
     ignores: [
+      '.claude/**',
       '**/target/**',
       '**/node_modules/**',
       '**/dist/**',
@@ -25,6 +26,10 @@ export default tseslint.config(
   {
     files: ['**/*.{js,mjs,cjs}'],
     languageOptions: { globals: { ...globals.node } },
+  },
+  {
+    files: ['apps/desktop/isolation/**/*.js'],
+    languageOptions: { globals: { ...globals.browser } },
   },
   {
     files: ['apps/**/*.{ts,tsx}'],
@@ -44,7 +49,10 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       ...jsxA11y.flatConfigs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // Fast refresh is a dev-only nicety; feature modules intentionally co-locate helpers.
+      'react-refresh/only-export-components': 'off',
+      // Dialogs focus their primary field on open, which is the expected behaviour.
+      'jsx-a11y/no-autofocus': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
@@ -59,6 +67,11 @@ export default tseslint.config(
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
     },
+  },
+  {
+    // The browser mock backend throws IPC-shaped error objects like the real core does.
+    files: ['apps/desktop/src/lib/ipc/mock*.ts'],
+    rules: { '@typescript-eslint/only-throw-error': 'off' },
   },
   {
     files: ['apps/**/*.{test,spec}.{ts,tsx}', 'apps/**/e2e/**/*.ts'],

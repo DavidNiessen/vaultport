@@ -1,0 +1,56 @@
+name: Bug report
+description: Something does not work as expected.
+labels: ['type: bug', 'status: triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. **Never paste private keys, passwords,
+        hostnames or IP addresses you consider sensitive.**
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Create a host with ...
+        2. Connect ...
+        3. See error ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Settings → About
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      multiple: true
+      options: [Windows, macOS, Linux, iOS, iPadOS, Android]
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS version
+  - type: input
+    id: server
+    attributes:
+      label: Server software (if relevant)
+      placeholder: OpenSSH_9.9, dropbear 2024.86, mosh 1.4.0, ...
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Settings → Advanced → Copy diagnostic log. Review it before pasting.
+      render: text

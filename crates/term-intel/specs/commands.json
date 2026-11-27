@@ -1,0 +1,1311 @@
+{
+  "version": 1,
+  "commands": [
+    {
+      "name": "git",
+      "desc": "Distributed version control",
+      "opts": [
+        {"name": "-C", "desc": "Run as if started in this directory", "arg": "directory"},
+        {"name": "-c", "desc": "Set a configuration value for this run", "arg": "text"},
+        {"name": "--no-pager", "desc": "Do not pipe output into a pager"},
+        {"name": "--version", "desc": "Print the git version"}
+      ],
+      "subs": [
+        {"name": "add", "desc": "Stage changes for the next commit", "args": ["path..."], "opts": [
+          {"name": "-A --all", "desc": "Stage all changes, including removals"},
+          {"name": "-p --patch", "desc": "Choose hunks interactively"},
+          {"name": "-u --update", "desc": "Stage changes to tracked files only"},
+          {"name": "-n --dry-run", "desc": "Show what would be staged"},
+          {"name": "-f --force", "desc": "Allow adding ignored files"}
+        ]},
+        {"name": "status", "desc": "Show the working tree state", "opts": [
+          {"name": "-s --short", "desc": "Compact output"},
+          {"name": "-b --branch", "desc": "Show branch information"},
+          {"name": "--ignored", "desc": "Also list ignored files"}
+        ]},
+        {"name": "commit", "desc": "Record staged changes", "opts": [
+          {"name": "-m --message", "desc": "Use this commit message", "arg": "text", "repeat": true},
+          {"name": "-a --all", "desc": "Stage modified tracked files first"},
+          {"name": "--amend", "desc": "Replace the previous commit"},
+          {"name": "--no-edit", "desc": "Keep the existing message"},
+          {"name": "-S --gpg-sign", "desc": "Sign the commit"},
+          {"name": "-s --signoff", "desc": "Add a Signed-off-by trailer"},
+          {"name": "--fixup", "desc": "Create a fixup commit for a commit", "arg": "ref"},
+          {"name": "--allow-empty", "desc": "Allow a commit without changes"},
+          {"name": "-v --verbose", "desc": "Show the diff in the editor"}
+        ]},
+        {"name": "push", "desc": "Upload local commits to a remote", "args": ["remote", "branch"], "opts": [
+          {"name": "-u --set-upstream", "desc": "Remember the remote branch as upstream"},
+          {"name": "-f --force", "desc": "Overwrite remote history (dangerous)"},
+          {"name": "--force-with-lease", "desc": "Force only if the remote is as expected"},
+          {"name": "--tags", "desc": "Push all tags"},
+          {"name": "-d --delete", "desc": "Delete the remote ref"},
+          {"name": "-n --dry-run", "desc": "Show what would be pushed"}
+        ]},
+        {"name": "pull", "desc": "Fetch and integrate remote changes", "args": ["remote", "branch"], "opts": [
+          {"name": "--rebase", "desc": "Rebase instead of merging"},
+          {"name": "--ff-only", "desc": "Only fast-forward"},
+          {"name": "--no-rebase", "desc": "Merge instead of rebasing"},
+          {"name": "--autostash", "desc": "Stash local changes around the pull"}
+        ]},
+        {"name": "fetch", "desc": "Download objects and refs from a remote", "args": ["remote"], "opts": [
+          {"name": "--all", "desc": "Fetch from every remote"},
+          {"name": "-p --prune", "desc": "Drop remote-tracking refs that no longer exist"},
+          {"name": "--tags", "desc": "Fetch all tags"}
+        ]},
+        {"name": "clone", "desc": "Copy a repository into a new directory", "args": ["url", "directory"], "opts": [
+          {"name": "--depth", "desc": "Shallow clone with this many commits", "arg": "number"},
+          {"name": "-b --branch", "desc": "Check out this branch", "arg": "text"},
+          {"name": "--recurse-submodules", "desc": "Also clone submodules"},
+          {"name": "--bare", "desc": "Create a bare repository"}
+        ]},
+        {"name": "checkout", "desc": "Switch branches or restore files", "args": ["ref", "path..."], "opts": [
+          {"name": "-b", "desc": "Create and switch to a new branch", "arg": "text"},
+          {"name": "-B", "desc": "Create or reset a branch and switch to it", "arg": "text"},
+          {"name": "--", "desc": "Treat the rest as paths"}
+        ]},
+        {"name": "switch", "desc": "Switch to a branch", "args": ["branch"], "opts": [
+          {"name": "-c --create", "desc": "Create a new branch", "arg": "text"},
+          {"name": "-d --detach", "desc": "Detach HEAD at a commit"},
+          {"name": "-", "desc": "Switch to the previous branch"}
+        ]},
+        {"name": "restore", "desc": "Restore working tree files", "args": ["path..."], "opts": [
+          {"name": "-S --staged", "desc": "Restore the index instead"},
+          {"name": "-s --source", "desc": "Restore from this commit", "arg": "ref"}
+        ]},
+        {"name": "branch", "desc": "List, create or delete branches", "args": ["branch"], "opts": [
+          {"name": "-a --all", "desc": "Include remote-tracking branches"},
+          {"name": "-d --delete", "desc": "Delete a merged branch", "arg": "branch"},
+          {"name": "-D", "desc": "Delete a branch even if unmerged", "arg": "branch"},
+          {"name": "-m --move", "desc": "Rename a branch"},
+          {"name": "-v --verbose", "desc": "Show last commit per branch"},
+          {"name": "--merged", "desc": "Only branches merged into HEAD"}
+        ]},
+        {"name": "merge", "desc": "Join another branch into the current one", "args": ["ref"], "opts": [
+          {"name": "--no-ff", "desc": "Always create a merge commit"},
+          {"name": "--squash", "desc": "Squash changes without committing"},
+          {"name": "--abort", "desc": "Abort an in-progress merge"},
+          {"name": "--continue", "desc": "Continue after resolving conflicts"}
+        ]},
+        {"name": "rebase", "desc": "Replay commits on top of another base", "args": ["ref"], "opts": [
+          {"name": "-i --interactive", "desc": "Edit the list of commits"},
+          {"name": "--onto", "desc": "Rebase onto this commit", "arg": "ref"},
+          {"name": "--continue", "desc": "Continue after resolving conflicts"},
+          {"name": "--abort", "desc": "Abort and restore the original branch"},
+          {"name": "--skip", "desc": "Skip the current patch"},
+          {"name": "--autosquash", "desc": "Apply fixup commits automatically"}
+        ]},
+        {"name": "log", "desc": "Show commit history", "args": ["ref", "path..."], "opts": [
+          {"name": "--oneline", "desc": "One line per commit"},
+          {"name": "--graph", "desc": "Draw the branch graph"},
+          {"name": "-n --max-count", "desc": "Limit the number of commits", "arg": "number"},
+          {"name": "-p --patch", "desc": "Show diffs"},
+          {"name": "--stat", "desc": "Show changed file statistics"},
+          {"name": "--author", "desc": "Filter by author", "arg": "text"},
+          {"name": "--since", "desc": "Only commits newer than a date", "arg": "text"},
+          {"name": "--all", "desc": "Show all refs"}
+        ]},
+        {"name": "diff", "desc": "Show changes", "args": ["ref", "path..."], "opts": [
+          {"name": "--staged --cached", "desc": "Compare the index with HEAD"},
+          {"name": "--stat", "desc": "Only show statistics"},
+          {"name": "--name-only", "desc": "Only show file names"},
+          {"name": "-w --ignore-all-space", "desc": "Ignore whitespace"}
+        ]},
+        {"name": "show", "desc": "Show a commit or object", "args": ["ref"], "opts": [
+          {"name": "--stat", "desc": "Show changed file statistics"},
+          {"name": "--name-only", "desc": "Only show file names"}
+        ]},
+        {"name": "stash", "desc": "Set local changes aside", "subs": [
+          {"name": "push", "desc": "Stash current changes", "opts": [{"name": "-m --message", "desc": "Describe the stash", "arg": "text"}, {"name": "-u --include-untracked", "desc": "Include untracked files"}]},
+          {"name": "pop", "desc": "Apply and drop the latest stash"},
+          {"name": "apply", "desc": "Apply a stash and keep it"},
+          {"name": "list", "desc": "List stashes"},
+          {"name": "drop", "desc": "Delete a stash"},
+          {"name": "show", "desc": "Show the changes in a stash"},
+          {"name": "clear", "desc": "Delete all stashes"}
+        ]},
+        {"name": "reset", "desc": "Move HEAD and optionally reset index and files", "args": ["ref", "path..."], "opts": [
+          {"name": "--soft", "desc": "Keep index and working tree"},
+          {"name": "--mixed", "desc": "Reset the index, keep files"},
+          {"name": "--hard", "desc": "Discard all local changes (dangerous)"}
+        ]},
+        {"name": "remote", "desc": "Manage remotes", "opts": [{"name": "-v --verbose", "desc": "Show URLs"}], "subs": [
+          {"name": "add", "desc": "Add a remote", "args": ["text", "url"]},
+          {"name": "remove rm", "desc": "Remove a remote", "args": ["remote"]},
+          {"name": "rename", "desc": "Rename a remote", "args": ["remote", "text"]},
+          {"name": "set-url", "desc": "Change a remote URL", "args": ["remote", "url"]},
+          {"name": "show", "desc": "Show details of a remote", "args": ["remote"]}
+        ]},
+        {"name": "tag", "desc": "Create, list or delete tags", "args": ["text", "ref"], "opts": [
+          {"name": "-a --annotate", "desc": "Create an annotated tag"},
+          {"name": "-m --message", "desc": "Tag message", "arg": "text"},
+          {"name": "-d --delete", "desc": "Delete a tag"},
+          {"name": "-l --list", "desc": "List tags"}
+        ]},
+        {"name": "cherry-pick", "desc": "Apply the changes of existing commits", "args": ["ref..."], "opts": [
+          {"name": "--continue", "desc": "Continue after resolving conflicts"},
+          {"name": "--abort", "desc": "Cancel the operation"},
+          {"name": "-x", "desc": "Record the original commit id"}
+        ]},
+        {"name": "revert", "desc": "Create commits that undo earlier ones", "args": ["ref..."]},
+        {"name": "clean", "desc": "Remove untracked files", "opts": [
+          {"name": "-n --dry-run", "desc": "Show what would be removed"},
+          {"name": "-f --force", "desc": "Actually remove files"},
+          {"name": "-d", "desc": "Also remove directories"},
+          {"name": "-x", "desc": "Also remove ignored files"}
+        ]},
+        {"name": "init", "desc": "Create an empty repository", "args": ["directory"], "opts": [{"name": "-b --initial-branch", "desc": "Name of the first branch", "arg": "text"}]},
+        {"name": "blame", "desc": "Show who last changed each line", "args": ["file"]},
+        {"name": "bisect", "desc": "Binary search for a bad commit", "args": ["enum:start,good,bad,reset,skip,log,run"]},
+        {"name": "submodule", "desc": "Manage submodules", "args": ["enum:update,init,status,add,sync,foreach"], "opts": [{"name": "--init", "desc": "Initialize before updating"}, {"name": "--recursive", "desc": "Recurse into nested submodules"}]},
+        {"name": "worktree", "desc": "Manage linked working trees", "args": ["enum:add,list,remove,prune,move"]},
+        {"name": "config", "desc": "Get and set options", "args": ["text", "text"], "opts": [
+          {"name": "--global", "desc": "Use the per-user file"},
+          {"name": "--local", "desc": "Use the repository file"},
+          {"name": "--list -l", "desc": "List all settings"},
+          {"name": "--unset", "desc": "Remove a setting"}
+        ]},
+        {"name": "reflog", "desc": "Show where HEAD has been"},
+        {"name": "grep", "desc": "Search tracked files", "args": ["text", "path..."], "opts": [{"name": "-n --line-number", "desc": "Show line numbers"}, {"name": "-i --ignore-case", "desc": "Case-insensitive"}]},
+        {"name": "mv", "desc": "Move or rename a tracked file", "args": ["path..."]},
+        {"name": "rm", "desc": "Remove tracked files", "args": ["path..."], "opts": [{"name": "--cached", "desc": "Only remove from the index"}, {"name": "-r", "desc": "Recurse into directories"}]}
+      ]
+    },
+    {
+      "name": "docker",
+      "aliases": ["podman"],
+      "desc": "Container engine",
+      "opts": [
+        {"name": "-H --host", "desc": "Daemon socket to connect to", "arg": "url"},
+        {"name": "--context", "desc": "Context to use", "arg": "text"}
+      ],
+      "subs": [
+        {"name": "run", "desc": "Create and start a container", "args": ["image", "command", "text..."], "opts": [
+          {"name": "-d --detach", "desc": "Run in the background"},
+          {"name": "-i --interactive", "desc": "Keep stdin open"},
+          {"name": "-t --tty", "desc": "Allocate a terminal"},
+          {"name": "--rm", "desc": "Remove the container when it exits"},
+          {"name": "--name", "desc": "Container name", "arg": "text"},
+          {"name": "-p --publish", "desc": "Publish a port (host:container)", "arg": "port", "repeat": true},
+          {"name": "-v --volume", "desc": "Bind mount a volume", "arg": "path", "repeat": true},
+          {"name": "-e --env", "desc": "Set an environment variable", "arg": "text", "repeat": true},
+          {"name": "--env-file", "desc": "Read environment variables from a file", "arg": "file"},
+          {"name": "--network", "desc": "Connect to a network", "arg": "text"},
+          {"name": "--restart", "desc": "Restart policy", "arg": "enum:no,always,unless-stopped,on-failure"},
+          {"name": "-w --workdir", "desc": "Working directory inside the container", "arg": "text"},
+          {"name": "--entrypoint", "desc": "Override the entrypoint", "arg": "text"},
+          {"name": "-u --user", "desc": "User inside the container", "arg": "text"}
+        ]},
+        {"name": "ps", "desc": "List containers", "opts": [
+          {"name": "-a --all", "desc": "Include stopped containers"},
+          {"name": "-q --quiet", "desc": "Only print ids"},
+          {"name": "--format", "desc": "Format output with a Go template", "arg": "text"},
+          {"name": "-f --filter", "desc": "Filter output", "arg": "text"}
+        ]},
+        {"name": "exec", "desc": "Run a command in a running container", "args": ["container", "command", "text..."], "opts": [
+          {"name": "-i --interactive", "desc": "Keep stdin open"},
+          {"name": "-t --tty", "desc": "Allocate a terminal"},
+          {"name": "-u --user", "desc": "User to run as", "arg": "text"},
+          {"name": "-w --workdir", "desc": "Working directory", "arg": "text"},
+          {"name": "-e --env", "desc": "Set an environment variable", "arg": "text"}
+        ]},
+        {"name": "logs", "desc": "Show container logs", "args": ["container"], "opts": [
+          {"name": "-f --follow", "desc": "Follow new output"},
+          {"name": "--tail -n", "desc": "Number of lines from the end", "arg": "number"},
+          {"name": "-t --timestamps", "desc": "Show timestamps"},
+          {"name": "--since", "desc": "Only logs since a time", "arg": "text"}
+        ]},
+        {"name": "start", "desc": "Start stopped containers", "args": ["container..."]},
+        {"name": "stop", "desc": "Stop running containers", "args": ["container..."], "opts": [{"name": "-t --time", "desc": "Seconds to wait before killing", "arg": "number"}]},
+        {"name": "restart", "desc": "Restart containers", "args": ["container..."]},
+        {"name": "rm", "desc": "Remove containers", "args": ["container..."], "opts": [{"name": "-f --force", "desc": "Kill running containers first"}, {"name": "-v --volumes", "desc": "Also remove anonymous volumes"}]},
+        {"name": "images", "desc": "List images", "opts": [{"name": "-a --all", "desc": "Include intermediate images"}, {"name": "-q --quiet", "desc": "Only print ids"}]},
+        {"name": "rmi", "desc": "Remove images", "args": ["image..."], "opts": [{"name": "-f --force", "desc": "Force removal"}]},
+        {"name": "pull", "desc": "Download an image", "args": ["image"], "opts": [{"name": "--platform", "desc": "Target platform", "arg": "text"}]},
+        {"name": "push", "desc": "Upload an image", "args": ["image"]},
+        {"name": "build", "desc": "Build an image from a Dockerfile", "args": ["directory"], "opts": [
+          {"name": "-t --tag", "desc": "Name and tag for the image", "arg": "text"},
+          {"name": "-f --file", "desc": "Path of the Dockerfile", "arg": "file"},
+          {"name": "--build-arg", "desc": "Set a build-time variable", "arg": "text"},
+          {"name": "--no-cache", "desc": "Do not use the build cache"},
+          {"name": "--platform", "desc": "Target platform", "arg": "text"}
+        ]},
+        {"name": "inspect", "desc": "Show low-level object details", "args": ["container..."], "opts": [{"name": "-f --format", "desc": "Format output with a Go template", "arg": "text"}]},
+        {"name": "stats", "desc": "Live resource usage", "args": ["container..."], "opts": [{"name": "--no-stream", "desc": "Print once and exit"}]},
+        {"name": "cp", "desc": "Copy files between a container and the host", "args": ["path", "path"]},
+        {"name": "top", "desc": "Show processes of a container", "args": ["container"]},
+        {"name": "kill", "desc": "Kill running containers", "args": ["container..."], "opts": [{"name": "-s --signal", "desc": "Signal to send", "arg": "signal"}]},
+        {"name": "tag", "desc": "Create a tag for an image", "args": ["image", "text"]},
+        {"name": "login", "desc": "Log in to a registry", "args": ["host"], "opts": [{"name": "-u --username", "desc": "User name", "arg": "user"}, {"name": "--password-stdin", "desc": "Read the password from stdin"}]},
+        {"name": "network", "desc": "Manage networks", "args": ["enum:ls,create,rm,inspect,connect,disconnect,prune"]},
+        {"name": "volume", "desc": "Manage volumes", "args": ["enum:ls,create,rm,inspect,prune"]},
+        {"name": "system", "desc": "Manage the engine", "args": ["enum:df,info,prune,events"], "opts": [{"name": "-a --all", "desc": "Prune all unused images"}, {"name": "--volumes", "desc": "Also prune volumes"}]},
+        {"name": "compose", "desc": "Multi-container applications", "opts": [{"name": "-f --file", "desc": "Compose file", "arg": "file"}, {"name": "-p --project-name", "desc": "Project name", "arg": "text"}], "subs": [
+          {"name": "up", "desc": "Create and start services", "opts": [{"name": "-d --detach", "desc": "Run in the background"}, {"name": "--build", "desc": "Build images first"}, {"name": "--force-recreate", "desc": "Recreate containers"}]},
+          {"name": "down", "desc": "Stop and remove services", "opts": [{"name": "-v --volumes", "desc": "Also remove volumes"}, {"name": "--remove-orphans", "desc": "Remove undeclared containers"}]},
+          {"name": "ps", "desc": "List services"},
+          {"name": "logs", "desc": "Show service logs", "opts": [{"name": "-f --follow", "desc": "Follow new output"}, {"name": "--tail", "desc": "Lines from the end", "arg": "number"}]},
+          {"name": "pull", "desc": "Pull service images"},
+          {"name": "build", "desc": "Build service images"},
+          {"name": "restart", "desc": "Restart services"},
+          {"name": "exec", "desc": "Run a command in a service", "args": ["text", "command", "text..."]},
+          {"name": "config", "desc": "Validate and print the configuration"}
+        ]},
+        {"name": "info", "desc": "Show system-wide information"},
+        {"name": "version", "desc": "Show version information"}
+      ]
+    },
+    {
+      "name": "kubectl",
+      "aliases": ["k", "oc"],
+      "desc": "Kubernetes command-line client",
+      "opts": [
+        {"name": "-n --namespace", "desc": "Namespace to use", "arg": "kube_namespace"},
+        {"name": "-A --all-namespaces", "desc": "Across all namespaces"},
+        {"name": "--context", "desc": "Kubeconfig context", "arg": "text"},
+        {"name": "-o --output", "desc": "Output format", "arg": "enum:json,yaml,wide,name,jsonpath="},
+        {"name": "-l --selector", "desc": "Label selector", "arg": "text"},
+        {"name": "--kubeconfig", "desc": "Path of the kubeconfig file", "arg": "file"}
+      ],
+      "subs": [
+        {"name": "get", "desc": "List resources", "args": ["kube_resource", "text..."], "opts": [{"name": "-w --watch", "desc": "Watch for changes"}, {"name": "--show-labels", "desc": "Show labels"}]},
+        {"name": "describe", "desc": "Show resource details", "args": ["kube_resource", "text..."]},
+        {"name": "apply", "desc": "Apply a configuration", "opts": [{"name": "-f --filename", "desc": "File or directory", "arg": "path"}, {"name": "-k --kustomize", "desc": "Kustomization directory", "arg": "directory"}, {"name": "--dry-run", "desc": "Only print the result", "arg": "enum:none,client,server"}]},
+        {"name": "delete", "desc": "Delete resources", "args": ["kube_resource", "text..."], "opts": [{"name": "-f --filename", "desc": "File with resources", "arg": "path"}, {"name": "--all", "desc": "All resources of the type"}, {"name": "--force", "desc": "Delete immediately"}]},
+        {"name": "logs", "desc": "Print container logs", "args": ["pod"], "opts": [{"name": "-f --follow", "desc": "Follow new output"}, {"name": "-c --container", "desc": "Container name", "arg": "container"}, {"name": "--tail", "desc": "Lines from the end", "arg": "number"}, {"name": "-p --previous", "desc": "Logs of the previous instance"}]},
+        {"name": "exec", "desc": "Run a command in a container", "args": ["pod", "command", "text..."], "opts": [{"name": "-i --stdin", "desc": "Pass stdin"}, {"name": "-t --tty", "desc": "Allocate a terminal"}, {"name": "-c --container", "desc": "Container name", "arg": "container"}]},
+        {"name": "port-forward", "desc": "Forward local ports to a pod", "args": ["pod", "port..."]},
+        {"name": "rollout", "desc": "Manage rollouts", "args": ["enum:status,restart,undo,history,pause,resume", "kube_resource"]},
+        {"name": "scale", "desc": "Set the number of replicas", "args": ["kube_resource"], "opts": [{"name": "--replicas", "desc": "New replica count", "arg": "number"}]},
+        {"name": "edit", "desc": "Edit a resource in the editor", "args": ["kube_resource", "text"]},
+        {"name": "create", "desc": "Create a resource", "args": ["kube_resource", "text"], "opts": [{"name": "-f --filename", "desc": "File with resources", "arg": "path"}]},
+        {"name": "top", "desc": "Show resource usage", "args": ["enum:pod,node"]},
+        {"name": "config", "desc": "Manage kubeconfig", "args": ["enum:get-contexts,use-context,current-context,view,set-context"]},
+        {"name": "cp", "desc": "Copy files to and from containers", "args": ["path", "path"]},
+        {"name": "drain", "desc": "Evict workloads from a node", "args": ["text"], "opts": [{"name": "--ignore-daemonsets", "desc": "Skip DaemonSet pods"}]},
+        {"name": "cordon", "desc": "Mark a node unschedulable", "args": ["text"]},
+        {"name": "uncordon", "desc": "Mark a node schedulable", "args": ["text"]},
+        {"name": "label", "desc": "Update labels", "args": ["kube_resource", "text..."]},
+        {"name": "explain", "desc": "Documentation for a resource", "args": ["kube_resource"]},
+        {"name": "api-resources", "desc": "List resource types"},
+        {"name": "version", "desc": "Show client and server versions"}
+      ]
+    },
+    {
+      "name": "systemctl",
+      "desc": "Control systemd services and the system",
+      "opts": [
+        {"name": "--user", "desc": "Talk to the user's service manager"},
+        {"name": "--now", "desc": "Also start/stop when enabling/disabling"},
+        {"name": "-a --all", "desc": "Show all units"},
+        {"name": "--type -t", "desc": "Filter by unit type", "arg": "enum:service,timer,socket,mount,target"},
+        {"name": "--failed", "desc": "Only failed units"},
+        {"name": "--no-pager", "desc": "Do not use a pager"}
+      ],
+      "subs": [
+        {"name": "status", "desc": "Show unit status", "args": ["service..."]},
+        {"name": "start", "desc": "Start units", "args": ["service..."]},
+        {"name": "stop", "desc": "Stop units", "args": ["service..."]},
+        {"name": "restart", "desc": "Restart units", "args": ["service..."]},
+        {"name": "reload", "desc": "Reload unit configuration", "args": ["service..."]},
+        {"name": "enable", "desc": "Start units at boot", "args": ["service..."]},
+        {"name": "disable", "desc": "Do not start units at boot", "args": ["service..."]},
+        {"name": "is-active", "desc": "Check whether units are running", "args": ["service..."]},
+        {"name": "is-enabled", "desc": "Check whether units start at boot", "args": ["service..."]},
+        {"name": "mask", "desc": "Prevent units from starting", "args": ["service..."]},
+        {"name": "unmask", "desc": "Allow masked units again", "args": ["service..."]},
+        {"name": "cat", "desc": "Show unit files", "args": ["service..."]},
+        {"name": "edit", "desc": "Edit a unit override", "args": ["service"]},
+        {"name": "list-units", "desc": "List loaded units"},
+        {"name": "list-unit-files", "desc": "List installed unit files"},
+        {"name": "list-timers", "desc": "List timers"},
+        {"name": "daemon-reload", "desc": "Reload systemd configuration"},
+        {"name": "reboot", "desc": "Reboot the system"},
+        {"name": "poweroff", "desc": "Power off the system"}
+      ]
+    },
+    {
+      "name": "journalctl",
+      "desc": "Query the systemd journal",
+      "opts": [
+        {"name": "-u --unit", "desc": "Only this unit", "arg": "service", "repeat": true},
+        {"name": "-f --follow", "desc": "Follow new entries"},
+        {"name": "-n --lines", "desc": "Number of recent entries", "arg": "number"},
+        {"name": "-e --pager-end", "desc": "Jump to the end"},
+        {"name": "-b --boot", "desc": "Only entries from a boot"},
+        {"name": "-p --priority", "desc": "Minimum priority", "arg": "enum:emerg,alert,crit,err,warning,notice,info,debug"},
+        {"name": "--since", "desc": "Entries since a time", "arg": "text"},
+        {"name": "--until", "desc": "Entries until a time", "arg": "text"},
+        {"name": "-k --dmesg", "desc": "Kernel messages only"},
+        {"name": "-o --output", "desc": "Output format", "arg": "enum:short,short-iso,json,json-pretty,cat,verbose"},
+        {"name": "-x --catalog", "desc": "Add explanations"},
+        {"name": "--user", "desc": "User journal"},
+        {"name": "--disk-usage", "desc": "Show journal disk usage"},
+        {"name": "--vacuum-size", "desc": "Shrink the journal to a size", "arg": "text"},
+        {"name": "--no-pager", "desc": "Do not use a pager"}
+      ]
+    },
+    {
+      "name": "apt",
+      "desc": "Debian/Ubuntu package manager",
+      "opts": [{"name": "-y --yes", "desc": "Assume yes"}, {"name": "-q --quiet", "desc": "Less output"}],
+      "subs": [
+        {"name": "update", "desc": "Refresh package lists"},
+        {"name": "upgrade", "desc": "Upgrade installed packages"},
+        {"name": "full-upgrade", "desc": "Upgrade, removing packages if needed"},
+        {"name": "install", "desc": "Install packages", "args": ["package..."], "opts": [{"name": "--no-install-recommends", "desc": "Skip recommended packages"}, {"name": "--reinstall", "desc": "Reinstall packages"}]},
+        {"name": "remove", "desc": "Remove packages", "args": ["package..."]},
+        {"name": "purge", "desc": "Remove packages and their configuration", "args": ["package..."]},
+        {"name": "autoremove", "desc": "Remove unneeded dependencies"},
+        {"name": "search", "desc": "Search package descriptions", "args": ["text"]},
+        {"name": "show", "desc": "Show package details", "args": ["package"]},
+        {"name": "list", "desc": "List packages", "opts": [{"name": "--installed", "desc": "Only installed packages"}, {"name": "--upgradable", "desc": "Only upgradable packages"}]},
+        {"name": "policy", "desc": "Show package priorities", "args": ["package"]}
+      ]
+    },
+    {
+      "name": "apt-get",
+      "desc": "Low-level Debian package tool",
+      "opts": [{"name": "-y --yes", "desc": "Assume yes"}, {"name": "-q --quiet", "desc": "Less output"}, {"name": "--no-install-recommends", "desc": "Skip recommended packages"}],
+      "subs": [
+        {"name": "update", "desc": "Refresh package lists"},
+        {"name": "upgrade", "desc": "Upgrade installed packages"},
+        {"name": "dist-upgrade", "desc": "Upgrade with dependency changes"},
+        {"name": "install", "desc": "Install packages", "args": ["package..."]},
+        {"name": "remove", "desc": "Remove packages", "args": ["package..."]},
+        {"name": "purge", "desc": "Remove packages and configuration", "args": ["package..."]},
+        {"name": "autoremove", "desc": "Remove unneeded dependencies"},
+        {"name": "clean", "desc": "Clear the download cache"},
+        {"name": "source", "desc": "Download source packages", "args": ["package"]}
+      ]
+    },
+    {
+      "name": "dnf",
+      "desc": "Fedora/RHEL package manager",
+      "opts": [{"name": "-y --assumeyes", "desc": "Assume yes"}, {"name": "-q --quiet", "desc": "Less output"}, {"name": "--enablerepo", "desc": "Enable a repository", "arg": "text"}],
+      "subs": [
+        {"name": "install", "desc": "Install packages", "args": ["package..."]},
+        {"name": "remove", "desc": "Remove packages", "args": ["package..."]},
+        {"name": "upgrade update", "desc": "Upgrade packages", "args": ["package..."]},
+        {"name": "search", "desc": "Search packages", "args": ["text"]},
+        {"name": "info", "desc": "Show package details", "args": ["package"]},
+        {"name": "list", "desc": "List packages", "args": ["enum:installed,available,updates"]},
+        {"name": "provides", "desc": "Find the package providing a file", "args": ["path"]},
+        {"name": "autoremove", "desc": "Remove unneeded dependencies"},
+        {"name": "check-update", "desc": "Check for available updates"},
+        {"name": "clean", "desc": "Remove cached data", "args": ["enum:all,metadata,packages"]},
+        {"name": "history", "desc": "Show transaction history"},
+        {"name": "repolist", "desc": "List repositories"}
+      ]
+    },
+    {
+      "name": "yum",
+      "desc": "Older RHEL/CentOS package manager",
+      "opts": [{"name": "-y --assumeyes", "desc": "Assume yes"}, {"name": "-q --quiet", "desc": "Less output"}],
+      "subs": [
+        {"name": "install", "desc": "Install packages", "args": ["package..."]},
+        {"name": "remove erase", "desc": "Remove packages", "args": ["package..."]},
+        {"name": "update", "desc": "Update packages", "args": ["package..."]},
+        {"name": "search", "desc": "Search packages", "args": ["text"]},
+        {"name": "info", "desc": "Show package details", "args": ["package"]},
+        {"name": "list", "desc": "List packages", "args": ["enum:installed,available,updates"]},
+        {"name": "provides", "desc": "Find the package providing a file", "args": ["path"]},
+        {"name": "clean", "desc": "Remove cached data", "args": ["enum:all,metadata,packages"]},
+        {"name": "repolist", "desc": "List repositories"}
+      ]
+    },
+    {
+      "name": "pacman",
+      "desc": "Arch Linux package manager",
+      "opts": [
+        {"name": "-S --sync", "desc": "Install or sync packages"},
+        {"name": "-Syu", "desc": "Refresh and upgrade the system"},
+        {"name": "-Ss", "desc": "Search the repositories"},
+        {"name": "-R --remove", "desc": "Remove packages"},
+        {"name": "-Rns", "desc": "Remove packages, dependencies and configs"},
+        {"name": "-Q --query", "desc": "Query installed packages"},
+        {"name": "-Qi", "desc": "Show installed package info"},
+        {"name": "-Ql", "desc": "List files of an installed package"},
+        {"name": "-U --upgrade", "desc": "Install a package file", "arg": "file"},
+        {"name": "--noconfirm", "desc": "Do not ask for confirmation"},
+        {"name": "--needed", "desc": "Skip up-to-date packages"}
+      ],
+      "args": ["package..."]
+    },
+    {
+      "name": "brew",
+      "desc": "Homebrew package manager",
+      "subs": [
+        {"name": "install", "desc": "Install formulae or casks", "args": ["package..."], "opts": [{"name": "--cask", "desc": "Install a cask"}]},
+        {"name": "uninstall remove", "desc": "Remove formulae", "args": ["package..."]},
+        {"name": "upgrade", "desc": "Upgrade outdated packages", "args": ["package..."]},
+        {"name": "update", "desc": "Fetch the newest Homebrew"},
+        {"name": "search", "desc": "Search packages", "args": ["text"]},
+        {"name": "info", "desc": "Show package details", "args": ["package"]},
+        {"name": "list ls", "desc": "List installed packages"},
+        {"name": "outdated", "desc": "List outdated packages"},
+        {"name": "services", "desc": "Manage background services", "args": ["enum:list,start,stop,restart,run", "service"]},
+        {"name": "cleanup", "desc": "Remove old versions"},
+        {"name": "doctor", "desc": "Check for problems"},
+        {"name": "tap", "desc": "Add a third-party repository", "args": ["text"]}
+      ]
+    },
+    {
+      "name": "npm",
+      "desc": "Node.js package manager",
+      "subs": [
+        {"name": "install i add", "desc": "Install dependencies", "args": ["package..."], "opts": [{"name": "-D --save-dev", "desc": "As a development dependency"}, {"name": "-g --global", "desc": "Install globally"}, {"name": "-E --save-exact", "desc": "Pin the exact version"}]},
+        {"name": "ci", "desc": "Clean install from the lockfile"},
+        {"name": "uninstall remove rm", "desc": "Remove a dependency", "args": ["package..."]},
+        {"name": "run run-script", "desc": "Run a package script", "args": ["script"]},
+        {"name": "test t", "desc": "Run the test script"},
+        {"name": "start", "desc": "Run the start script"},
+        {"name": "update", "desc": "Update dependencies", "args": ["package..."]},
+        {"name": "outdated", "desc": "List outdated dependencies"},
+        {"name": "ls list", "desc": "List installed packages", "opts": [{"name": "--depth", "desc": "Tree depth", "arg": "number"}]},
+        {"name": "init", "desc": "Create a package.json", "opts": [{"name": "-y --yes", "desc": "Accept defaults"}]},
+        {"name": "audit", "desc": "Check for known vulnerabilities", "args": ["enum:fix"]},
+        {"name": "publish", "desc": "Publish the package"},
+        {"name": "exec x", "desc": "Run a package binary", "args": ["command", "text..."]}
+      ]
+    },
+    {
+      "name": "pnpm",
+      "desc": "Fast, disk-efficient Node.js package manager",
+      "opts": [{"name": "-r --recursive", "desc": "Run in every workspace package"}, {"name": "-F --filter", "desc": "Select workspace packages", "arg": "text"}],
+      "subs": [
+        {"name": "install i", "desc": "Install dependencies", "opts": [{"name": "--frozen-lockfile", "desc": "Fail if the lockfile is outdated"}]},
+        {"name": "add", "desc": "Add dependencies", "args": ["package..."], "opts": [{"name": "-D --save-dev", "desc": "As a development dependency"}, {"name": "-g --global", "desc": "Install globally"}]},
+        {"name": "remove rm", "desc": "Remove dependencies", "args": ["package..."]},
+        {"name": "run", "desc": "Run a package script", "args": ["script"]},
+        {"name": "test t", "desc": "Run the test script"},
+        {"name": "update up", "desc": "Update dependencies", "args": ["package..."], "opts": [{"name": "-L --latest", "desc": "Ignore declared ranges"}]},
+        {"name": "exec", "desc": "Run a command in the package context", "args": ["command", "text..."]},
+        {"name": "dlx", "desc": "Run a package without installing", "args": ["package", "text..."]},
+        {"name": "outdated", "desc": "List outdated dependencies"},
+        {"name": "why", "desc": "Show why a package is installed", "args": ["package"]}
+      ]
+    },
+    {
+      "name": "yarn",
+      "desc": "Node.js package manager",
+      "subs": [
+        {"name": "install", "desc": "Install dependencies", "opts": [{"name": "--frozen-lockfile --immutable", "desc": "Fail if the lockfile changes"}]},
+        {"name": "add", "desc": "Add dependencies", "args": ["package..."], "opts": [{"name": "-D --dev", "desc": "As a development dependency"}]},
+        {"name": "remove", "desc": "Remove dependencies", "args": ["package..."]},
+        {"name": "run", "desc": "Run a package script", "args": ["script"]},
+        {"name": "test", "desc": "Run the test script"},
+        {"name": "upgrade up", "desc": "Upgrade dependencies", "args": ["package..."]},
+        {"name": "why", "desc": "Show why a package is installed", "args": ["package"]},
+        {"name": "dlx", "desc": "Run a package without installing", "args": ["package", "text..."]},
+        {"name": "workspace", "desc": "Run a command in a workspace", "args": ["text", "command"]}
+      ]
+    },
+    {
+      "name": "cargo",
+      "desc": "Rust package manager",
+      "opts": [{"name": "--version -V", "desc": "Print version"}, {"name": "-v --verbose", "desc": "More output"}],
+      "subs": [
+        {"name": "build b", "desc": "Compile the package", "opts": [{"name": "-r --release", "desc": "Optimized build"}, {"name": "-p --package", "desc": "Package to build", "arg": "text"}, {"name": "--all-targets", "desc": "All targets"}, {"name": "--features -F", "desc": "Features to enable", "arg": "text"}, {"name": "--target", "desc": "Target triple", "arg": "text"}]},
+        {"name": "run r", "desc": "Build and run a binary", "opts": [{"name": "-r --release", "desc": "Optimized build"}, {"name": "--bin", "desc": "Binary to run", "arg": "text"}, {"name": "-p --package", "desc": "Package", "arg": "text"}]},
+        {"name": "test t", "desc": "Run tests", "args": ["text"], "opts": [{"name": "-p --package", "desc": "Package to test", "arg": "text"}, {"name": "--release", "desc": "Optimized build"}, {"name": "--doc", "desc": "Only doc tests"}, {"name": "--no-run", "desc": "Compile without running"}]},
+        {"name": "check c", "desc": "Type-check without producing binaries", "opts": [{"name": "--all-targets", "desc": "All targets"}, {"name": "-p --package", "desc": "Package", "arg": "text"}]},
+        {"name": "clippy", "desc": "Run lints", "opts": [{"name": "--all-targets", "desc": "All targets"}, {"name": "--fix", "desc": "Apply suggestions"}]},
+        {"name": "fmt", "desc": "Format code", "opts": [{"name": "--all", "desc": "All packages"}, {"name": "--check", "desc": "Only check formatting"}]},
+        {"name": "add", "desc": "Add a dependency", "args": ["package..."], "opts": [{"name": "--dev", "desc": "As a dev-dependency"}, {"name": "-F --features", "desc": "Features to enable", "arg": "text"}]},
+        {"name": "remove rm", "desc": "Remove a dependency", "args": ["package..."]},
+        {"name": "update", "desc": "Update the lockfile", "opts": [{"name": "-p --package", "desc": "Only this package", "arg": "text"}]},
+        {"name": "doc", "desc": "Build documentation", "opts": [{"name": "--open", "desc": "Open in a browser"}, {"name": "--no-deps", "desc": "Skip dependencies"}]},
+        {"name": "new", "desc": "Create a new package", "args": ["directory"], "opts": [{"name": "--lib", "desc": "Library package"}, {"name": "--bin", "desc": "Binary package"}]},
+        {"name": "init", "desc": "Create a package in this directory", "opts": [{"name": "--lib", "desc": "Library package"}]},
+        {"name": "install", "desc": "Install a binary crate", "args": ["package"], "opts": [{"name": "--path", "desc": "Install from a local path", "arg": "directory"}, {"name": "--locked", "desc": "Use the lockfile"}]},
+        {"name": "clean", "desc": "Remove build artifacts"},
+        {"name": "bench", "desc": "Run benchmarks"},
+        {"name": "tree", "desc": "Show the dependency tree", "opts": [{"name": "-i --invert", "desc": "Invert for a package", "arg": "text"}]},
+        {"name": "publish", "desc": "Upload to the registry", "opts": [{"name": "--dry-run", "desc": "Check without uploading"}]}
+      ]
+    },
+    {
+      "name": "ls",
+      "aliases": ["exa", "eza"],
+      "desc": "List directory contents",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-l", "desc": "Long format"},
+        {"name": "-a --all", "desc": "Include hidden entries"},
+        {"name": "-A --almost-all", "desc": "Hidden entries except . and .."},
+        {"name": "-h --human-readable", "desc": "Human-readable sizes"},
+        {"name": "-t", "desc": "Sort by modification time"},
+        {"name": "-S", "desc": "Sort by size"},
+        {"name": "-r --reverse", "desc": "Reverse the sort order"},
+        {"name": "-R --recursive", "desc": "List subdirectories recursively"},
+        {"name": "-d --directory", "desc": "List directories themselves"},
+        {"name": "-1", "desc": "One entry per line"},
+        {"name": "-i --inode", "desc": "Show inode numbers"},
+        {"name": "--color", "desc": "Colorize output", "arg": "enum:auto,always,never"}
+      ]
+    },
+    {
+      "name": "cd",
+      "aliases": ["pushd"],
+      "desc": "Change the working directory",
+      "args": ["directory"],
+      "opts": [{"name": "-", "desc": "Go to the previous directory"}, {"name": "-P", "desc": "Resolve symbolic links"}]
+    },
+    {
+      "name": "cp",
+      "desc": "Copy files and directories",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-r -R --recursive", "desc": "Copy directories recursively"},
+        {"name": "-a --archive", "desc": "Preserve everything, recursive"},
+        {"name": "-i --interactive", "desc": "Ask before overwriting"},
+        {"name": "-n --no-clobber", "desc": "Never overwrite"},
+        {"name": "-f --force", "desc": "Overwrite without asking"},
+        {"name": "-p", "desc": "Preserve mode, ownership and timestamps"},
+        {"name": "-u --update", "desc": "Only copy newer files"},
+        {"name": "-v --verbose", "desc": "Explain what is being done"},
+        {"name": "-t --target-directory", "desc": "Copy into this directory", "arg": "directory"}
+      ]
+    },
+    {
+      "name": "mv",
+      "desc": "Move or rename files",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-i --interactive", "desc": "Ask before overwriting"},
+        {"name": "-n --no-clobber", "desc": "Never overwrite"},
+        {"name": "-f --force", "desc": "Overwrite without asking"},
+        {"name": "-u --update", "desc": "Only move newer files"},
+        {"name": "-v --verbose", "desc": "Explain what is being done"},
+        {"name": "-t --target-directory", "desc": "Move into this directory", "arg": "directory"}
+      ]
+    },
+    {
+      "name": "rm",
+      "desc": "Remove files or directories",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-r -R --recursive", "desc": "Remove directories and their contents"},
+        {"name": "-f --force", "desc": "Ignore missing files, never prompt"},
+        {"name": "-i", "desc": "Prompt before every removal"},
+        {"name": "-I", "desc": "Prompt once before removing many files"},
+        {"name": "-d --dir", "desc": "Remove empty directories"},
+        {"name": "-v --verbose", "desc": "Explain what is being done"}
+      ]
+    },
+    {
+      "name": "mkdir",
+      "desc": "Create directories",
+      "args": ["directory..."],
+      "opts": [
+        {"name": "-p --parents", "desc": "Create parents as needed, no error if existing"},
+        {"name": "-m --mode", "desc": "Permission mode", "arg": "text"},
+        {"name": "-v --verbose", "desc": "Print each created directory"}
+      ]
+    },
+    {
+      "name": "chmod",
+      "desc": "Change file permissions",
+      "args": ["enum:644,755,600,700,640,750,u+x,+x,go-w,g+w", "path..."],
+      "opts": [
+        {"name": "-R --recursive", "desc": "Change files and directories recursively"},
+        {"name": "-v --verbose", "desc": "Report every file"},
+        {"name": "-c --changes", "desc": "Report only changes"},
+        {"name": "--reference", "desc": "Copy the mode of a file", "arg": "file"}
+      ]
+    },
+    {
+      "name": "chown",
+      "aliases": ["chgrp"],
+      "desc": "Change file owner and group",
+      "args": ["user", "path..."],
+      "opts": [
+        {"name": "-R --recursive", "desc": "Operate recursively"},
+        {"name": "-h --no-dereference", "desc": "Change symlinks themselves"},
+        {"name": "-v --verbose", "desc": "Report every file"},
+        {"name": "--reference", "desc": "Copy owner and group of a file", "arg": "file"}
+      ]
+    },
+    {
+      "name": "tar",
+      "desc": "Create and extract archives",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-c --create", "desc": "Create an archive"},
+        {"name": "-x --extract", "desc": "Extract an archive"},
+        {"name": "-t --list", "desc": "List archive contents"},
+        {"name": "-f --file", "desc": "Archive file", "arg": "file"},
+        {"name": "-v --verbose", "desc": "List processed files"},
+        {"name": "-z --gzip", "desc": "Filter through gzip"},
+        {"name": "-j --bzip2", "desc": "Filter through bzip2"},
+        {"name": "-J --xz", "desc": "Filter through xz"},
+        {"name": "--zstd", "desc": "Filter through zstd"},
+        {"name": "-C --directory", "desc": "Change to this directory first", "arg": "directory"},
+        {"name": "--exclude", "desc": "Exclude matching files", "arg": "text", "repeat": true},
+        {"name": "--strip-components", "desc": "Drop leading path components", "arg": "number"},
+        {"name": "-xzf", "desc": "Extract a gzip archive", "arg": "file"},
+        {"name": "-czf", "desc": "Create a gzip archive", "arg": "file"},
+        {"name": "-tvf", "desc": "List an archive verbosely", "arg": "file"}
+      ]
+    },
+    {
+      "name": "grep",
+      "aliases": ["egrep", "fgrep", "rg"],
+      "desc": "Search text with patterns",
+      "args": ["text", "path..."],
+      "opts": [
+        {"name": "-i --ignore-case", "desc": "Case-insensitive matching"},
+        {"name": "-r --recursive", "desc": "Search directories recursively"},
+        {"name": "-n --line-number", "desc": "Show line numbers"},
+        {"name": "-v --invert-match", "desc": "Select non-matching lines"},
+        {"name": "-l --files-with-matches", "desc": "Only print file names"},
+        {"name": "-c --count", "desc": "Count matching lines"},
+        {"name": "-w --word-regexp", "desc": "Match whole words"},
+        {"name": "-E --extended-regexp", "desc": "Extended regular expressions"},
+        {"name": "-F --fixed-strings", "desc": "Patterns are plain strings"},
+        {"name": "-o --only-matching", "desc": "Print only the matched part"},
+        {"name": "-A --after-context", "desc": "Lines after each match", "arg": "number"},
+        {"name": "-B --before-context", "desc": "Lines before each match", "arg": "number"},
+        {"name": "-C --context", "desc": "Lines around each match", "arg": "number"},
+        {"name": "--include", "desc": "Only search matching files", "arg": "text"},
+        {"name": "--exclude", "desc": "Skip matching files", "arg": "text"},
+        {"name": "--color", "desc": "Highlight matches", "arg": "enum:auto,always,never"}
+      ]
+    },
+    {
+      "name": "find",
+      "desc": "Search for files in a directory tree",
+      "args": ["directory..."],
+      "opts": [
+        {"name": "-name", "desc": "Base name matches a glob", "arg": "text"},
+        {"name": "-iname", "desc": "Case-insensitive name match", "arg": "text"},
+        {"name": "-path", "desc": "Path matches a glob", "arg": "text"},
+        {"name": "-type", "desc": "File type", "arg": "enum:f,d,l,s,p,b,c"},
+        {"name": "-size", "desc": "File size (e.g. +100M)", "arg": "text"},
+        {"name": "-mtime", "desc": "Modified n days ago", "arg": "text"},
+        {"name": "-mmin", "desc": "Modified n minutes ago", "arg": "text"},
+        {"name": "-user", "desc": "Owned by user", "arg": "user"},
+        {"name": "-perm", "desc": "Permission bits", "arg": "text"},
+        {"name": "-maxdepth", "desc": "Descend at most n levels", "arg": "number"},
+        {"name": "-mindepth", "desc": "Skip the first n levels", "arg": "number"},
+        {"name": "-exec", "desc": "Run a command per match", "arg": "command"},
+        {"name": "-delete", "desc": "Delete matches (dangerous)"},
+        {"name": "-print0", "desc": "NUL-separated output"},
+        {"name": "-newer", "desc": "Newer than a file", "arg": "file"},
+        {"name": "-empty", "desc": "Empty files and directories"}
+      ]
+    },
+    {
+      "name": "ssh",
+      "desc": "Secure shell client",
+      "args": ["host", "command", "text..."],
+      "opts": [
+        {"name": "-p", "desc": "Port", "arg": "port"},
+        {"name": "-i", "desc": "Identity (private key) file", "arg": "file"},
+        {"name": "-l", "desc": "Login name", "arg": "user"},
+        {"name": "-J", "desc": "Jump host(s)", "arg": "host"},
+        {"name": "-L", "desc": "Local port forward", "arg": "text"},
+        {"name": "-R", "desc": "Remote port forward", "arg": "text"},
+        {"name": "-D", "desc": "Dynamic SOCKS forward", "arg": "port"},
+        {"name": "-N", "desc": "Do not run a remote command"},
+        {"name": "-f", "desc": "Go to the background"},
+        {"name": "-A", "desc": "Forward the agent"},
+        {"name": "-t", "desc": "Force a terminal"},
+        {"name": "-v", "desc": "Verbose diagnostics"},
+        {"name": "-o", "desc": "Set a config option", "arg": "text", "repeat": true},
+        {"name": "-F", "desc": "Config file", "arg": "file"},
+        {"name": "-C", "desc": "Compress traffic"}
+      ]
+    },
+    {
+      "name": "scp",
+      "desc": "Copy files over SSH",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-r", "desc": "Copy directories recursively"},
+        {"name": "-P", "desc": "Port", "arg": "port"},
+        {"name": "-i", "desc": "Identity file", "arg": "file"},
+        {"name": "-p", "desc": "Preserve times and modes"},
+        {"name": "-C", "desc": "Compress traffic"},
+        {"name": "-J", "desc": "Jump host", "arg": "host"},
+        {"name": "-3", "desc": "Copy between two remotes through this host"},
+        {"name": "-l", "desc": "Bandwidth limit in Kbit/s", "arg": "number"}
+      ]
+    },
+    {
+      "name": "rsync",
+      "desc": "Fast incremental file transfer",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-a --archive", "desc": "Archive mode (recursive, preserve attributes)"},
+        {"name": "-v --verbose", "desc": "More output"},
+        {"name": "-z --compress", "desc": "Compress during transfer"},
+        {"name": "-h --human-readable", "desc": "Human-readable numbers"},
+        {"name": "-n --dry-run", "desc": "Show what would be transferred"},
+        {"name": "-P", "desc": "Show progress and keep partial files"},
+        {"name": "--progress", "desc": "Show progress"},
+        {"name": "--delete", "desc": "Delete extraneous destination files"},
+        {"name": "--exclude", "desc": "Exclude matching files", "arg": "text", "repeat": true},
+        {"name": "-e --rsh", "desc": "Remote shell to use", "arg": "text"},
+        {"name": "-r --recursive", "desc": "Recurse into directories"},
+        {"name": "--partial", "desc": "Keep partially transferred files"},
+        {"name": "--bwlimit", "desc": "Bandwidth limit", "arg": "text"}
+      ]
+    },
+    {
+      "name": "curl",
+      "desc": "Transfer data with URLs",
+      "args": ["url..."],
+      "opts": [
+        {"name": "-X --request", "desc": "HTTP method", "arg": "enum:GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"},
+        {"name": "-H --header", "desc": "Extra header", "arg": "text", "repeat": true},
+        {"name": "-d --data", "desc": "Request body", "arg": "text"},
+        {"name": "--json", "desc": "Send JSON body", "arg": "text"},
+        {"name": "-o --output", "desc": "Write output to a file", "arg": "file"},
+        {"name": "-O --remote-name", "desc": "Save under the remote file name"},
+        {"name": "-L --location", "desc": "Follow redirects"},
+        {"name": "-s --silent", "desc": "No progress or errors"},
+        {"name": "-S --show-error", "desc": "Show errors even when silent"},
+        {"name": "-f --fail", "desc": "Fail on HTTP errors"},
+        {"name": "-I --head", "desc": "Fetch headers only"},
+        {"name": "-i --include", "desc": "Include response headers"},
+        {"name": "-v --verbose", "desc": "Verbose output"},
+        {"name": "-k --insecure", "desc": "Skip TLS verification (unsafe)"},
+        {"name": "-u --user", "desc": "user:password credentials", "arg": "text"},
+        {"name": "-F --form", "desc": "Multipart form field", "arg": "text"},
+        {"name": "--connect-timeout", "desc": "Connect timeout in seconds", "arg": "number"},
+        {"name": "-m --max-time", "desc": "Total timeout in seconds", "arg": "number"}
+      ]
+    },
+    {
+      "name": "wget",
+      "desc": "Non-interactive downloader",
+      "args": ["url..."],
+      "opts": [
+        {"name": "-O --output-document", "desc": "Write to this file", "arg": "file"},
+        {"name": "-q --quiet", "desc": "No output"},
+        {"name": "-c --continue", "desc": "Resume a partial download"},
+        {"name": "-r --recursive", "desc": "Recursive download"},
+        {"name": "-P --directory-prefix", "desc": "Save files here", "arg": "directory"},
+        {"name": "-N --timestamping", "desc": "Only fetch newer files"},
+        {"name": "--no-check-certificate", "desc": "Skip TLS verification (unsafe)"},
+        {"name": "-i --input-file", "desc": "Read URLs from a file", "arg": "file"}
+      ]
+    },
+    {
+      "name": "tail",
+      "aliases": ["head"],
+      "desc": "Print the end (or start) of files",
+      "args": ["file..."],
+      "opts": [
+        {"name": "-n --lines", "desc": "Number of lines", "arg": "number"},
+        {"name": "-f --follow", "desc": "Keep printing appended data"},
+        {"name": "-F", "desc": "Follow by name, retry on rotation"},
+        {"name": "-c --bytes", "desc": "Number of bytes", "arg": "number"},
+        {"name": "-q --quiet", "desc": "Never print file headers"},
+        {"name": "--pid", "desc": "Stop following when a process exits", "arg": "process"}
+      ]
+    },
+    {
+      "name": "less",
+      "aliases": ["more"],
+      "desc": "Page through text",
+      "args": ["file..."],
+      "opts": [
+        {"name": "-R", "desc": "Show colors"},
+        {"name": "-S", "desc": "Do not wrap long lines"},
+        {"name": "-N", "desc": "Show line numbers"},
+        {"name": "-F", "desc": "Quit if the text fits on one screen"},
+        {"name": "-i", "desc": "Case-insensitive search"},
+        {"name": "+F", "desc": "Follow like tail -f"}
+      ]
+    },
+    {
+      "name": "cat",
+      "aliases": ["bat"],
+      "desc": "Print and concatenate files",
+      "args": ["file..."],
+      "opts": [
+        {"name": "-n --number", "desc": "Number all lines"},
+        {"name": "-b --number-nonblank", "desc": "Number non-empty lines"},
+        {"name": "-A --show-all", "desc": "Show non-printing characters"},
+        {"name": "-s --squeeze-blank", "desc": "Squeeze repeated empty lines"}
+      ]
+    },
+    {
+      "name": "ps",
+      "desc": "Report running processes",
+      "args": ["enum:aux,-ef,axjf"],
+      "opts": [
+        {"name": "-e -A", "desc": "All processes"},
+        {"name": "-f", "desc": "Full format"},
+        {"name": "-u", "desc": "Processes of a user", "arg": "user"},
+        {"name": "-p --pid", "desc": "Select by process id", "arg": "process"},
+        {"name": "-o", "desc": "Output columns", "arg": "text"},
+        {"name": "--sort", "desc": "Sort by columns", "arg": "enum:-%cpu,-%mem,pid,start_time"},
+        {"name": "--forest", "desc": "Show the process tree"}
+      ]
+    },
+    {
+      "name": "kill",
+      "desc": "Send a signal to processes",
+      "args": ["process..."],
+      "opts": [
+        {"name": "-s", "desc": "Signal to send", "arg": "signal"},
+        {"name": "-9", "desc": "SIGKILL: kill immediately"},
+        {"name": "-15", "desc": "SIGTERM: ask to terminate"},
+        {"name": "-HUP", "desc": "SIGHUP: hang up / reload"},
+        {"name": "-l", "desc": "List signal names"}
+      ]
+    },
+    {
+      "name": "top",
+      "desc": "Live process monitor",
+      "opts": [
+        {"name": "-u", "desc": "Only processes of a user", "arg": "user"},
+        {"name": "-p", "desc": "Only these process ids", "arg": "process"},
+        {"name": "-d", "desc": "Refresh interval in seconds", "arg": "number"},
+        {"name": "-b", "desc": "Batch mode for scripting"},
+        {"name": "-n", "desc": "Number of iterations", "arg": "number"},
+        {"name": "-o", "desc": "Sort field", "arg": "enum:%CPU,%MEM,TIME+"}
+      ]
+    },
+    {
+      "name": "htop",
+      "aliases": ["btop"],
+      "desc": "Interactive process viewer",
+      "opts": [
+        {"name": "-u --user", "desc": "Only processes of a user", "arg": "user"},
+        {"name": "-p --pid", "desc": "Only these process ids", "arg": "process"},
+        {"name": "-d --delay", "desc": "Refresh delay in tenths of a second", "arg": "number"},
+        {"name": "-t --tree", "desc": "Tree view"},
+        {"name": "-s --sort-key", "desc": "Sort column", "arg": "enum:PERCENT_CPU,PERCENT_MEM,TIME"}
+      ]
+    },
+    {
+      "name": "df",
+      "desc": "Report file system space usage",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-h --human-readable", "desc": "Human-readable sizes"},
+        {"name": "-T --print-type", "desc": "Show file system type"},
+        {"name": "-i --inodes", "desc": "Inode usage"},
+        {"name": "-x --exclude-type", "desc": "Exclude a file system type", "arg": "text"}
+      ]
+    },
+    {
+      "name": "du",
+      "desc": "Estimate file space usage",
+      "args": ["path..."],
+      "opts": [
+        {"name": "-h --human-readable", "desc": "Human-readable sizes"},
+        {"name": "-s --summarize", "desc": "Only a total per argument"},
+        {"name": "-d --max-depth", "desc": "Depth of the listing", "arg": "number"},
+        {"name": "-a --all", "desc": "Include files"},
+        {"name": "-c --total", "desc": "Print a grand total"},
+        {"name": "-x --one-file-system", "desc": "Stay on one file system"},
+        {"name": "--exclude", "desc": "Exclude matching files", "arg": "text"}
+      ]
+    },
+    {
+      "name": "free",
+      "desc": "Show memory usage",
+      "opts": [
+        {"name": "-h --human", "desc": "Human-readable sizes"},
+        {"name": "-m --mebi", "desc": "Sizes in MiB"},
+        {"name": "-g --gibi", "desc": "Sizes in GiB"},
+        {"name": "-s --seconds", "desc": "Repeat every n seconds", "arg": "number"},
+        {"name": "-t --total", "desc": "Show a total line"}
+      ]
+    },
+    {
+      "name": "ip",
+      "desc": "Show and configure networking",
+      "opts": [
+        {"name": "-4", "desc": "IPv4 only"},
+        {"name": "-6", "desc": "IPv6 only"},
+        {"name": "-c -color", "desc": "Colorized output"},
+        {"name": "-br -brief", "desc": "Brief output"},
+        {"name": "-j -json", "desc": "JSON output"}
+      ],
+      "subs": [
+        {"name": "addr address a", "desc": "Protocol addresses", "args": ["enum:show,add,del,flush", "text..."]},
+        {"name": "link l", "desc": "Network devices", "args": ["enum:show,set,add,del", "interface"]},
+        {"name": "route r", "desc": "Routing table", "args": ["enum:show,add,del,get,flush", "text..."]},
+        {"name": "neigh n", "desc": "ARP / neighbor cache", "args": ["enum:show,add,del,flush"]},
+        {"name": "rule", "desc": "Routing policy rules", "args": ["enum:show,add,del"]},
+        {"name": "netns", "desc": "Network namespaces", "args": ["enum:list,add,delete,exec"]}
+      ]
+    },
+    {
+      "name": "ss",
+      "desc": "Show sockets",
+      "opts": [
+        {"name": "-t --tcp", "desc": "TCP sockets"},
+        {"name": "-u --udp", "desc": "UDP sockets"},
+        {"name": "-l --listening", "desc": "Listening sockets"},
+        {"name": "-n --numeric", "desc": "Do not resolve names"},
+        {"name": "-p --processes", "desc": "Show owning processes"},
+        {"name": "-a --all", "desc": "All sockets"},
+        {"name": "-s --summary", "desc": "Summary statistics"},
+        {"name": "-tulpn", "desc": "Listening TCP/UDP with processes"}
+      ]
+    },
+    {
+      "name": "netstat",
+      "desc": "Network statistics (legacy)",
+      "opts": [
+        {"name": "-t --tcp", "desc": "TCP connections"},
+        {"name": "-u --udp", "desc": "UDP connections"},
+        {"name": "-l --listening", "desc": "Listening sockets"},
+        {"name": "-n --numeric", "desc": "Do not resolve names"},
+        {"name": "-p --program", "desc": "Show owning programs"},
+        {"name": "-r --route", "desc": "Routing table"},
+        {"name": "-i --interfaces", "desc": "Interface statistics"},
+        {"name": "-tulpn", "desc": "Listening TCP/UDP with programs"}
+      ]
+    },
+    {
+      "name": "ping",
+      "aliases": ["ping6"],
+      "desc": "Send ICMP echo requests",
+      "args": ["host"],
+      "opts": [
+        {"name": "-c", "desc": "Stop after n replies", "arg": "number"},
+        {"name": "-i", "desc": "Seconds between packets", "arg": "number"},
+        {"name": "-W", "desc": "Reply timeout in seconds", "arg": "number"},
+        {"name": "-s", "desc": "Payload size in bytes", "arg": "number"},
+        {"name": "-4", "desc": "IPv4 only"},
+        {"name": "-6", "desc": "IPv6 only"},
+        {"name": "-q", "desc": "Only print the summary"}
+      ]
+    },
+    {
+      "name": "tmux",
+      "desc": "Terminal multiplexer",
+      "opts": [{"name": "-L", "desc": "Server socket name", "arg": "text"}, {"name": "-f", "desc": "Config file", "arg": "file"}],
+      "subs": [
+        {"name": "new-session new", "desc": "Start a new session", "opts": [{"name": "-s", "desc": "Session name", "arg": "text"}, {"name": "-d", "desc": "Do not attach"}, {"name": "-A", "desc": "Attach if it already exists"}]},
+        {"name": "attach-session attach a", "desc": "Attach to a session", "opts": [{"name": "-t", "desc": "Target session", "arg": "session"}, {"name": "-d", "desc": "Detach other clients"}]},
+        {"name": "list-sessions ls", "desc": "List sessions"},
+        {"name": "kill-session", "desc": "Destroy a session", "opts": [{"name": "-t", "desc": "Target session", "arg": "session"}]},
+        {"name": "kill-server", "desc": "Stop the server and all sessions"},
+        {"name": "detach-client detach", "desc": "Detach the current client"},
+        {"name": "rename-session", "desc": "Rename a session", "args": ["text"], "opts": [{"name": "-t", "desc": "Target session", "arg": "session"}]},
+        {"name": "new-window neww", "desc": "Create a window", "opts": [{"name": "-n", "desc": "Window name", "arg": "text"}]},
+        {"name": "split-window splitw", "desc": "Split the pane", "opts": [{"name": "-h", "desc": "Side by side"}, {"name": "-v", "desc": "Top and bottom"}]},
+        {"name": "send-keys send", "desc": "Send keys to a pane", "args": ["text..."], "opts": [{"name": "-t", "desc": "Target pane", "arg": "text"}]},
+        {"name": "source-file source", "desc": "Load a config file", "args": ["file"]}
+      ]
+    },
+    {
+      "name": "screen",
+      "desc": "Terminal multiplexer",
+      "opts": [
+        {"name": "-S", "desc": "Name a new session", "arg": "text"},
+        {"name": "-r", "desc": "Reattach to a session", "arg": "session"},
+        {"name": "-x", "desc": "Attach to a session already attached", "arg": "session"},
+        {"name": "-d", "desc": "Detach a session"},
+        {"name": "-ls -list", "desc": "List sessions"},
+        {"name": "-dmS", "desc": "Start a named session detached", "arg": "text"},
+        {"name": "-L", "desc": "Turn on logging"}
+      ]
+    },
+    {
+      "name": "vim",
+      "aliases": ["vi", "nvim", "view"],
+      "desc": "Text editor",
+      "args": ["file..."],
+      "opts": [
+        {"name": "-R", "desc": "Read-only mode"},
+        {"name": "-O", "desc": "Open files in vertical splits"},
+        {"name": "-o", "desc": "Open files in horizontal splits"},
+        {"name": "-p", "desc": "Open files in tabs"},
+        {"name": "-d", "desc": "Diff mode"},
+        {"name": "-u", "desc": "Use this vimrc", "arg": "file"},
+        {"name": "+", "desc": "Start at the last line"}
+      ]
+    },
+    {
+      "name": "nano",
+      "desc": "Simple text editor",
+      "args": ["file..."],
+      "opts": [
+        {"name": "-l --linenumbers", "desc": "Show line numbers"},
+        {"name": "-v --view", "desc": "Read-only mode"},
+        {"name": "-B --backup", "desc": "Keep a backup"},
+        {"name": "-w --nowrap", "desc": "Do not wrap long lines"},
+        {"name": "-m --mouse", "desc": "Enable mouse support"}
+      ]
+    },
+    {
+      "name": "sudo",
+      "aliases": ["doas"],
+      "desc": "Run a command as another user",
+      "wrapper": true,
+      "args": ["command"],
+      "opts": [
+        {"name": "-u --user", "desc": "Run as this user", "arg": "user"},
+        {"name": "-g --group", "desc": "Run with this group", "arg": "group"},
+        {"name": "-i --login", "desc": "Run a login shell"},
+        {"name": "-s --shell", "desc": "Run a shell"},
+        {"name": "-E --preserve-env", "desc": "Keep the environment"},
+        {"name": "-k --reset-timestamp", "desc": "Forget cached credentials"},
+        {"name": "-l --list", "desc": "List allowed commands"},
+        {"name": "-v --validate", "desc": "Refresh cached credentials"},
+        {"name": "-e --edit", "desc": "Edit files as another user"}
+      ]
+    },
+    {
+      "name": "crontab",
+      "desc": "Maintain cron tables",
+      "args": ["file"],
+      "opts": [
+        {"name": "-l", "desc": "List the crontab"},
+        {"name": "-e", "desc": "Edit the crontab"},
+        {"name": "-r", "desc": "Remove the crontab (no confirmation)"},
+        {"name": "-i", "desc": "Ask before removing"},
+        {"name": "-u", "desc": "Crontab of another user", "arg": "user"}
+      ]
+    },
+    {
+      "name": "ufw",
+      "desc": "Uncomplicated firewall",
+      "subs": [
+        {"name": "status", "desc": "Show firewall status", "args": ["enum:verbose,numbered"]},
+        {"name": "enable", "desc": "Turn the firewall on"},
+        {"name": "disable", "desc": "Turn the firewall off"},
+        {"name": "allow", "desc": "Allow traffic", "args": ["enum:ssh,http,https,22/tcp,80/tcp,443/tcp", "text..."]},
+        {"name": "deny", "desc": "Block traffic", "args": ["text..."]},
+        {"name": "limit", "desc": "Rate-limit connections", "args": ["enum:ssh,22/tcp"]},
+        {"name": "delete", "desc": "Delete a rule", "args": ["text..."]},
+        {"name": "default", "desc": "Set the default policy", "args": ["enum:allow,deny,reject", "enum:incoming,outgoing,routed"]},
+        {"name": "reload", "desc": "Reload rules"},
+        {"name": "reset", "desc": "Remove all rules and disable"},
+        {"name": "app", "desc": "Application profiles", "args": ["enum:list,info"]}
+      ]
+    },
+    {
+      "name": "iptables",
+      "aliases": ["ip6tables"],
+      "desc": "IPv4/IPv6 packet filter administration",
+      "opts": [
+        {"name": "-L --list", "desc": "List rules"},
+        {"name": "-S --list-rules", "desc": "Print rules as commands"},
+        {"name": "-A --append", "desc": "Append a rule to a chain", "arg": "enum:INPUT,OUTPUT,FORWARD,PREROUTING,POSTROUTING"},
+        {"name": "-I --insert", "desc": "Insert a rule into a chain", "arg": "enum:INPUT,OUTPUT,FORWARD"},
+        {"name": "-D --delete", "desc": "Delete a rule", "arg": "enum:INPUT,OUTPUT,FORWARD"},
+        {"name": "-F --flush", "desc": "Delete all rules (dangerous)"},
+        {"name": "-P --policy", "desc": "Set the default policy of a chain", "arg": "enum:INPUT,OUTPUT,FORWARD"},
+        {"name": "-t --table", "desc": "Table to operate on", "arg": "enum:filter,nat,mangle,raw"},
+        {"name": "-p --protocol", "desc": "Protocol", "arg": "enum:tcp,udp,icmp,all"},
+        {"name": "-s --source", "desc": "Source address", "arg": "text"},
+        {"name": "-d --destination", "desc": "Destination address", "arg": "text"},
+        {"name": "--dport", "desc": "Destination port", "arg": "port"},
+        {"name": "-i --in-interface", "desc": "Input interface", "arg": "interface"},
+        {"name": "-j --jump", "desc": "Target", "arg": "enum:ACCEPT,DROP,REJECT,LOG,MASQUERADE,DNAT,SNAT"},
+        {"name": "-n --numeric", "desc": "Numeric addresses and ports"},
+        {"name": "-v --verbose", "desc": "Verbose output"},
+        {"name": "--line-numbers", "desc": "Show rule numbers"}
+      ]
+    },
+    {
+      "name": "nginx",
+      "desc": "HTTP server and reverse proxy",
+      "opts": [
+        {"name": "-t", "desc": "Test the configuration"},
+        {"name": "-T", "desc": "Test and dump the configuration"},
+        {"name": "-s", "desc": "Send a signal to the master process", "arg": "enum:reload,reopen,stop,quit"},
+        {"name": "-c", "desc": "Configuration file", "arg": "file"},
+        {"name": "-V", "desc": "Show version and build options"},
+        {"name": "-g", "desc": "Global directives", "arg": "text"}
+      ]
+    },
+    {
+      "name": "psql",
+      "desc": "PostgreSQL interactive terminal",
+      "args": ["database", "user"],
+      "opts": [
+        {"name": "-h --host", "desc": "Server host", "arg": "host"},
+        {"name": "-p --port", "desc": "Server port", "arg": "port"},
+        {"name": "-U --username", "desc": "Database user", "arg": "user"},
+        {"name": "-d --dbname", "desc": "Database name", "arg": "database"},
+        {"name": "-c --command", "desc": "Run one command and exit", "arg": "text"},
+        {"name": "-f --file", "desc": "Run commands from a file", "arg": "file"},
+        {"name": "-l --list", "desc": "List databases"},
+        {"name": "-W --password", "desc": "Prompt for a password"},
+        {"name": "-x --expanded", "desc": "Expanded table output"},
+        {"name": "-A --no-align", "desc": "Unaligned output"},
+        {"name": "-t --tuples-only", "desc": "Rows only"}
+      ]
+    },
+    {
+      "name": "mysql",
+      "aliases": ["mariadb"],
+      "desc": "MySQL / MariaDB client",
+      "args": ["database"],
+      "opts": [
+        {"name": "-h --host", "desc": "Server host", "arg": "host"},
+        {"name": "-P --port", "desc": "Server port", "arg": "port"},
+        {"name": "-u --user", "desc": "Database user", "arg": "user"},
+        {"name": "-p --password", "desc": "Prompt for a password"},
+        {"name": "-D --database", "desc": "Database to use", "arg": "database"},
+        {"name": "-e --execute", "desc": "Run a statement and exit", "arg": "text"},
+        {"name": "-B --batch", "desc": "Tab-separated output"},
+        {"name": "-N --skip-column-names", "desc": "No column names"},
+        {"name": "--protocol", "desc": "Connection protocol", "arg": "enum:tcp,socket,pipe,memory"}
+      ]
+    },
+    {
+      "name": "redis-cli",
+      "aliases": ["valkey-cli"],
+      "desc": "Redis command-line client",
+      "args": ["enum:PING,INFO,GET,SET,DEL,KEYS,SCAN,TTL,EXPIRE,MONITOR,DBSIZE,CONFIG,CLIENT,SLOWLOG", "text..."],
+      "opts": [
+        {"name": "-h", "desc": "Server host", "arg": "host"},
+        {"name": "-p", "desc": "Server port", "arg": "port"},
+        {"name": "-a", "desc": "Password (visible in process list)", "arg": "text"},
+        {"name": "-n", "desc": "Database number", "arg": "number"},
+        {"name": "-u", "desc": "Server URI", "arg": "url"},
+        {"name": "--tls", "desc": "Use TLS"},
+        {"name": "--scan", "desc": "List keys with SCAN"},
+        {"name": "--pattern", "desc": "Key pattern for --scan", "arg": "text"},
+        {"name": "--stat", "desc": "Rolling statistics"},
+        {"name": "--bigkeys", "desc": "Find large keys"},
+        {"name": "--latency", "desc": "Measure latency"},
+        {"name": "-c", "desc": "Cluster mode"}
+      ]
+    },
+    {
+      "name": "python",
+      "aliases": ["python3", "python2"],
+      "desc": "Python interpreter",
+      "args": ["file", "text..."],
+      "opts": [
+        {"name": "-m", "desc": "Run a library module as a script", "arg": "enum:venv,pip,http.server,json.tool,pdb,unittest,pytest"},
+        {"name": "-c", "desc": "Run a program passed as a string", "arg": "text"},
+        {"name": "-i", "desc": "Interactive after running"},
+        {"name": "-u", "desc": "Unbuffered output"},
+        {"name": "-V --version", "desc": "Print version"},
+        {"name": "-X", "desc": "Implementation-specific option", "arg": "text"}
+      ]
+    },
+    {
+      "name": "pip",
+      "aliases": ["pip3"],
+      "desc": "Python package installer",
+      "subs": [
+        {"name": "install", "desc": "Install packages", "args": ["package..."], "opts": [
+          {"name": "-r --requirement", "desc": "Install from a requirements file", "arg": "file"},
+          {"name": "-U --upgrade", "desc": "Upgrade to the newest version"},
+          {"name": "-e --editable", "desc": "Editable install from a path", "arg": "directory"},
+          {"name": "--user", "desc": "Install into the user directory"},
+          {"name": "--no-cache-dir", "desc": "Do not use the cache"}
+        ]},
+        {"name": "uninstall", "desc": "Remove packages", "args": ["package..."], "opts": [{"name": "-y --yes", "desc": "Do not ask"}]},
+        {"name": "list", "desc": "List installed packages", "opts": [{"name": "-o --outdated", "desc": "Only outdated packages"}]},
+        {"name": "show", "desc": "Show package details", "args": ["package"]},
+        {"name": "freeze", "desc": "Print installed packages as requirements"},
+        {"name": "download", "desc": "Download packages", "args": ["package..."]},
+        {"name": "check", "desc": "Verify dependencies"}
+      ]
+    },
+    {
+      "name": "make",
+      "aliases": ["gmake"],
+      "desc": "Build targets from a Makefile",
+      "args": ["script..."],
+      "opts": [
+        {"name": "-j --jobs", "desc": "Parallel jobs", "arg": "number"},
+        {"name": "-C --directory", "desc": "Change to a directory first", "arg": "directory"},
+        {"name": "-f --file", "desc": "Makefile to use", "arg": "file"},
+        {"name": "-n --dry-run", "desc": "Print commands without running"},
+        {"name": "-B --always-make", "desc": "Rebuild everything"},
+        {"name": "-k --keep-going", "desc": "Continue after errors"},
+        {"name": "-s --silent", "desc": "Do not echo commands"}
+      ]
+    },
+    {
+      "name": "terraform",
+      "aliases": ["tofu"],
+      "desc": "Infrastructure as code",
+      "opts": [{"name": "-chdir", "desc": "Switch to a directory first", "arg": "directory"}],
+      "subs": [
+        {"name": "init", "desc": "Prepare the working directory", "opts": [{"name": "-upgrade", "desc": "Upgrade providers and modules"}, {"name": "-reconfigure", "desc": "Ignore saved backend config"}, {"name": "-backend-config", "desc": "Backend setting", "arg": "text"}]},
+        {"name": "plan", "desc": "Show planned changes", "opts": [{"name": "-out", "desc": "Save the plan", "arg": "file"}, {"name": "-var", "desc": "Set a variable", "arg": "text", "repeat": true}, {"name": "-var-file", "desc": "Variables file", "arg": "file"}, {"name": "-target", "desc": "Limit to a resource", "arg": "text"}, {"name": "-destroy", "desc": "Plan a destroy"}]},
+        {"name": "apply", "desc": "Apply changes", "args": ["file"], "opts": [{"name": "-auto-approve", "desc": "Skip interactive approval"}, {"name": "-var", "desc": "Set a variable", "arg": "text", "repeat": true}, {"name": "-var-file", "desc": "Variables file", "arg": "file"}, {"name": "-target", "desc": "Limit to a resource", "arg": "text"}]},
+        {"name": "destroy", "desc": "Destroy all managed infrastructure", "opts": [{"name": "-auto-approve", "desc": "Skip interactive approval"}, {"name": "-target", "desc": "Limit to a resource", "arg": "text"}]},
+        {"name": "validate", "desc": "Check the configuration"},
+        {"name": "fmt", "desc": "Format configuration files", "opts": [{"name": "-recursive", "desc": "Include subdirectories"}, {"name": "-check", "desc": "Only check"}]},
+        {"name": "output", "desc": "Show output values", "args": ["text"], "opts": [{"name": "-json", "desc": "JSON output"}, {"name": "-raw", "desc": "Raw string output"}]},
+        {"name": "state", "desc": "Advanced state management", "args": ["enum:list,show,mv,rm,pull,push", "text"]},
+        {"name": "import", "desc": "Import existing infrastructure", "args": ["text", "text"]},
+        {"name": "workspace", "desc": "Manage workspaces", "args": ["enum:list,select,new,delete,show", "text"]},
+        {"name": "providers", "desc": "Show required providers"},
+        {"name": "show", "desc": "Show state or a plan", "args": ["file"]},
+        {"name": "graph", "desc": "Print the dependency graph"}
+      ]
+    },
+    {
+      "name": "helm",
+      "desc": "Kubernetes package manager",
+      "opts": [{"name": "-n --namespace", "desc": "Namespace", "arg": "kube_namespace"}, {"name": "--kube-context", "desc": "Kubeconfig context", "arg": "text"}],
+      "subs": [
+        {"name": "install", "desc": "Install a chart", "args": ["text", "text"], "opts": [{"name": "-f --values", "desc": "Values file", "arg": "file", "repeat": true}, {"name": "--set", "desc": "Set a value", "arg": "text", "repeat": true}, {"name": "--create-namespace", "desc": "Create the namespace"}, {"name": "--version", "desc": "Chart version", "arg": "text"}, {"name": "--dry-run", "desc": "Simulate"}]},
+        {"name": "upgrade", "desc": "Upgrade a release", "args": ["text", "text"], "opts": [{"name": "-i --install", "desc": "Install if missing"}, {"name": "-f --values", "desc": "Values file", "arg": "file", "repeat": true}, {"name": "--set", "desc": "Set a value", "arg": "text", "repeat": true}, {"name": "--atomic", "desc": "Roll back on failure"}, {"name": "--wait", "desc": "Wait for readiness"}]},
+        {"name": "uninstall", "desc": "Remove a release", "args": ["text"]},
+        {"name": "list ls", "desc": "List releases", "opts": [{"name": "-A --all-namespaces", "desc": "All namespaces"}]},
+        {"name": "rollback", "desc": "Roll back to a revision", "args": ["text", "number"]},
+        {"name": "history", "desc": "Release history", "args": ["text"]},
+        {"name": "status", "desc": "Release status", "args": ["text"]},
+        {"name": "repo", "desc": "Manage chart repositories", "args": ["enum:add,update,list,remove"]},
+        {"name": "search", "desc": "Search charts", "args": ["enum:repo,hub", "text"]},
+        {"name": "template", "desc": "Render templates locally", "args": ["text", "text"]},
+        {"name": "get", "desc": "Download release information", "args": ["enum:values,manifest,notes,all", "text"]},
+        {"name": "lint", "desc": "Check a chart", "args": ["directory"]},
+        {"name": "dependency", "desc": "Manage chart dependencies", "args": ["enum:update,build,list"]}
+      ]
+    },
+    {
+      "name": "aws",
+      "desc": "Amazon Web Services CLI",
+      "opts": [
+        {"name": "--profile", "desc": "Named profile", "arg": "text"},
+        {"name": "--region", "desc": "Region", "arg": "enum:us-east-1,us-east-2,us-west-1,us-west-2,eu-west-1,eu-central-1,eu-north-1,ap-southeast-1,ap-northeast-1"},
+        {"name": "--output", "desc": "Output format", "arg": "enum:json,text,table,yaml"},
+        {"name": "--query", "desc": "JMESPath filter", "arg": "text"},
+        {"name": "--no-cli-pager", "desc": "Do not use a pager"}
+      ],
+      "subs": [
+        {"name": "s3", "desc": "Object storage", "subs": [
+          {"name": "ls", "desc": "List buckets or objects", "args": ["url"]},
+          {"name": "cp", "desc": "Copy files", "args": ["path", "path"], "opts": [{"name": "--recursive", "desc": "Copy a tree"}]},
+          {"name": "sync", "desc": "Synchronize directories", "args": ["path", "path"], "opts": [{"name": "--delete", "desc": "Delete extraneous files"}, {"name": "--exclude", "desc": "Exclude a pattern", "arg": "text"}]},
+          {"name": "mv", "desc": "Move files", "args": ["path", "path"]},
+          {"name": "rm", "desc": "Delete objects", "args": ["url"], "opts": [{"name": "--recursive", "desc": "Delete a prefix"}]},
+          {"name": "mb", "desc": "Create a bucket", "args": ["url"]},
+          {"name": "rb", "desc": "Remove a bucket", "args": ["url"], "opts": [{"name": "--force", "desc": "Delete contents first"}]},
+          {"name": "presign", "desc": "Generate a pre-signed URL", "args": ["url"]}
+        ]},
+        {"name": "ec2", "desc": "Virtual machines", "args": ["enum:describe-instances,start-instances,stop-instances,reboot-instances,terminate-instances,describe-security-groups,describe-vpcs"]},
+        {"name": "sts", "desc": "Security tokens", "args": ["enum:get-caller-identity,assume-role"]},
+        {"name": "iam", "desc": "Identity and access", "args": ["enum:list-users,list-roles,get-user,list-policies"]},
+        {"name": "logs", "desc": "CloudWatch Logs", "args": ["enum:tail,describe-log-groups,filter-log-events"]},
+        {"name": "ecr", "desc": "Container registry", "args": ["enum:get-login-password,describe-repositories"]},
+        {"name": "eks", "desc": "Kubernetes service", "args": ["enum:update-kubeconfig,list-clusters,describe-cluster"]},
+        {"name": "lambda", "desc": "Functions", "args": ["enum:list-functions,invoke,get-function"]},
+        {"name": "ssm", "desc": "Systems Manager", "args": ["enum:start-session,get-parameter,put-parameter,send-command"]},
+        {"name": "configure", "desc": "Configure credentials and defaults", "args": ["enum:list,get,set,sso"]},
+        {"name": "sso", "desc": "Single sign-on", "args": ["enum:login,logout"]}
+      ]
+    },
+    {
+      "name": "env",
+      "aliases": ["nohup", "time", "xargs", "exec", "command"],
+      "desc": "Run a command (in a modified environment, detached, timed, ...)",
+      "wrapper": true,
+      "args": ["command"]
+    }
+  ]
+}

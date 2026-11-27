@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/*", "apps/desktop/src-tauri"]
+members = ["crates/*", "plugins/*", "apps/desktop/src-tauri"]
 
 [workspace.package]
 version = "0.1.0"
@@ -8,8 +8,8 @@ edition = "2024"
 rust-version = "1.90"
 license = "GPL-3.0-or-later"
 authors = ["David Niessen"]
-repository = "https://github.com/davidniessen/ssh-client"
-homepage = "https://github.com/davidniessen/ssh-client"
+repository = "https://github.com/DavidNiessen/vaultport"
+homepage = "https://github.com/DavidNiessen/vaultport"
 publish = false
 
 [workspace.lints.rust]
@@ -47,6 +47,7 @@ strip = "symbols"
 
 [profile.dev.package."*"]
 opt-level = 2
+
 
 [profile.dev.package.argon2]
 opt-level = 3

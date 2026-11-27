@@ -1,5 +1,5 @@
 {
-  "name": "ssh-client-monorepo",
+  "name": "vaultport-monorepo",
   "private": true,
   "license": "GPL-3.0-or-later",
   "packageManager": "pnpm@10.28.0",
@@ -8,8 +8,8 @@
     "pnpm": ">=10"
   },
   "scripts": {
-    "dev": "pnpm --filter @ssh-client/desktop tauri dev",
-    "build": "pnpm --filter @ssh-client/desktop tauri build",
+    "dev": "pnpm --filter @vaultport/desktop tauri dev",
+    "build": "pnpm --filter @vaultport/desktop tauri build",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

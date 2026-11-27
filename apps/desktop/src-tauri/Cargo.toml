@@ -1,0 +1,85 @@
+[package]
+name = "vaultport"
+description = "A secure, serverless, cross-platform SSH, SFTP, Mosh and Telnet client"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+default-run = "vaultport"
+
+[lib]
+name = "vaultport_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = ["isolation"] }
+
+[dependencies]
+core-model = { path = "../../../crates/core-model", features = ["specta"] }
+vault = { path = "../../../crates/vault" }
+telnet-proto = { path = "../../../crates/telnet-proto" }
+mosh-proto = { path = "../../../crates/mosh-proto" }
+term-intel = { path = "../../../crates/term-intel" }
+session-log = { path = "../../../crates/session-log" }
+importers = { path = "../../../crates/importers" }
+sync = { path = "../../../crates/sync" }
+cloud-inventory = { path = "../../../crates/cloud-inventory" }
+ssh-engine = { path = "../../../crates/ssh-engine" }
+sftp-engine = { path = "../../../crates/sftp-engine" }
+hw-keys = { path = "../../../crates/hw-keys" }
+serial-io = { path = "../../../crates/serial-io" }
+local-ai = { path = "../../../crates/local-ai", default-features = false }
+
+tauri = { version = "2", features = ["isolation"] }
+tauri-plugin-opener = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-os = "2"
+tauri-plugin-process = "2"
+tauri-plugin-log = "2"
+tauri-specta = { version = "=2.0.0-rc.29", features = ["derive", "typescript"] }
+specta = { version = "=2.0.0-rc.28", features = ["derive", "uuid", "serde_json"] }
+specta-typescript = "0.0.15"
+
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time", "net", "io-util", "io-std", "fs"] }
+tracing = "0.1"
+log = "0.4"
+uuid = { version = "1", features = ["v7", "serde"] }
+zeroize = "1"
+base64 = "0.22"
+getrandom = "0.3"
+parking_lot = "0.12"
+tauri-plugin-vaultport-mobile = { path = "../../../plugins/mobile" }
+mcp-server = { path = "../../../crates/mcp-server" }
+dirs = "6"
+qrcode = { version = "0.14", default-features = false, features = ["svg"] }
+async-trait = "0.1"
+futures = "0.3"
+
+[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+portable-pty = "0.9"
+tauri-plugin-window-state = "2"
+tauri-plugin-single-instance = "2"
+tauri-plugin-updater = "2"
+window-vibrancy = "0.8"
+
+[target.'cfg(any(target_os = "macos", target_os = "ios", target_os = "windows", target_os = "linux"))'.dependencies]
+keyring = { version = "3", features = ["apple-native", "windows-native", "async-secret-service", "tokio", "crypto-rust"] }
+
+[features]
+default = ["local-ai"]
+# Enables the custom protocol in production builds (required by Tauri).
+custom-protocol = ["tauri/custom-protocol"]
+# On-device AI command generation (llama.cpp; needs cmake and clang to build).
+local-ai = ["local-ai/llama"]
+# Apple GPU acceleration for local AI.
+metal = ["local-ai", "local-ai/metal"]
+
+[lints]
+workspace = true

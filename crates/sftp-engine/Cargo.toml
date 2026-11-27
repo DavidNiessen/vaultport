@@ -1,0 +1,35 @@
+[package]
+name = "sftp-engine"
+description = "SFTP and local file systems behind one async trait, plus a resumable transfer queue"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+# File watcher for edit-and-upload (desktop only; leave off for iOS/Android).
+watch = ["dep:notify"]
+# Runs the docker-backed integration tests (`cargo test -p sftp-engine --features integration`).
+integration = []
+
+[dependencies]
+async-trait = "0.1"
+notify = { version = "8.2", optional = true }
+russh-sftp = "4.0.0"
+tempfile = "3"
+thiserror = "2"
+tokio = { version = "1", features = ["fs", "rt", "sync", "time", "macros", "io-util"] }
+tracing = "0.1"
+
+[dev-dependencies]
+core-model = { path = "../core-model" }
+russh = { version = "0.65.4", default-features = false, features = ["ring", "rsa", "flate2"] }
+ssh-engine = { path = "../ssh-engine" }
+tokio = { version = "1", features = ["fs", "rt", "rt-multi-thread", "sync", "time", "macros", "io-util"] }
+
+[lints]
+workspace = true
