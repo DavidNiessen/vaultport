@@ -12,6 +12,7 @@ use tauri::Manager;
 /// The `security` settings document (`features/settings/security.ts`).
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
+#[cfg_attr(mobile, allow(dead_code))]
 pub struct SecurityPrefs {
     pub lock_on_sleep: bool,
 }
@@ -59,6 +60,7 @@ impl Default for LoggingPrefs {
     }
 }
 
+#[cfg_attr(mobile, allow(dead_code))]
 pub const SECURITY: &str = "security";
 pub const TERMINAL: &str = "terminal";
 pub const LOGGING: &str = "logging";

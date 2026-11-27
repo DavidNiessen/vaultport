@@ -176,6 +176,7 @@ pub struct AgentState {
     clients: Mutex<HashMap<u64, AgentClient>>,
     /// Bumped to drop every connection (disable, token rotation).
     epoch: watch::Sender<u64>,
+    #[cfg_attr(mobile, allow(dead_code))]
     next_connection: AtomicU64,
     listener: Mutex<ListenerState>,
 }
@@ -242,6 +243,7 @@ impl AgentState {
         self.grants.lock().clear();
     }
 
+    #[cfg_attr(mobile, allow(dead_code))]
     fn connection_id(&self) -> u64 {
         self.next_connection.fetch_add(1, Ordering::Relaxed)
     }
@@ -315,6 +317,7 @@ impl AgentState {
         }
     }
 
+    #[cfg_attr(mobile, allow(dead_code))]
     fn connected(&self, id: u64, name: String) {
         self.clients.lock().insert(
             id,
@@ -417,6 +420,7 @@ pub fn status(app: &AppHandle) -> AgentStatus {
     }
 }
 
+#[cfg_attr(mobile, allow(dead_code))]
 fn set_listener_error(state: &AgentState, error: String) {
     log::warn!("agent listener: {error}");
     state.listener.lock().error = Some(error);
