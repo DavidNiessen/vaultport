@@ -57,8 +57,19 @@ The threat model and cryptographic design are documented in
 
 ## Verifying releases
 
-Every release artifact ships with a SHA-256 checksum, a Sigstore (cosign) signature and a
-GitHub build-provenance attestation:
+Every release lists the SHA-256 checksum of each artifact in `SHA256SUMS.txt`, which is
+signed with Sigstore (keyless cosign, bundle `SHA256SUMS.txt.sigstore.json`). Every artifact
+also has a GitHub build-provenance attestation:
+
+```bash
+cosign verify-blob SHA256SUMS.txt --bundle SHA256SUMS.txt.sigstore.json \
+  --certificate-identity-regexp '^https://github\.com/davidniessen/ssh-client/\.github/workflows/release\.yml@' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+```bash
+sha256sum -c SHA256SUMS.txt --ignore-missing
+```
 
 ```bash
 gh attestation verify <artifact> --repo davidniessen/ssh-client
