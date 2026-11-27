@@ -1,11 +1,11 @@
 ---
 title: Known hosts
-description: How ssh-client verifies host keys, what the trust prompts mean, strict mode, certificate authorities and revoked keys.
+description: How Vaultport verifies host keys, what the trust prompts mean, strict mode, certificate authorities and revoked keys.
 ---
 
 # Known hosts & host-key verification
 
-A server proves its identity with its **host key**. Checking that key is what protects you from someone intercepting the connection (a man-in-the-middle attack). ssh-client verifies the host key of **every hop** of every connection — the target and each jump host — against the **Known Hosts** list in your vault.
+A server proves its identity with its **host key**. Checking that key is what protects you from someone intercepting the connection (a man-in-the-middle attack). Vaultport verifies the host key of **every hop** of every connection — the target and each jump host — against the **Known Hosts** list in your vault.
 
 ## The prompts
 
@@ -62,4 +62,4 @@ Entries marked `@revoked` block a key everywhere — including a certificate's s
 
 ## Algorithm preferences and key changes
 
-When a host is already known, ssh-client prefers the host-key algorithms it already trusts for that host during negotiation. If a server then presents a key of a different type, that is treated as a **change** rather than silently accepted. See [Host-key policy](/security/host-keys) for the full decision order.
+When a host is already known, Vaultport prefers the host-key algorithms it already trusts for that host during negotiation. If a server then presents a key of a different type, that is treated as a **change** rather than silently accepted. See [Host-key policy](/security/host-keys) for the full decision order.

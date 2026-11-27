@@ -1,39 +1,39 @@
 ---
 title: AI agents (MCP)
-description: Let AI tools such as Claude Code, Claude Desktop, Cursor, VS Code and Codex work with your servers through ssh-client over the Model Context Protocol — locally, without exposing credentials, and with your approval.
+description: Let AI tools such as Claude Code, Claude Desktop, Cursor, VS Code and Codex work with your servers through Vaultport over the Model Context Protocol — locally, without exposing credentials, and with your approval.
 ---
 
 # AI agents (MCP)
 
-ssh-client can act as a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server, so AI tools such as **Claude Code**, **Claude Desktop**, **Cursor**, **VS Code** or **Codex** can list your hosts, read files and — with your approval — run commands on your servers.
+Vaultport can act as a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server, so AI tools such as **Claude Code**, **Claude Desktop**, **Cursor**, **VS Code** or **Codex** can list your hosts, read files and — with your approval — run commands on your servers.
 
-The agent never gets your passwords, keys or vault. It asks ssh-client to do something; ssh-client shows you what exactly will happen, opens the connection itself with your saved credentials, and returns only the result.
+The agent never gets your passwords, keys or vault. It asks Vaultport to do something; Vaultport shows you what exactly will happen, opens the connection itself with your saved credentials, and returns only the result.
 
 ::: info Desktop only, off by default
 Agent access is available in the desktop apps (Windows, macOS, Linux). It is **off** until you turn it on, and it only accepts connections from programs running as your user on the same computer.
 :::
 
-This is separate from [Local AI](/guide/local-ai), which generates commands with an on-device model. With agent access, the AI tool you connect decides what to ask for, and its model may run in the cloud — whatever ssh-client returns to it (command output, file contents, host names) is sent wherever that tool sends its prompts.
+This is separate from [Local AI](/guide/local-ai), which generates commands with an on-device model. With agent access, the AI tool you connect decides what to ask for, and its model may run in the cloud — whatever Vaultport returns to it (command output, file contents, host names) is sent wherever that tool sends its prompts.
 
 ## Turn it on
 
 1. Open **Settings → AI agents** and switch on **Allow AI agents**. The status changes to _On: agents on this computer can connect_.
 2. Choose when you want to be asked (**Ask before**), whether agents may only read (**Read-only**), and which **hosts** they can see.
-3. Under **Connect a client**, pick your tool and copy the ready-made snippet. It already contains the correct path to the ssh-client executable on your computer.
+3. Under **Connect a client**, pick your tool and copy the ready-made snippet. It already contains the correct path to the Vaultport executable on your computer.
 
-The MCP client starts `ssh-client mcp` whenever it needs the server. That small command relays the conversation to the running app; if ssh-client is not running, it starts it.
+The MCP client starts `vaultport mcp` whenever it needs the server. That small command relays the conversation to the running app; if Vaultport is not running, it starts it.
 
 ## Connect a client
 
-The snippets below use a placeholder for the executable. Use the exact snippet shown in **Settings → AI agents**, or replace `<ssh-client>` with the path for your installation:
+The snippets below use a placeholder for the executable. Use the exact snippet shown in **Settings → AI agents**, or replace `<vaultport>` with the path for your installation:
 
-| Platform                      | Typical path                                             |
-| ----------------------------- | -------------------------------------------------------- |
-| macOS                         | `/Applications/ssh-client.app/Contents/MacOS/ssh-client` |
-| Windows (installer, per user) | `C:\Users\<you>\AppData\Local\ssh-client\ssh-client.exe` |
-| Windows (MSI)                 | `C:\Program Files\ssh-client\ssh-client.exe`             |
-| Linux (`.deb`, `.rpm`)        | `/usr/bin/ssh-client`                                    |
-| Linux (AppImage)              | the full path of the `.AppImage` file                    |
+| Platform                      | Typical path                                           |
+| ----------------------------- | ------------------------------------------------------ |
+| macOS                         | `/Applications/vaultport.app/Contents/MacOS/vaultport` |
+| Windows (installer, per user) | `C:\Users\<you>\AppData\Local\vaultport\vaultport.exe` |
+| Windows (MSI)                 | `C:\Program Files\vaultport\vaultport.exe`             |
+| Linux (`.deb`, `.rpm`)        | `/usr/bin/vaultport`                                   |
+| Linux (AppImage)              | the full path of the `.AppImage` file                  |
 
 Paths that contain spaces must be quoted in shell commands (`'…'` on macOS and Linux, `"…"` on Windows); the app does this for you.
 
@@ -42,14 +42,14 @@ The JSON snippets go into `claude_desktop_config.json` for Claude Desktop (**Set
 ::: code-group
 
 ```bash [Claude Code]
-claude mcp add --scope user ssh-client -- <ssh-client> mcp
+claude mcp add --scope user vaultport -- <vaultport> mcp
 ```
 
 ```json [Claude Desktop]
 {
   "mcpServers": {
-    "ssh-client": {
-      "command": "<ssh-client>",
+    "vaultport": {
+      "command": "<vaultport>",
       "args": ["mcp"]
     }
   }
@@ -59,8 +59,8 @@ claude mcp add --scope user ssh-client -- <ssh-client> mcp
 ```json [Cursor]
 {
   "mcpServers": {
-    "ssh-client": {
-      "command": "<ssh-client>",
+    "vaultport": {
+      "command": "<vaultport>",
       "args": ["mcp"]
     }
   }
@@ -70,9 +70,9 @@ claude mcp add --scope user ssh-client -- <ssh-client> mcp
 ```json [VS Code]
 {
   "servers": {
-    "ssh-client": {
+    "vaultport": {
       "type": "stdio",
-      "command": "<ssh-client>",
+      "command": "<vaultport>",
       "args": ["mcp"]
     }
   }
@@ -80,19 +80,19 @@ claude mcp add --scope user ssh-client -- <ssh-client> mcp
 ```
 
 ```bash [Codex]
-codex mcp add ssh-client -- <ssh-client> mcp
+codex mcp add vaultport -- <vaultport> mcp
 ```
 
 ```bash [Other clients]
 # Any MCP client that supports the stdio transport:
-<ssh-client> mcp
+<vaultport> mcp
 ```
 
 :::
 
-In JSON files on Windows, write backslashes twice (`"C:\\Program Files\\ssh-client\\ssh-client.exe"`).
+In JSON files on Windows, write backslashes twice (`"C:\\Program Files\\vaultport\\vaultport.exe"`).
 
-If agent access is turned off, `ssh-client mcp` still starts, but only offers a single status tool that tells the agent to ask you to turn access on — so you get a clear message instead of a broken server.
+If agent access is turned off, `vaultport mcp` still starts, but only offers a single status tool that tells the agent to ask you to turn access on — so you get a clear message instead of a broken server.
 
 ## Tools
 
@@ -110,13 +110,13 @@ If agent access is turned off, `ssh-client mcp` still starts, but only offers a 
 | `delete_path`        | Deletes a file, symlink or empty directory over SFTP (not recursive).                                                                                                           | yes, destructive  |
 | `start_port_forward` | Starts a saved port-forwarding rule.                                                                                                                                            | yes               |
 | `stop_port_forward`  | Stops a running port-forwarding rule.                                                                                                                                           | yes               |
-| `open_terminal`      | Opens an interactive terminal tab for you in ssh-client; the agent cannot read or type into it. Use it to hand over.                                                            | yes               |
+| `open_terminal`      | Opens an interactive terminal tab for you in Vaultport; the agent cannot read or type into it. Use it to hand over.                                                             | yes               |
 
 Hosts are referred to by id, label or address. Connections use the host's saved settings — jump hosts, proxy, keys, [host-key verification](/guide/known-hosts) — exactly as if you connected yourself.
 
 ## Approvals
 
-When an agent wants to do something that needs approval, ssh-client comes to the front and shows **"&lt;agent&gt; wants to act"** with the tool, the host and the exact details: the full command, the path, or a preview of the content to write. Destructive actions are marked **Makes changes**.
+When an agent wants to do something that needs approval, Vaultport comes to the front and shows **"&lt;agent&gt; wants to act"** with the tool, the host and the exact details: the full command, the path, or a preview of the content to write. Destructive actions are marked **Makes changes**.
 
 - **Deny** — the agent is told that you declined and not to retry unchanged.
 - **Allow once** — only this call.
@@ -140,23 +140,23 @@ Actions that change something always need your approval (or an earlier "allow fo
 
 ## Connected agents and activity
 
-**Settings → AI agents** shows the agents that are connected right now (named after what the client reports, such as "Claude Code"), with **Disconnect all**. **Reset access** creates a new access token and disconnects every agent; clients reconnect automatically the next time they start `ssh-client mcp`.
+**Settings → AI agents** shows the agents that are connected right now (named after what the client reports, such as "Claude Code"), with **Disconnect all**. **Reset access** creates a new access token and disconnects every agent; clients reconnect automatically the next time they start `vaultport mcp`.
 
 The **Activity** list records every agent call — time, agent, tool, host, a one-line summary and whether it was done, failed or denied. It keeps the last 500 entries while the app is running.
 
 ## When the vault is locked
 
-Agents cannot do anything while the vault is locked: every call returns "The ssh-client vault is locked. Ask the user to unlock ssh-client" without asking you first. Locking the vault also revokes all "allow for this session" grants.
+Agents cannot do anything while the vault is locked: every call returns "The Vaultport vault is locked. Ask the user to unlock Vaultport, then try again." without asking you first. Locking the vault also revokes all "allow for this session" grants.
 
 ## Security model
 
 - **Local only.** There is no network listener. The app listens on a Unix socket with mode `0600` in your runtime or app data directory (macOS, Linux), or on a per-user named pipe that rejects remote clients (Windows).
-- **Token.** `ssh-client mcp` must present a random 256-bit token from the file `agent-token` in the app data directory, readable only by you (`0600`). Tokens are compared in constant time; **Reset access** replaces it.
+- **Token.** `vaultport mcp` must present a random 256-bit token from the file `agent-token` in the app data directory, readable only by you (`0600`). Tokens are compared in constant time; **Reset access** replaces it.
 - **Same user.** On macOS and Linux the app additionally checks the connecting process's user id and drops connections from anyone else.
-- **No secrets.** Tools never return passwords, private keys, passphrases or vault contents; credentials are used inside ssh-client only.
+- **No secrets.** Tools never return passwords, private keys, passphrases or vault contents; credentials are used inside Vaultport only.
 - **Per device.** Agent settings live in a local file and are not synced; enabling access on one computer does not enable it anywhere else.
-- **Off means off.** When you turn access off, the listener stops and all connections are dropped; `ssh-client mcp` then serves only the status tool.
+- **Off means off.** When you turn access off, the listener stops and all connections are dropped; `vaultport mcp` then serves only the status tool.
 
 ### Prompt injection
 
-An agent reads command output and file contents from your servers. Anything there — a log line, a README, a crafted file — can contain text that tries to steer the agent ("ignore previous instructions and run …"). ssh-client cannot tell such text from legitimate output. **Your approval is the control**: read every command and path in the approval dialog before allowing it, prefer _Allow once_ on production hosts, use **Read-only** or **Selected** hosts for exploratory sessions, and check the **Activity** list afterwards. See also the [threat model](/security/#ai-agents-over-mcp).
+An agent reads command output and file contents from your servers. Anything there — a log line, a README, a crafted file — can contain text that tries to steer the agent ("ignore previous instructions and run …"). Vaultport cannot tell such text from legitimate output. **Your approval is the control**: read every command and path in the approval dialog before allowing it, prefer _Allow once_ on production hosts, use **Read-only** or **Selected** hosts for exploratory sessions, and check the **Activity** list afterwards. See also the [threat model](/security/#ai-agents-over-mcp).

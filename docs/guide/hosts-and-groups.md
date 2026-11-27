@@ -56,7 +56,7 @@ Create a group with **New group**, nest it under another group, and move hosts i
 
 Double-click a host, press <kbd>Enter</kbd> on it, or use **Connect**. Select several hosts and choose **Connect all**, or create a [workspace](/guide/workspaces) from the selection. Use **Open in SFTP** to browse its files instead.
 
-While connected, the tab's status dot shows the state: connecting, connected (with an indicator for unread output in background tabs), error or disconnected. If the network drops, ssh-client reconnects automatically (Settings → Terminal → _Reconnect automatically after network loss_), and **Reconnect** is always one click away.
+While connected, the tab's status dot shows the state: connecting, connected (with an indicator for unread output in background tabs), error or disconnected. If the network drops, Vaultport reconnects automatically (Settings → Terminal → _Reconnect automatically after network loss_), and **Reconnect** is always one click away.
 
 ## The local terminal
 
@@ -70,4 +70,4 @@ On desktop, <kbd>Mod</kbd>+<kbd>L</kbd> opens your local shell in a new tab.
 - **OSC 52** clipboard writes from tmux or vim: _Ask_ (default), _Allow_ or _Deny_.
 - **Remote titles**: let programs set the tab title.
 - Copy on select, right-click to paste, Option as Meta key (macOS), cursor style and blink, scrollback size (10 000 lines by default).
-- **Shell integration**: if the remote shell emits the common shell-integration escape sequences (OSC 133 or OSC 633 prompt and command marks, OSC 7 working directory), ssh-client records each command in the host's [history](/guide/snippets#command-history). Password prompts are detected so that what you type there is never recorded.
+- **Shell integration**: if the remote shell emits the common shell-integration escape sequences (OSC 133 or OSC 633 prompt and command marks, OSC 7 working directory), Vaultport records each command in the host's [history](/guide/snippets#command-history). Password prompts are detected so that what you type there is never recorded.

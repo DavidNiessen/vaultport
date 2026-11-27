@@ -137,7 +137,7 @@ export function CommandPalette({ onLock, onImport }: { onLock: () => void; onImp
               activate(VAULT_TAB);
               setSection('hosts');
               select(null);
-              window.dispatchEvent(new CustomEvent('ssh-client:new-host'));
+              window.dispatchEvent(new CustomEvent('vaultport:new-host'));
             })}
             {platform.localTerminal
               ? action(t('hosts.terminal'), <SquareTerminal />, () => sessions.openLocal(), [

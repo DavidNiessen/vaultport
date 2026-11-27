@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Glue between the core and the native mobile plugin (`tauri-plugin-ssh-client-mobile`).
+//! Glue between the core and the native mobile plugin (`tauri-plugin-vaultport-mobile`).
 //!
 //! On desktop the plugin's functions are no-ops, so callers do not need `cfg` guards.
 
 use std::sync::Arc;
 use std::sync::OnceLock;
 use tauri::{AppHandle, Manager};
-use tauri_plugin_ssh_client_mobile::MobileServicesExt as _;
+use tauri_plugin_vaultport_mobile::MobileServicesExt as _;
 
 static APP: OnceLock<AppHandle> = OnceLock::new();
 

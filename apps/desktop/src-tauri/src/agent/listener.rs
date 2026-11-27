@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! The local socket (Unix) / named pipe (Windows) that `ssh-client mcp` relays to.
+//! The local socket (Unix) / named pipe (Windows) that `vaultport mcp` relays to.
 
 use std::io;
 use std::sync::Arc;
@@ -108,8 +108,8 @@ where
     let mut epoch = state.epoch.subscribe();
     let handler = Arc::new(tools::AgentHandler::new(app, state.clone()));
     let info = mcp_server::ServerInfo {
-        name: "ssh-client".into(),
-        title: "ssh-client".into(),
+        name: "vaultport".into(),
+        title: "Vaultport".into(),
         version: env!("CARGO_PKG_VERSION").into(),
         instructions: Some(tools::INSTRUCTIONS.into()),
     };

@@ -61,7 +61,7 @@ const claims = [
         v-reveal="80"
         class="flow"
         role="img"
-        aria-label="Two of your devices exchange encrypted vault segments through your own storage. No ssh-client server is involved."
+        aria-label="Two of your devices exchange encrypted vault segments through your own storage. No Vaultport server is involved."
       >
         <div class="node">
           <Laptop :size="22" aria-hidden="true" />
@@ -79,7 +79,7 @@ const claims = [
           <span>Phone</span>
         </div>
         <p class="none">
-          <ServerOff :size="14" aria-hidden="true" /> ssh-client cloud: <s>does not exist</s>
+          <ServerOff :size="14" aria-hidden="true" /> Vaultport cloud: <s>does not exist</s>
         </p>
       </div>
 

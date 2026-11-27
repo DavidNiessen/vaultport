@@ -1,6 +1,6 @@
 # Security Policy
 
-ssh-client handles private keys, passwords and access to production infrastructure. We treat
+Vaultport handles private keys, passwords and access to production infrastructure. We treat
 security reports as our highest priority.
 
 ## Supported versions
@@ -16,7 +16,7 @@ security reports as our highest priority.
 **Please do not open a public issue.**
 
 Report vulnerabilities privately through
-[GitHub Security Advisories](https://github.com/davidniessen/ssh-client/security/advisories/new).
+[GitHub Security Advisories](https://github.com/DavidNiessen/vaultport/security/advisories/new).
 Include:
 
 - affected version(s) and platform(s),
@@ -40,7 +40,7 @@ Out of scope:
 
 - vulnerabilities in SSH servers you connect to,
 - issues that require a fully compromised operating system or a malicious, already-installed
-  application with the same privileges as ssh-client,
+  application with the same privileges as Vaultport,
 - denial of service by the user against their own device.
 
 ## Security design
@@ -48,7 +48,7 @@ Out of scope:
 The threat model and cryptographic design are documented in
 [`docs/security/`](docs/security/). Highlights:
 
-- **No servers.** ssh-client has no backend, no accounts and no telemetry.
+- **No servers.** Vaultport has no backend, no accounts and no telemetry.
 - **Secrets never leave the Rust core.** The UI only handles opaque identifiers.
 - **Vault encryption:** XChaCha20-Poly1305 per record, keys wrapped with Argon2id-derived keys
   and/or the OS key store (Keychain, DPAPI/Credential Manager, Secret Service, Android Keystore).
@@ -63,7 +63,7 @@ also has a GitHub build-provenance attestation:
 
 ```bash
 cosign verify-blob SHA256SUMS.txt --bundle SHA256SUMS.txt.sigstore.json \
-  --certificate-identity-regexp '^https://github\.com/davidniessen/ssh-client/\.github/workflows/release\.yml@' \
+  --certificate-identity-regexp '^https://github\.com/DavidNiessen/vaultport/\.github/workflows/release\.yml@' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
@@ -72,5 +72,5 @@ sha256sum -c SHA256SUMS.txt --ignore-missing
 ```
 
 ```bash
-gh attestation verify <artifact> --repo davidniessen/ssh-client
+gh attestation verify <artifact> --repo DavidNiessen/vaultport
 ```

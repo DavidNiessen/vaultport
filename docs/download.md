@@ -2,7 +2,7 @@
 layout: home
 markdownStyles: false
 title: Download
-description: Download ssh-client for Windows, macOS, Linux, iOS, iPadOS and Android, and verify the files with SHA-256 checksums, GitHub attestations and Sigstore signatures.
+description: Download Vaultport for Windows, macOS, Linux, iOS, iPadOS and Android, and verify the files with SHA-256 checksums, GitHub attestations and Sigstore signatures.
 ---
 
 <DownloadPage />
@@ -11,7 +11,7 @@ description: Download ssh-client for Windows, macOS, Linux, iOS, iPadOS and Andr
 
 ## Verify your download
 
-Every release is built by the [release workflow](https://github.com/davidniessen/ssh-client/blob/main/.github/workflows/release.yml) in GitHub Actions from a tagged commit. Next to the installers, each release has:
+Every release is built by the [release workflow](https://github.com/DavidNiessen/vaultport/blob/main/.github/workflows/release.yml) in GitHub Actions from a tagged commit. Next to the installers, each release has:
 
 | File                           | What it is                                                                            |
 | ------------------------------ | ------------------------------------------------------------------------------------- |
@@ -20,7 +20,7 @@ Every release is built by the [release workflow](https://github.com/davidniessen
 | `sbom.spdx.json`               | Software bill of materials (SPDX) of the source tree                                  |
 | `*.sig`, `latest.json`         | Signatures and manifest for the desktop self-updater (when updater signing is set up) |
 
-Every file listed in `SHA256SUMS.txt` also has a GitHub build-provenance attestation. All of them are on the [releases page](https://github.com/davidniessen/ssh-client/releases).
+Every file listed in `SHA256SUMS.txt` also has a GitHub build-provenance attestation. All of them are on the [releases page](https://github.com/DavidNiessen/vaultport/releases).
 
 ### 1. Verify the checksum file's signature
 
@@ -29,7 +29,7 @@ The signature is keyless: it is bound to the release workflow's GitHub identity,
 ```bash
 cosign verify-blob SHA256SUMS.txt \
   --bundle SHA256SUMS.txt.sigstore.json \
-  --certificate-identity-regexp '^https://github\.com/davidniessen/ssh-client/\.github/workflows/release\.yml@' \
+  --certificate-identity-regexp '^https://github\.com/DavidNiessen/vaultport/\.github/workflows/release\.yml@' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
@@ -47,7 +47,7 @@ shasum -a 256 -c SHA256SUMS.txt --ignore-missing
 
 ```powershell
 # Windows (PowerShell): compare the output with the line in SHA256SUMS.txt
-Get-FileHash .\ssh-client_<version>_x64-setup.exe -Algorithm SHA256
+Get-FileHash .\vaultport_<version>_x64-setup.exe -Algorithm SHA256
 ```
 
 Together, steps 1 and 2 prove that your file is exactly what the release workflow published.
@@ -57,7 +57,7 @@ Together, steps 1 and 2 prove that your file is exactly what the release workflo
 With the [GitHub CLI](https://cli.github.com/), confirm directly that a file was built in this repository's GitHub Actions:
 
 ```bash
-gh attestation verify ssh-client_<version>_amd64.AppImage --repo davidniessen/ssh-client
+gh attestation verify vaultport_<version>_amd64.AppImage --repo DavidNiessen/vaultport
 ```
 
 ### Updates
@@ -66,6 +66,6 @@ Desktop builds include a self-updater that reads `latest.json` from the latest G
 
 ### Prefer to build it yourself?
 
-Everything needed to build ssh-client from source is in the repository. See [Build from source](/development/building).
+Everything needed to build Vaultport from source is in the repository. See [Build from source](/development/building).
 
 </div>

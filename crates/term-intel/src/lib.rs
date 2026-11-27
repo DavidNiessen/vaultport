@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Terminal intelligence for ssh-client: deterministic, offline, no AI.
+//! Terminal intelligence for Vaultport: deterministic, offline, no AI.
 //!
 //! * [`shell`]: sans-IO parser for shell integration escape sequences (OSC 7, 133, 633, 1337,
 //!   9;4) and heuristic password prompt detection.

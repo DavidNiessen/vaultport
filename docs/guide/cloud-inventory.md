@@ -5,7 +5,7 @@ description: Keep a group of hosts in sync with AWS EC2 and Lightsail, DigitalOc
 
 # Cloud inventory
 
-A **cloud integration** keeps a group of hosts in line with the machines in a cloud account. There is no service in between: ssh-client calls the provider's API **directly from your device**, with credentials that stay in your vault.
+A **cloud integration** keeps a group of hosts in line with the machines in a cloud account. There is no service in between: Vaultport calls the provider's API **directly from your device**, with credentials that stay in your vault.
 
 ## Supported providers
 
@@ -15,13 +15,13 @@ A **cloud integration** keeps a group of hosts in line with the machines in a cl
 | DigitalOcean    | Droplets                              | Personal access token with read scope                                          |
 | Microsoft Azure | Virtual machines with a public IP     | Service principal (tenant ID, client ID, client secret) with the _Reader_ role |
 
-**Use read-only credentials.** ssh-client only ever reads the inventory; a key that can do more is an unnecessary risk.
+**Use read-only credentials.** Vaultport only ever reads the inventory; a key that can do more is an unnecessary risk.
 
 ## Adding an integration
 
 1. **Hosts → Import → Cloud**.
 2. Choose the provider, give the integration a label, and enter the credentials (and, for AWS, regions such as `us-east-1,eu-central-1`).
-3. **Add and sync.** ssh-client creates a group named after the integration and fills it with one host per instance.
+3. **Add and sync.** Vaultport creates a group named after the integration and fills it with one host per instance.
 
 In the current build the sync runs when you add the integration; the core can re-sync an existing integration, but there is no button for it in the UI yet. Cloud credentials are stored as vault secrets that **stay on this device**: they are not synced to your other devices.
 
@@ -46,5 +46,5 @@ Because the integration owns a normal group, you can put shared settings on it �
 
 - TLS is provided by rustls; redirects are disabled.
 - Pagination links are followed only on the provider's own API origin, so tokens and signatures are never sent to another host.
-- AWS requests are signed with Signature Version 4 inside ssh-client; no AWS SDK or CLI is needed.
+- AWS requests are signed with Signature Version 4 inside Vaultport; no AWS SDK or CLI is needed.
 - Credentials are wiped from memory after use and redacted from logs.

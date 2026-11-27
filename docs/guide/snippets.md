@@ -49,11 +49,11 @@ Set a **startup snippet** on a host or group (SSH options) to run it automatical
 
 ## Command history
 
-When the remote shell reports its commands through [shell-integration sequences](/guide/hosts-and-groups#terminal-features), ssh-client recognizes each command you run and keeps a per-host, frecency-ranked **history** in the encrypted vault. Browse it in the terminal side panel under **History**: click a command to insert it, double-click to run it.
+When the remote shell reports its commands through [shell-integration sequences](/guide/hosts-and-groups#terminal-features), Vaultport recognizes each command you run and keeps a per-host, frecency-ranked **history** in the encrypted vault. Browse it in the terminal side panel under **History**: click a command to insert it, double-click to run it.
 
 ## Autocomplete: deterministic, no AI
 
-ssh-client's completion engine is deliberately **not** AI. It is a small, offline, deterministic engine in the Rust core (`term-intel`) that ranks suggestions from:
+Vaultport's completion engine is deliberately **not** AI. It is a small, offline, deterministic engine in the Rust core (`term-intel`) that ranks suggestions from:
 
 - your command **history** for the host,
 - your **snippets**,

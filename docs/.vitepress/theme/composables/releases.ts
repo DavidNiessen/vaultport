@@ -227,7 +227,7 @@ export function formatBytes(bytes: number): string {
   return `${value.toFixed(value >= 100 || unit === 0 ? 0 : 1)} ${units[unit] ?? 'B'}`;
 }
 
-const CACHE_KEY = 'ssh-client:latest-release:v1';
+const CACHE_KEY = 'vaultport:latest-release:v1';
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
 function readCache(): GithubRelease | null | undefined {

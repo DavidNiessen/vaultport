@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# ssh-client shell integration for bash >= 4.4 (opt-in).
+# Vaultport shell integration for bash >= 4.4 (opt-in).
 # Emits OSC 7 (cwd) and OSC 133 A/B/C/D (prompt / command marks). Safe to source twice.
-if [[ $- == *i* && -n ${SSH_CLIENT_SHELL_INTEGRATION-} && -z ${__sshc_si-} ]]; then
+if [[ $- == *i* && -n ${VAULTPORT_SHELL_INTEGRATION-} && -z ${__sshc_si-} ]]; then
   __sshc_si=1
   __sshc_first=1
   __sshc_osc7() {

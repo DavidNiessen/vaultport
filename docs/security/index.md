@@ -1,11 +1,11 @@
 ---
 title: Security overview & threat model
-description: The security architecture of ssh-client — what it protects, against whom, and the design decisions behind the vault, sync, SSH engine and app shell.
+description: The security architecture of Vaultport — what it protects, against whom, and the design decisions behind the vault, sync, SSH engine and app shell.
 ---
 
 # Security overview & threat model
 
-ssh-client handles private keys, passwords and access to production infrastructure. This section summarizes how it protects them. The design principles:
+Vaultport handles private keys, passwords and access to production infrastructure. This section summarizes how it protects them. The design principles:
 
 1. **No servers.** There is no backend, no account system and no telemetry. Nothing can be breached on our side because there is nothing on our side.
 2. **Secrets never leave the Rust core.** The web UI only handles opaque identifiers; private keys and passwords are decrypted inside the core, used, and wiped.
@@ -38,17 +38,17 @@ ssh-client handles private keys, passwords and access to production infrastructu
 
 ## AI agents over MCP
 
-[Agent access](/guide/ai-agents) lets local AI tools call ssh-client over the Model Context Protocol. It is off by default and desktop-only.
+[Agent access](/guide/ai-agents) lets local AI tools call Vaultport over the Model Context Protocol. It is off by default and desktop-only.
 
 - **Reachability:** a `0600` Unix socket or a local-only, per-user named pipe; no network listener. Connections must present a 256-bit token from a `0600` file, and on macOS and Linux the peer's user id must match.
-- **Secrets:** tools never return passwords, keys or vault data. ssh-client opens connections itself, with full host-key verification.
+- **Secrets:** tools never return passwords, keys or vault data. Vaultport opens connections itself, with full host-key verification.
 - **Authority:** the agent can only use the tools you allow (read-only mode), on the hosts you allow (host scope). Every call that changes something needs your approval in the app, with the exact command, path or content shown; approvals time out (denied) after 5 minutes; session grants end when the agent disconnects or the vault locks. A locked vault refuses all calls.
-- **Residual risk — prompt injection:** output from your servers (logs, files, command output) flows into the agent's context and may contain instructions aimed at the model. ssh-client cannot detect this. **Approvals are the control**: review each action, prefer _Allow once_ for anything destructive, and use read-only mode or a host allow-list when exploring. Also remember that what the agent reads is sent to wherever the AI tool runs its model.
+- **Residual risk — prompt injection:** output from your servers (logs, files, command output) flows into the agent's context and may contain instructions aimed at the model. Vaultport cannot detect this. **Approvals are the control**: review each action, prefer _Allow once_ for anything destructive, and use read-only mode or a host allow-list when exploring. Also remember that what the agent reads is sent to wherever the AI tool runs its model.
 
 ## Out of scope
 
 - Vulnerabilities in the SSH servers you connect to.
-- A fully compromised operating system, or a malicious application already running with the same privileges as ssh-client. Such an attacker can read process memory while the vault is unlocked.
+- A fully compromised operating system, or a malicious application already running with the same privileges as Vaultport. Such an attacker can read process memory while the vault is unlocked.
 - Denial of service by the user against their own device.
 
 ## Hardening in the Rust core

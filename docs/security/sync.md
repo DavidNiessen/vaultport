@@ -1,6 +1,6 @@
 ---
 title: Sync protocol
-description: How ssh-client replicates the vault through untrusted user-owned storage with encrypted segment files, per-device hash chains, integrity issues, compaction, export and pairing.
+description: How Vaultport replicates the vault through untrusted user-owned storage with encrypted segment files, per-device hash chains, integrity issues, compaction, export and pairing.
 ---
 
 # Sync protocol
@@ -23,7 +23,7 @@ Every device numbers its segments 1, 2, 3 … on a backend. A **delta** segment 
 
 ```text
 file  = "SSHSEG01" ‖ XChaCha20-Poly1305(segment key, aad, json(body))
-aad   = "ssh-client/segment/v1|<vault id>|<device>|<counter>|<delta|snapshot>"
+aad   = "vaultport/segment/v1|<vault id>|<device>|<counter>|<delta|snapshot>"
 body  = { vault, device, counter, kind, prev = SHA-256(previous file of this device), ops, covers? }
 ```
 
@@ -53,19 +53,19 @@ Compaction first syncs, then writes a snapshot containing all ops this device ha
 
 ## Backends
 
-| Backend | Notes                                                                                                                                                                    |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Folder  | Atomic writes (temporary file, flush, rename); create-only writes via hard links; sync-tool conflict copies are skipped                                                  |
-| WebDAV  | `PROPFIND`, conditional `PUT` (`If-None-Match` / `If-Match`), Basic authentication over rustls, redirects not followed                                                   |
-| S3      | AWS Signature V4, any S3-compatible endpoint over HTTPS, conditional writes                                                                                              |
-| Git     | Pure Rust (`gix`), one branch (`refs/heads/ssh-client-sync`), set-of-files three-way merge that is always conflict-free; the SSH transport is not wired into the app yet |
+| Backend | Notes                                                                                                                                                                   |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Folder  | Atomic writes (temporary file, flush, rename); create-only writes via hard links; sync-tool conflict copies are skipped                                                 |
+| WebDAV  | `PROPFIND`, conditional `PUT` (`If-None-Match` / `If-Match`), Basic authentication over rustls, redirects not followed                                                  |
+| S3      | AWS Signature V4, any S3-compatible endpoint over HTTPS, conditional writes                                                                                             |
+| Git     | Pure Rust (`gix`), one branch (`refs/heads/vaultport-sync`), set-of-files three-way merge that is always conflict-free; the SSH transport is not wired into the app yet |
 
-## Encrypted export (`.sshvault`)
+## Encrypted export (`.vaultport`)
 
 ```text
-"SSHVAULT" ‖ version u16 ‖ header length u32 ‖ header JSON ‖ payload
+"VAULTPRT" ‖ version u16 ‖ header length u32 ‖ header JSON ‖ payload
 header  = { vaultId, kdf: { memoryKib, iterations, parallelism, salt }, createdAt, opCount, wrappedKey }
-payload = XChaCha20-Poly1305(export key, "ssh-client/export/v1|" ‖ SHA-256(header), json([SealedOp]))
+payload = XChaCha20-Poly1305(export key, "vaultport/export/v1|" ‖ SHA-256(header), json([SealedOp]))
 ```
 
 `wrappedKey` is the vault key wrapped with `Argon2id(passphrase)`. Any change to the header or payload is detected. Because the payload contains the vault's own sealed ops, an imported file is the same CRDT replica and can keep syncing with the original devices.

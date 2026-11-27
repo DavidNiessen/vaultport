@@ -1,11 +1,11 @@
 ---
 title: Introduction
-description: What ssh-client is, what it does, and the principles behind it — serverless, private and open source.
+description: What Vaultport is, what it does, and the principles behind it — serverless, private and open source.
 ---
 
 # Introduction
 
-**ssh-client** is a free, open-source terminal and file-transfer client for **SSH, SFTP, Mosh, Telnet and serial consoles**. It runs on Windows, macOS, Linux, iOS, iPadOS and Android from one code base: a Rust core for everything security-relevant and a React UI, packaged with [Tauri 2](https://v2.tauri.app/).
+**Vaultport** is a free, open-source terminal and file-transfer client for **SSH, SFTP, Mosh, Telnet and serial consoles**. It runs on Windows, macOS, Linux, iOS, iPadOS and Android from one code base: a Rust core for everything security-relevant and a React UI, packaged with [Tauri 2](https://v2.tauri.app/).
 
 It is built around three promises:
 
@@ -41,10 +41,10 @@ Secrets never cross into the web UI: it handles opaque identifiers and asks the 
 
 ## A native feel on every platform
 
-ssh-client draws its own title bar with tabs, but follows the conventions of each system: macOS keeps its traffic-light buttons, Windows gets Fluent-style caption buttons, and Linux honours your GNOME `button-layout` setting (order and side). On phones and tablets the layout switches to a touch-first design with a terminal key bar — see [Phones & tablets](/guide/mobile).
+Vaultport draws its own title bar with tabs, but follows the conventions of each system: macOS keeps its traffic-light buttons, Windows gets Fluent-style caption buttons, and Linux honours your GNOME `button-layout` setting (order and side). On phones and tablets the layout switches to a touch-first design with a terminal key bar — see [Phones & tablets](/guide/mobile).
 
 ## Next steps
 
-1. [Install ssh-client](/guide/installation) for your platform.
+1. [Install Vaultport](/guide/installation) for your platform.
 2. Follow the [quick start](/guide/quick-start) to create your vault and connect to your first server.
 3. Learn how the [vault](/concepts/vault) and [groups & inheritance](/concepts/groups-and-inheritance) work.

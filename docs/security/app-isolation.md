@@ -5,7 +5,7 @@ description: How the Tauri shell isolates the web UI from secrets — typed IPC 
 
 # App isolation
 
-ssh-client's UI is a web application (React) running in the system webview through [Tauri 2](https://v2.tauri.app/). Web UIs pull in many dependencies, so the design assumes a UI dependency _could_ be compromised and limits what it could do.
+Vaultport's UI is a web application (React) running in the system webview through [Tauri 2](https://v2.tauri.app/). Web UIs pull in many dependencies, so the design assumes a UI dependency _could_ be compromised and limits what it could do.
 
 ## Secrets stay in the core
 

@@ -422,9 +422,9 @@ const agent = {
 };
 
 function agentStatus() {
-  const command = '/usr/bin/ssh-client';
+  const command = '/usr/bin/vaultport';
   const desktop = JSON.stringify(
-    { mcpServers: { 'ssh-client': { command, args: ['mcp'] } } },
+    { mcpServers: { vaultport: { command, args: ['mcp'] } } },
     null,
     2,
   );
@@ -440,7 +440,7 @@ function agentStatus() {
         client: 'claude-code',
         kind: 'shell',
         location: null,
-        text: `claude mcp add --scope user ssh-client -- ${command} mcp`,
+        text: `claude mcp add --scope user vaultport -- ${command} mcp`,
       },
       {
         client: 'claude-desktop',

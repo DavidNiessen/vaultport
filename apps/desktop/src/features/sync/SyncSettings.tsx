@@ -36,7 +36,7 @@ function AddTargetDialog({ onClose }: { onClose: () => void }) {
   const [secret, setSecret] = useState('');
   const [bucket, setBucket] = useState('');
   const [region, setRegion] = useState('us-east-1');
-  const [prefix, setPrefix] = useState('ssh-client');
+  const [prefix, setPrefix] = useState('vaultport');
   const [busy, setBusy] = useState(false);
 
   const build = (): SyncTargetConfig => {
@@ -176,8 +176,8 @@ function PassphraseDialog({ mode, onClose }: { mode: 'export' | 'import'; onClos
       const dialog = await import('@tauri-apps/plugin-dialog');
       if (mode === 'export') {
         const path = await dialog.save({
-          defaultPath: 'vault.sshvault',
-          filters: [{ name: 'ssh-client vault', extensions: ['sshvault'] }],
+          defaultPath: 'vault.vaultport',
+          filters: [{ name: 'Vaultport vault', extensions: ['vaultport'] }],
         });
         if (path) {
           await commands.syncExportFile(path, pw);
@@ -185,7 +185,7 @@ function PassphraseDialog({ mode, onClose }: { mode: 'export' | 'import'; onClos
         }
       } else {
         const path = await dialog.open({
-          filters: [{ name: 'ssh-client vault', extensions: ['sshvault'] }],
+          filters: [{ name: 'Vaultport vault', extensions: ['vaultport'] }],
         });
         if (typeof path === 'string') {
           const name = window.prompt(t('sync.importName'), 'restored') ?? '';

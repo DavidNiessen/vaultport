@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use super::AgentClientConfig;
 
 /// The app identifier from `tauri.conf.json` (the app data directory name).
-pub const IDENTIFIER: &str = "dev.niessen.sshclient";
+pub const IDENTIFIER: &str = "dev.niessen.vaultport";
 pub const SETTINGS_FILE: &str = "agent.json";
 pub const TOKEN_FILE: &str = "agent-token";
 #[cfg(unix)]
@@ -39,7 +39,7 @@ pub fn socket_path(data_dir: &Path) -> PathBuf {
     private_temp_dir(data_dir).join(SOCKET_FILE)
 }
 
-/// `$TMPDIR/ssh-client-<hash of the data dir>`; the short name keeps the socket path short.
+/// `$TMPDIR/vaultport-<hash of the data dir>`; the short name keeps the socket path short.
 #[cfg(unix)]
 fn private_temp_dir(data_dir: &Path) -> PathBuf {
     use std::hash::{Hash as _, Hasher as _};
@@ -51,7 +51,7 @@ fn private_temp_dir(data_dir: &Path) -> PathBuf {
     } else {
         base
     };
-    base.join(format!("ssh-client-{:012x}", h.finish() & 0xffff_ffff_ffff))
+    base.join(format!("vaultport-{:012x}", h.finish() & 0xffff_ffff_ffff))
 }
 
 /// Makes sure the socket's directory exists and only the current user can enter it.
@@ -164,10 +164,10 @@ pub fn token_eq(a: &str, b: &str) -> bool {
 pub fn client_configs(exe: &str) -> Vec<AgentClientConfig> {
     let quoted = shell_quote(exe);
     let desktop = serde_json::json!({
-        "mcpServers": { "ssh-client": { "command": exe, "args": ["mcp"] } }
+        "mcpServers": { "vaultport": { "command": exe, "args": ["mcp"] } }
     });
     let vscode = serde_json::json!({
-        "servers": { "ssh-client": { "type": "stdio", "command": exe, "args": ["mcp"] } }
+        "servers": { "vaultport": { "type": "stdio", "command": exe, "args": ["mcp"] } }
     });
     let pretty = |v: &serde_json::Value| serde_json::to_string_pretty(v).unwrap_or_default();
     vec![
@@ -175,7 +175,7 @@ pub fn client_configs(exe: &str) -> Vec<AgentClientConfig> {
             client: "claude-code".into(),
             kind: "shell".into(),
             location: None,
-            text: format!("claude mcp add --scope user ssh-client -- {quoted} mcp"),
+            text: format!("claude mcp add --scope user vaultport -- {quoted} mcp"),
         },
         AgentClientConfig {
             client: "claude-desktop".into(),
@@ -199,7 +199,7 @@ pub fn client_configs(exe: &str) -> Vec<AgentClientConfig> {
             client: "codex".into(),
             kind: "shell".into(),
             location: None,
-            text: format!("codex mcp add ssh-client -- {quoted} mcp"),
+            text: format!("codex mcp add vaultport -- {quoted} mcp"),
         },
         AgentClientConfig {
             client: "generic".into(),
@@ -270,13 +270,13 @@ mod tests {
 
     #[test]
     fn configs_quote_paths() {
-        let c = client_configs("/Applications/ssh client.app/Contents/MacOS/ssh-client");
+        let c = client_configs("/Applications/ssh client.app/Contents/MacOS/vaultport");
         assert!(c[0].text.contains("-- '/Applications/ssh client.app"));
         let json: serde_json::Value = serde_json::from_str(&c[1].text).unwrap_or_default();
-        assert_eq!(json["mcpServers"]["ssh-client"]["args"][0], "mcp");
+        assert_eq!(json["mcpServers"]["vaultport"]["args"][0], "mcp");
         assert_eq!(
-            client_configs("/usr/bin/ssh-client")[5].text,
-            "/usr/bin/ssh-client mcp"
+            client_configs("/usr/bin/vaultport")[5].text,
+            "/usr/bin/vaultport mcp"
         );
     }
 }

@@ -116,7 +116,7 @@ impl S3Backend {
             .redirect(reqwest::redirect::Policy::none())
             .connect_timeout(Duration::from_secs(15))
             .timeout(Duration::from_secs(300))
-            .user_agent(concat!("ssh-client/", env!("CARGO_PKG_VERSION")))
+            .user_agent(concat!("vaultport/", env!("CARGO_PKG_VERSION")))
             .build()?;
         Ok(Self {
             http,

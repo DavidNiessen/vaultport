@@ -18,7 +18,7 @@ Keys live in the **Keychain** section of the vault. Hosts and identities referen
 | ECDSA P-384 | Same, larger curve                                        |
 | RSA 4096    | For legacy systems that do not accept the others          |
 
-The private key is generated on your device and stored encrypted in the vault. You may add a passphrase; ssh-client can remember it in the vault or ask on each use.
+The private key is generated on your device and stored encrypted in the vault. You may add a passphrase; Vaultport can remember it in the vault or ask on each use.
 
 ## Import a key
 
@@ -28,7 +28,7 @@ Importing an `ssh_config` with `IdentityFile` lines imports those keys too — s
 
 ## Install a public key on a server
 
-Select a key and choose **Install on host…**. ssh-client connects to the saved host and appends the public key to `~/.ssh/authorized_keys`, creating the file with safe permissions if needed. If the key is already there, nothing changes. **Copy public key** puts the OpenSSH public key on the clipboard for anything else.
+Select a key and choose **Install on host…**. Vaultport connects to the saved host and appends the public key to `~/.ssh/authorized_keys`, creating the file with safe permissions if needed. If the key is already there, nothing changes. **Copy public key** puts the OpenSSH public key on the clipboard for anything else.
 
 ## FIDO2 security keys
 
@@ -62,10 +62,10 @@ Android Keystore keys have not yet been verified on many devices. Keep a second 
 
 ## How hardware signatures are checked
 
-Before a signature from a security key or the platform key store is sent to a server, ssh-client verifies it against the key's public key, so a misbehaving device can never make it send a wrong signature. PINs are held in memory that is wiped after use.
+Before a signature from a security key or the platform key store is sent to a server, Vaultport verifies it against the key's public key, so a misbehaving device can never make it send a wrong signature. PINs are held in memory that is wiped after use.
 
 ## Agent forwarding
 
-When agent forwarding is enabled for a host, ssh-client serves a **read-only, in-process agent** to that server. It can list and use only the keys configured for that host, it cannot add, remove or export keys, and each signature request can require your confirmation. SHA-1 `ssh-rsa` signatures are refused unless legacy algorithms are enabled. Only enable agent forwarding for servers you trust.
+When agent forwarding is enabled for a host, Vaultport serves a **read-only, in-process agent** to that server. It can list and use only the keys configured for that host, it cannot add, remove or export keys, and each signature request can require your confirmation. SHA-1 `ssh-rsa` signatures are refused unless legacy algorithms are enabled. Only enable agent forwarding for servers you trust.
 
 When no keys are configured for a host, the desktop apps can also use your **system SSH agent** — see [authentication order](/concepts/identities-and-keychain#authentication-order).

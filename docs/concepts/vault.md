@@ -5,7 +5,7 @@ description: How the encrypted vault stores hosts, keys and secrets, how it is u
 
 # The vault
 
-Everything you configure in ssh-client — hosts, groups, identities, keys, passwords, known hosts, snippets, port-forwarding rules, workspaces, cloud integrations and settings — is stored in a **vault**: a single encrypted SQLite file in the app's data directory. You can have several vaults on one device (for example _work_ and _personal_) and switch between them on the lock screen.
+Everything you configure in Vaultport — hosts, groups, identities, keys, passwords, known hosts, snippets, port-forwarding rules, workspaces, cloud integrations and settings — is stored in a **vault**: a single encrypted SQLite file in the app's data directory. You can have several vaults on one device (for example _work_ and _personal_) and switch between them on the lock screen.
 
 ## Encryption at a glance
 
@@ -32,7 +32,7 @@ On Android, the device key is encrypted with an AES-256-GCM key that is generate
 
 ## Locking
 
-When the vault locks, decrypted data is wiped from memory and open sessions are closed. ssh-client locks the vault:
+When the vault locks, decrypted data is wiped from memory and open sessions are closed. Vaultport locks the vault:
 
 - after a period of inactivity (15 minutes by default, configurable or _never_),
 - when the app moves to the background (phones and tablets, on by default),
@@ -42,11 +42,11 @@ When the vault locks, decrypted data is wiped from memory and open sessions are 
 
 Internally the vault is not a set of rows that get overwritten. It is an append-only **log of operations** — "set field `/config/ssh/port` of host X to 2222 at time T" — that is materialized into documents. Each field is a _last-writer-wins register_ ordered by a hybrid logical clock, and deletions are tombstones.
 
-This is a [CRDT](https://crdt.tech/): any two devices that have seen the same set of operations hold exactly the same data, no matter in which order the operations arrived. That property is what lets ssh-client sync through plain, untrusted storage — a folder, WebDAV or an S3 bucket — without a server to resolve conflicts. See [Sync, backup & pairing](/guide/sync) and the [sync protocol](/security/sync).
+This is a [CRDT](https://crdt.tech/): any two devices that have seen the same set of operations hold exactly the same data, no matter in which order the operations arrived. That property is what lets Vaultport sync through plain, untrusted storage — a folder, WebDAV or an S3 bucket — without a server to resolve conflicts. See [Sync, backup & pairing](/guide/sync) and the [sync protocol](/security/sync).
 
 ## Backups
 
 Because the vault is end-to-end encrypted, losing every device _and_ the master password means losing the data. Protect yourself with at least one of:
 
 - sync to a second device,
-- an [encrypted `.sshvault` export](/guide/sync#encrypted-backups) kept somewhere safe.
+- an [encrypted `.vaultport` export](/guide/sync#encrypted-backups) kept somewhere safe.

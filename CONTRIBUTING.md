@@ -1,4 +1,4 @@
-# Contributing to ssh-client
+# Contributing to Vaultport
 
 Thanks for helping build a secure, serverless SSH client! This guide covers everything you
 need to get a development build running and a pull request merged.
@@ -34,8 +34,8 @@ For mobile targets you additionally need Android Studio (SDK + NDK) and, on macO
 ```bash
 pnpm install
 pnpm dev            # desktop app with hot reload
-pnpm --filter @ssh-client/desktop tauri android dev
-pnpm --filter @ssh-client/desktop tauri ios dev
+pnpm --filter @vaultport/desktop tauri android dev
+pnpm --filter @vaultport/desktop tauri ios dev
 ```
 
 ## Quality gates

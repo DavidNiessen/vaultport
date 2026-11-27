@@ -24,7 +24,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-pub const IMAGE: &str = "ssh-client-test-sshd:1";
+pub const IMAGE: &str = "vaultport-test-sshd:1";
 pub const ALICE_PASSWORD: &str = "alice-password";
 pub const BOB_PASSWORD: &str = "bob-password";
 
@@ -145,15 +145,9 @@ fn setup() -> Result<Env, String> {
         "prune",
         "-f",
         "--filter",
-        "label=ssh-client-test=1",
+        "label=vaultport-test=1",
     ]);
-    docker(&[
-        "network",
-        "create",
-        "--label",
-        "ssh-client-test=1",
-        &network,
-    ])?;
+    docker(&["network", "create", "--label", "vaultport-test=1", &network])?;
     let a = format!("sshc-a-{tag}");
     let b = format!("sshc-b-{tag}");
     for (name, publish) in [(&a, true), (&b, false)] {
@@ -162,7 +156,7 @@ fn setup() -> Result<Env, String> {
             "-d",
             "--rm",
             "--label",
-            "ssh-client-test=1",
+            "vaultport-test=1",
             "--network",
             &network,
             "--name",
@@ -238,7 +232,7 @@ fn remove_stale_containers() {
         "ps",
         "-a",
         "--filter",
-        "label=ssh-client-test=1",
+        "label=vaultport-test=1",
         "--format",
         "{{.Names}}",
     ]) else {

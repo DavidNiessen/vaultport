@@ -28,9 +28,9 @@ class SignArgs: Decodable {
     let reason: String
 }
 
-/// Native services for the ssh-client Rust core (not exposed to the web UI).
+/// Native services for the vaultport Rust core (not exposed to the web UI).
 class MobilePlugin: Plugin {
-    private let service = "dev.niessen.sshclient.secure-store"
+    private let service = "dev.niessen.vaultport.secure-store"
     private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
     private var privacyView: UIView?
 
@@ -99,7 +99,7 @@ class MobilePlugin: Plugin {
         DispatchQueue.main.async {
             if args.sessions > 0 && self.backgroundTask == .invalid {
                 self.backgroundTask = UIApplication.shared.beginBackgroundTask(
-                    withName: "ssh-client-sessions"
+                    withName: "vaultport-sessions"
                 ) { [weak self] in
                     guard let self else { return }
                     UIApplication.shared.endBackgroundTask(self.backgroundTask)
@@ -165,7 +165,7 @@ class MobilePlugin: Plugin {
     }
 }
 
-@_cdecl("init_plugin_ssh_client_mobile")
+@_cdecl("init_plugin_vaultport_mobile")
 func initPlugin() -> Plugin {
     return MobilePlugin()
 }

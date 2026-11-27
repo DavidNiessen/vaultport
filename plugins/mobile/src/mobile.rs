@@ -8,7 +8,7 @@ use tauri::plugin::{PluginApi, PluginHandle};
 use tauri::{AppHandle, Runtime};
 
 #[cfg(target_os = "ios")]
-tauri::ios_plugin_binding!(init_plugin_ssh_client_mobile);
+tauri::ios_plugin_binding!(init_plugin_vaultport_mobile);
 
 pub struct Mobile<R: Runtime>(PluginHandle<R>);
 
@@ -17,9 +17,9 @@ pub fn init<R: Runtime, C: DeserializeOwned>(
     api: PluginApi<R, C>,
 ) -> std::result::Result<Mobile<R>, Box<dyn std::error::Error>> {
     #[cfg(target_os = "android")]
-    let handle = api.register_android_plugin("dev.niessen.sshclient.mobile", "MobilePlugin")?;
+    let handle = api.register_android_plugin("dev.niessen.vaultport.mobile", "MobilePlugin")?;
     #[cfg(target_os = "ios")]
-    let handle = api.register_ios_plugin(init_plugin_ssh_client_mobile)?;
+    let handle = api.register_ios_plugin(init_plugin_vaultport_mobile)?;
     Ok(Mobile(handle))
 }
 

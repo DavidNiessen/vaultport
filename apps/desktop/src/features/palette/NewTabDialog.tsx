@@ -137,7 +137,7 @@ export function NewTabDialog() {
                 className="hover:bg-surface-2 flex h-10 items-center gap-3 rounded-lg px-2 text-left text-[13px]"
                 onClick={() => {
                   window.dispatchEvent(
-                    new CustomEvent('ssh-client:restore-workspace', { detail: w.id }),
+                    new CustomEvent('vaultport:restore-workspace', { detail: w.id }),
                   );
                   close();
                 }}

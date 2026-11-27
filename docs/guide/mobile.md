@@ -1,11 +1,11 @@
 ---
 title: Phones & tablets
-description: Using ssh-client on iPhone, iPad and Android — the phone and tablet layouts, the terminal key bar, locking, and what differs from desktop.
+description: Using Vaultport on iPhone, iPad and Android — the phone and tablet layouts, the terminal key bar, locking, and what differs from desktop.
 ---
 
 # Phones & tablets
 
-ssh-client on iOS, iPadOS and Android is the same app with the same Rust core and the same vault format as on desktop. The interface adapts to the screen size.
+Vaultport on iOS, iPadOS and Android is the same app with the same Rust core and the same vault format as on desktop. The interface adapts to the screen size.
 
 ## Layouts
 
@@ -39,13 +39,13 @@ On phones, a key bar sits above the on-screen keyboard with the keys that touch 
 
 Mobile systems suspend apps in the background, which drops network connections. To keep sessions and tunnels alive:
 
-- **Android:** while at least one session or port forward is open, ssh-client runs a foreground service with a persistent notification ("1 connection is open"). Tapping it returns to the app; it disappears when the last connection closes. On Android 13 and newer, allow notifications for the service to be shown.
+- **Android:** while at least one session or port forward is open, Vaultport runs a foreground service with a persistent notification ("1 connection is open"). Tapping it returns to the app; it disappears when the last connection closes. On Android 13 and newer, allow notifications for the service to be shown.
 - **iOS and iPadOS:** the app asks the system for extra background time when it leaves the foreground. iOS still suspends it after a short while, so long-running work is best done in a [Mosh](/guide/mosh) session, which survives suspension and network changes.
 
 This only helps when **Lock when the app is in the background** is turned off — locking closes all sessions. Decide per device which matters more to you.
 
 ::: info New on mobile
-The Android Keystore integration, the keep-alive service and screen privacy are new and have not yet been tested on many real devices. Please [report problems](https://github.com/davidniessen/ssh-client/issues) with your device model and OS version.
+The Android Keystore integration, the keep-alive service and screen privacy are new and have not yet been tested on many real devices. Please [report problems](https://github.com/DavidNiessen/vaultport/issues) with your device model and OS version.
 :::
 
 ## Keys on mobile

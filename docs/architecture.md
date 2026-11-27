@@ -1,11 +1,11 @@
 ---
 title: Architecture
-description: A tour of the ssh-client code base — the Tauri app, the React UI and the Rust crates for the vault, protocols, sync, importers, cloud inventory and local AI.
+description: A tour of the Vaultport code base — the Tauri app, the React UI and the Rust crates for the vault, protocols, sync, importers, cloud inventory and local AI.
 ---
 
 # Architecture
 
-ssh-client is a monorepo with a Cargo workspace (`crates/*` and the Tauri app) and a pnpm workspace (`apps/*`, `docs`).
+Vaultport is a monorepo with a Cargo workspace (`crates/*` and the Tauri app) and a pnpm workspace (`apps/*`, `docs`).
 
 ```text
 apps/desktop/            Tauri 2 app (desktop + iOS + Android)
@@ -92,7 +92,7 @@ Encrypted, chunked asciicast v2 recording with tamper detection, search, export,
 
 ### `sync`
 
-Serverless sync through folder, WebDAV, S3 and Git backends with encrypted, hash-chained segment files, integrity issue reporting and compaction; encrypted `.sshvault` export; QR-code pairing. See [Sync protocol](/security/sync).
+Serverless sync through folder, WebDAV, S3 and Git backends with encrypted, hash-chained segment files, integrity issue reporting and compaction; encrypted `.vaultport` export; QR-code pairing. See [Sync protocol](/security/sync).
 
 ### `importers`
 
@@ -121,7 +121,7 @@ A small, dependency-light [Model Context Protocol](https://modelcontextprotocol.
 - A **connection pool** shares SSH connections between SFTP panes and port forwards.
 - The **key store** module keeps device unlock keys in Keychain, Credential Manager or Secret Service, and on Android through the mobile plugin.
 - The **mobile plugin** (`plugins/mobile`, Kotlin and Swift) provides the Android Keystore secure store and hardware keys, the Android keep-alive foreground service and screen privacy. It exposes no commands to the web UI.
-- The **agent** module serves AI agents over the Model Context Protocol (see [AI agents](/guide/ai-agents)); `ssh-client mcp` is the stdio relay that MCP clients start.
+- The **agent** module serves AI agents over the Model Context Protocol (see [AI agents](/guide/ai-agents)); `vaultport mcp` is the stdio relay that MCP clients start.
 - **Recorders** write session logs and collect command history.
 
 ## The UI (`apps/desktop/src`)

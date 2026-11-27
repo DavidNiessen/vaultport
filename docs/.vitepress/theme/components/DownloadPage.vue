@@ -42,14 +42,14 @@ const PLATFORMS: PlatformInfo[] = [
     icon: Monitor,
     requirement: 'Windows 10 or 11 · x64 or ARM64',
     formats: ['.exe installer', '.msi', 'x64', 'ARM64'],
-    note: 'The installer sets ssh-client up for your user, no administrator rights needed. Use the MSI for managed deployments. WebView2 is installed automatically if it is missing.',
+    note: 'The installer sets Vaultport up for your user, no administrator rights needed. Use the MSI for managed deployments. WebView2 is installed automatically if it is missing.',
   },
   {
     id: 'macos',
     icon: Laptop,
     requirement: 'macOS 13 Ventura or later',
     formats: ['.dmg', 'Universal'],
-    note: 'One universal disk image for Apple silicon and Intel Macs. Open it and drag ssh-client into Applications.',
+    note: 'One universal disk image for Apple silicon and Intel Macs. Open it and drag Vaultport into Applications.',
   },
   {
     id: 'linux',
@@ -63,7 +63,7 @@ const PLATFORMS: PlatformInfo[] = [
     icon: Tablet,
     requirement: 'iOS & iPadOS 16 or later',
     formats: ['.ipa'],
-    note: 'ssh-client is not in the App Store. When a release is signed, the IPA reaches devices through TestFlight (when a beta is offered) or by re-signing it with a sideloading tool such as AltStore or Sideloadly.',
+    note: 'Vaultport is not in the App Store. When a release is signed, the IPA reaches devices through TestFlight (when a beta is offered) or by re-signing it with a sideloading tool such as AltStore or Sideloadly.',
   },
   {
     id: 'android',
@@ -111,7 +111,7 @@ const published = computed(() => {
     <header class="head">
       <div class="aura" aria-hidden="true" />
       <img class="logo" :src="withBase('/logo.svg')" alt="" width="72" height="72" />
-      <h1 class="title">Download ssh-client</h1>
+      <h1 class="title">Download Vaultport</h1>
       <p class="lead">
         Free and open source for Windows, macOS, Linux, iOS &amp; iPadOS and Android. No account
         required — install it and create your vault.
@@ -163,7 +163,7 @@ const published = computed(() => {
         <p>
           There is no published release yet. Watch the
           <a :href="RELEASES_URL" target="_blank" rel="noopener">releases page</a> on GitHub, or
-          <a :href="withBase('/development/building')">build ssh-client from source</a> today.
+          <a :href="withBase('/development/building')">build Vaultport from source</a> today.
         </p>
       </div>
     </section>

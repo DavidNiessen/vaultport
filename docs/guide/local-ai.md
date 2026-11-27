@@ -5,7 +5,7 @@ description: Optional, fully on-device command generation with a small pinned mo
 
 # Local AI
 
-ssh-client can turn a plain-language request such as _"find the 10 largest files in /var/log"_ into a shell command — using a small language model that runs **entirely on your device**. It is **off by default** and completely optional; every other feature works without it.
+Vaultport can turn a plain-language request such as _"find the 10 largest files in /var/log"_ into a shell command — using a small language model that runs **entirely on your device**. It is **off by default** and completely optional; every other feature works without it.
 
 ## Turning it on
 
@@ -28,7 +28,7 @@ Android release builds are currently compiled without the on-device inference en
 Open the terminal side panel (<kbd>Mod</kbd>+<kbd>.</kbd>) and choose **AI**:
 
 1. **Describe what you want to do.** Optionally **use selected terminal text as context**, for example an error message.
-2. **Generate command.** You get one command with a short explanation and a **risk rating** (low, medium, high, critical) from ssh-client's deterministic risk checker.
+2. **Generate command.** You get one command with a short explanation and a **risk rating** (low, medium, high, critical) from Vaultport's deterministic risk checker.
 3. **Insert into terminal.** The command is typed at the prompt — never executed. Review it and press <kbd>Enter</kbd> yourself.
 
 The engine can take more session context into account (remote OS, shell, working directory, recent commands); the current app passes only the request and, if you choose, the selected terminal text.

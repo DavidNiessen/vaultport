@@ -14,7 +14,7 @@ use vault::SymmetricKey;
 use zeroize::Zeroizing;
 
 #[cfg(not(target_os = "android"))]
-const SERVICE: &str = "dev.niessen.sshclient";
+const SERVICE: &str = "dev.niessen.vaultport";
 
 fn account(vault_id: &uuid::Uuid) -> String {
     format!("vault-device-key:{vault_id}")
@@ -68,15 +68,15 @@ fn map_err(e: keyring::Error) -> CmdError {
 // Android: the device key is stored by the native plugin, wrapped by an AES-256-GCM key that
 // lives in the Android Keystore (StrongBox when available).
 #[cfg(target_os = "android")]
-fn services() -> CmdResult<&'static tauri_plugin_ssh_client_mobile::MobileServices<tauri::Wry>> {
-    use tauri_plugin_ssh_client_mobile::MobileServicesExt as _;
+fn services() -> CmdResult<&'static tauri_plugin_vaultport_mobile::MobileServices<tauri::Wry>> {
+    use tauri_plugin_vaultport_mobile::MobileServicesExt as _;
     crate::mobile::app()
         .map(|a| a.mobile_services())
         .ok_or_else(|| CmdError::internal("the key store is not initialized"))
 }
 
 #[cfg(target_os = "android")]
-fn map_native(e: tauri_plugin_ssh_client_mobile::Error) -> CmdError {
+fn map_native(e: tauri_plugin_vaultport_mobile::Error) -> CmdError {
     CmdError::new(
         ErrorCode::Unsupported,
         format!("the Android Keystore is unavailable: {e}"),

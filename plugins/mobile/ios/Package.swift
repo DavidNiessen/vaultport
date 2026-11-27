@@ -3,17 +3,17 @@
 import PackageDescription
 
 let package = Package(
-    name: "tauri-plugin-ssh-client-mobile",
+    name: "tauri-plugin-vaultport-mobile",
     platforms: [.iOS(.v16)],
     products: [
-        .library(name: "tauri-plugin-ssh-client-mobile", type: .static, targets: ["SshClientMobile"])
+        .library(name: "tauri-plugin-vaultport-mobile", type: .static, targets: ["VaultportMobile"])
     ],
     dependencies: [
         .package(name: "Tauri", path: "../.tauri/tauri-api")
     ],
     targets: [
         .target(
-            name: "SshClientMobile",
+            name: "VaultportMobile",
             dependencies: [.byName(name: "Tauri")],
             path: "Sources"
         )

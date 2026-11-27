@@ -6,7 +6,7 @@
 //! magic   = "SSHCLOG" 0x01
 //! record  = len(u32 LE) sealed(len)
 //! sealed  = SymmetricKey::seal(aad, chunk)          // XChaCha20-Poly1305
-//! aad     = "ssh-client/log/v1|{log_id}|{chunk_index}"
+//! aad     = "vaultport/log/v1|{log_id}|{chunk_index}"
 //! chunk   = kind(1) body
 //!   kind 0 header: asciicast v2 header JSON          (always chunk 0)
 //!   kind 1 data:   raw DEFLATE of asciicast event lines, each ending in "\n"
@@ -53,7 +53,7 @@ pub struct LogSummary {
 }
 
 pub(crate) fn aad(id: &LogId, index: u64) -> Vec<u8> {
-    format!("ssh-client/log/v1|{id}|{index}").into_bytes()
+    format!("vaultport/log/v1|{id}|{index}").into_bytes()
 }
 
 pub(crate) fn preamble(id: &LogId) -> [u8; PREAMBLE_LEN] {

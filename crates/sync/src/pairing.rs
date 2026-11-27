@@ -47,7 +47,7 @@ use zeroize::{Zeroize, Zeroizing};
 /// Lifetime of a pairing offer.
 pub const PAIRING_TTL_MS: i64 = 10 * 60 * 1000;
 /// Prefix of the QR code string.
-pub const QR_PREFIX: &str = "sshclient-pair:1:";
+pub const QR_PREFIX: &str = "vaultport-pair:1:";
 const ALPHABET: &[u8; 32] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 /// Argon2id cost of the transfer key (the salt is generated per offer).
@@ -182,7 +182,7 @@ fn binding_salt(
     }
     let backend = serde_json::to_vec(backend).map_err(|e| SyncError::Format(e.to_string()))?;
     let mut h = Sha256::new();
-    h.update(b"ssh-client/pairing/v1|");
+    h.update(b"vaultport/pairing/v1|");
     h.update(vault_id.as_bytes());
     h.update(b"|");
     h.update(expires_at.to_be_bytes());
@@ -210,7 +210,7 @@ fn transfer_key(payload: &PairingPayload, code: &str) -> Result<SymmetricKey, Sy
 }
 
 fn secret_aad(vault_id: Uuid) -> String {
-    format!("ssh-client/pairing/secret/v1|{vault_id}")
+    format!("vaultport/pairing/secret/v1|{vault_id}")
 }
 
 /// Creates a pairing offer for an unlocked vault (device A).

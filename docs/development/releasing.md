@@ -1,6 +1,6 @@
 ---
 title: Release process
-description: How ssh-client is versioned with release-please and built, signed, attested and published by the release workflow, including every repository secret it reads and the updater setup.
+description: How Vaultport is versioned with release-please and built, signed, attested and published by the release workflow, including every repository secret it reads and the updater setup.
 ---
 
 # Release process
@@ -35,18 +35,18 @@ To rebuild an existing tag by hand, run **Actions → Release → Run workflow**
 
 ## What `release.yml` builds
 
-| Job                                        | Runner             | Output                                                                                                                                                                          |
-| ------------------------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Desktop (Linux x64)                        | `ubuntu-24.04`     | `ssh-client_<v>_amd64.AppImage`, `ssh-client_<v>_amd64.deb`, `ssh-client-<v>-1.x86_64.rpm`                                                                                      |
-| Desktop (Linux arm64)                      | `ubuntu-24.04-arm` | `ssh-client_<v>_aarch64.AppImage`, `ssh-client_<v>_arm64.deb`, `ssh-client-<v>-1.aarch64.rpm`                                                                                   |
-| Desktop (Windows x64)                      | `windows-2025`     | `ssh-client_<v>_x64-setup.exe`, `ssh-client_<v>_x64_en-US.msi`, `ssh-client_<v>_x64_de-DE.msi`                                                                                  |
-| Desktop (Windows arm64)                    | `windows-11-arm`   | `ssh-client_<v>_arm64-setup.exe`, `ssh-client_<v>_arm64_en-US.msi`, `ssh-client_<v>_arm64_de-DE.msi`                                                                            |
-| Desktop (macOS universal)                  | `macos-15`         | `ssh-client_<v>_universal.dmg` (built with Metal GPU support for local AI)                                                                                                      |
-| Android                                    | `ubuntu-24.04`     | `ssh-client_<v>_android-universal.apk`, `ssh-client_<v>_android-universal.aab` (built without local AI)                                                                         |
-| iOS                                        | `macos-15`         | `ssh-client_<v>_ios.ipa` (App Store Connect export) — only when iOS signing is configured; otherwise an unsigned simulator build is compiled as a check and nothing is uploaded |
-| Checksums, SBOM, signatures and provenance | `ubuntu-24.04`     | `SHA256SUMS.txt`, `SHA256SUMS.txt.sigstore.json`, `sbom.spdx.json`, build-provenance attestations                                                                               |
+| Job                                        | Runner             | Output                                                                                                                                                                         |
+| ------------------------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Desktop (Linux x64)                        | `ubuntu-24.04`     | `vaultport_<v>_amd64.AppImage`, `vaultport_<v>_amd64.deb`, `vaultport-<v>-1.x86_64.rpm`                                                                                        |
+| Desktop (Linux arm64)                      | `ubuntu-24.04-arm` | `vaultport_<v>_aarch64.AppImage`, `vaultport_<v>_arm64.deb`, `vaultport-<v>-1.aarch64.rpm`                                                                                     |
+| Desktop (Windows x64)                      | `windows-2025`     | `vaultport_<v>_x64-setup.exe`, `vaultport_<v>_x64_en-US.msi`, `vaultport_<v>_x64_de-DE.msi`                                                                                    |
+| Desktop (Windows arm64)                    | `windows-11-arm`   | `vaultport_<v>_arm64-setup.exe`, `vaultport_<v>_arm64_en-US.msi`, `vaultport_<v>_arm64_de-DE.msi`                                                                              |
+| Desktop (macOS universal)                  | `macos-15`         | `vaultport_<v>_universal.dmg` (built with Metal GPU support for local AI)                                                                                                      |
+| Android                                    | `ubuntu-24.04`     | `vaultport_<v>_android-universal.apk`, `vaultport_<v>_android-universal.aab` (built without local AI)                                                                          |
+| iOS                                        | `macos-15`         | `vaultport_<v>_ios.ipa` (App Store Connect export) — only when iOS signing is configured; otherwise an unsigned simulator build is compiled as a check and nothing is uploaded |
+| Checksums, SBOM, signatures and provenance | `ubuntu-24.04`     | `SHA256SUMS.txt`, `SHA256SUMS.txt.sigstore.json`, `sbom.spdx.json`, build-provenance attestations                                                                              |
 
-The desktop jobs use [`tauri-action`](https://github.com/tauri-apps/tauri-action), which uploads the bundles to the release under the names above. When updater signing is configured they also produce updater bundles with `.sig` files (for example `ssh-client_universal.app.tar.gz.sig`) and a `latest.json` manifest; the Windows entries in `latest.json` point to the NSIS installer.
+The desktop jobs use [`tauri-action`](https://github.com/tauri-apps/tauri-action), which uploads the bundles to the release under the names above. When updater signing is configured they also produce updater bundles with `.sig` files (for example `vaultport_universal.app.tar.gz.sig`) and a `latest.json` manifest; the Windows entries in `latest.json` point to the NSIS installer.
 
 The final job runs once the desktop builds succeed (mobile failures do not block it). It downloads every release asset, then:
 
@@ -84,7 +84,7 @@ Android only installs signed APKs. Without the `ANDROID_KEYSTORE*` secrets the j
 `apps/desktop/src-tauri/tauri.conf.json` already points the updater at
 
 ```text
-https://github.com/davidniessen/ssh-client/releases/latest/download/latest.json
+https://github.com/DavidNiessen/vaultport/releases/latest/download/latest.json
 ```
 
 with an empty `pubkey` and `bundle.createUpdaterArtifacts: false`. The release workflow turns updater artifacts on when `TAURI_SIGNING_PRIVATE_KEY` is set and a public key is available, either committed in `tauri.conf.json` (preferred) or from the optional `TAURI_UPDATER_PUBKEY` secret, which overrides the committed key. To enable updates:
@@ -92,11 +92,11 @@ with an empty `pubkey` and `bundle.createUpdaterArtifacts: false`. The release w
 1. Generate a key pair once, on a trusted machine:
 
    ```bash
-   pnpm --filter @ssh-client/desktop tauri signer generate -w ~/.tauri/ssh-client.key
+   pnpm --filter @vaultport/desktop tauri signer generate -w ~/.tauri/vaultport.key
    ```
 
 2. Store the **private key** file's content as `TAURI_SIGNING_PRIVATE_KEY` and its password as `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
-3. Commit the **public key** (the content of `~/.tauri/ssh-client.key.pub`) to `plugins.updater.pubkey` in `tauri.conf.json`. It is not secret, and committing it makes every build verify updates with it. Alternatively store it as the `TAURI_UPDATER_PUBKEY` secret.
+3. Commit the **public key** (the content of `~/.tauri/vaultport.key.pub`) to `plugins.updater.pubkey` in `tauri.conf.json`. It is not secret, and committing it makes every build verify updates with it. Alternatively store it as the `TAURI_UPDATER_PUBKEY` secret.
 4. Back up the private key offline. If it is lost, installed apps can no longer verify updates and users must reinstall manually.
 
 Releases built without these secrets have no `latest.json`, and **Check for updates** reports that no update is available.

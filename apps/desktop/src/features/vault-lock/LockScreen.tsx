@@ -27,7 +27,7 @@ function Brand() {
   return (
     <div className="mb-8 flex flex-col items-center text-center">
       <img src="/logo.svg" alt="" className="mb-4 size-16" />
-      <h1 className="text-2xl font-semibold tracking-tight">ssh-client</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">vaultport</h1>
       <p className="text-muted mt-1 text-[13px]">{t('lock.tagline')}</p>
     </div>
   );
@@ -56,7 +56,7 @@ function RestoreOrPair({
       if (mode === 'restore') {
         const { open } = await import('@tauri-apps/plugin-dialog');
         const path = await open({
-          filters: [{ name: 'ssh-client vault', extensions: ['sshvault'] }],
+          filters: [{ name: 'Vaultport vault', extensions: ['vaultport'] }],
         });
         if (typeof path !== 'string') return;
         await commands.syncImportFile(path, secret, name);
@@ -90,7 +90,7 @@ function RestoreOrPair({
                 id={id}
                 value={payload}
                 onChange={(e) => setPayload(e.target.value)}
-                placeholder="sshclient-pair:1:…"
+                placeholder="vaultport-pair:1:…"
               />
             )}
           </Field>

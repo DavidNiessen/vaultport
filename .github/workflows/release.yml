@@ -142,7 +142,7 @@ jobs:
           projectPath: apps/desktop
           tauriScript: pnpm tauri
           tagName: ${{ inputs.tag }}
-          releaseName: ssh-client ${{ inputs.version }}
+          releaseName: Vaultport ${{ inputs.version }}
           releaseDraft: false
           uploadUpdaterJson: ${{ steps.updater.outputs.json == 'true' }}
           updaterJsonPreferNsis: true
@@ -216,9 +216,9 @@ jobs:
           out=apps/desktop/src-tauri/gen/android/app/build/outputs
           apk=$(find "$out/apk" -name '*universal*release*.apk' | head -1)
           aab=$(find "$out/bundle" -name '*universal*release*.aab' | head -1)
-          cp "$apk" "ssh-client_${v}_android-universal.apk"
-          cp "$aab" "ssh-client_${v}_android-universal.aab"
-          gh release upload "${{ inputs.tag }}" "ssh-client_${v}_android-universal.apk" "ssh-client_${v}_android-universal.aab" --clobber
+          cp "$apk" "vaultport_${v}_android-universal.apk"
+          cp "$aab" "vaultport_${v}_android-universal.aab"
+          gh release upload "${{ inputs.tag }}" "vaultport_${v}_android-universal.apk" "vaultport_${v}_android-universal.aab" --clobber
 
   ios:
     name: iOS
@@ -259,8 +259,8 @@ jobs:
         run: |
           pnpm tauri ios build --export-method app-store-connect -- --features metal
           ipa=$(find src-tauri/gen/apple/build -name '*.ipa' | head -1)
-          cp "$ipa" "../../ssh-client_${{ inputs.version }}_ios.ipa"
-          gh release upload "${{ inputs.tag }}" "../../ssh-client_${{ inputs.version }}_ios.ipa" --clobber
+          cp "$ipa" "../../vaultport_${{ inputs.version }}_ios.ipa"
+          gh release upload "${{ inputs.tag }}" "../../vaultport_${{ inputs.version }}_ios.ipa" --clobber
       - name: Verify the iOS build (unsigned, simulator)
         if: env.HAS_IOS_SIGNING != 'true'
         working-directory: apps/desktop
