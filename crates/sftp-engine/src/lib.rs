@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! File management for ssh-client: one async [`FileSystem`] trait over the local disk
-//! ([`Local`], `tokio::fs`) and SFTP ([`Remote`], `russh-sftp`) and a [`TransferQueue`].
+//! ([`Local`], `tokio::fs`) and SFTP ([`Remote`], `russh-sftp`), a [`TransferQueue`] and
+//! edit-and-upload support ([`edit`]).
 //!
 //! # Example
 //!
@@ -39,9 +40,16 @@
 //! * Recursive deletion never follows symlinks.
 //! * Transfers write to `*.sshc-part` files and rename on completion, so an interrupted
 //!   transfer never leaves a truncated file under the real name (and can be resumed).
+//! * Edit-and-upload copies live in a `0700` temporary directory.
+//!
+//! # Features
+//!
+//! * `watch` — file watcher for edit-and-upload ([`notify`](https://docs.rs/notify));
+//!   desktop only, keep it disabled for iOS/Android builds.
 
 #![forbid(unsafe_code)]
 
+pub mod edit;
 mod error;
 mod fs;
 mod local;
@@ -49,6 +57,9 @@ pub mod path;
 mod remote;
 pub mod transfer;
 
+pub use edit::EditSession;
+#[cfg(feature = "watch")]
+pub use edit::EditWatcher;
 pub use error::FsError;
 pub use fs::{
     Entry, EntryKind, FileReader, FileSystem, FileWriter, FsKind, RemoveLimits, RemoveStats,
