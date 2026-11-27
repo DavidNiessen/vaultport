@@ -165,6 +165,14 @@ mod llama {
     static BACKEND: OnceLock<std::result::Result<LlamaBackend, String>> = OnceLock::new();
 
     fn backend() -> Result<&'static LlamaBackend> {
+        // Windows on ARM release builds compile ggml for ARMv8.2 with dot product. Every
+        // Windows 11 ARM device has it, but refuse cleanly instead of faulting if one does not.
+        #[cfg(all(windows, target_arch = "aarch64"))]
+        if !std::arch::is_aarch64_feature_detected!("dotprod") {
+            return Err(Error::Inference(
+                "this processor lacks the ARMv8.2 dot-product instructions local AI needs".into(),
+            ));
+        }
         BACKEND
             .get_or_init(|| {
                 // Route llama.cpp's own logging through `tracing` instead of stderr.
