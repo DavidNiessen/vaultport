@@ -92,8 +92,10 @@ pub struct Group {
     /// When set, the group is mirrored from a cloud integration.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub integration: Option<IntegrationId>,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub created_at: Millis,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub updated_at: Millis,
 }
@@ -137,10 +139,13 @@ pub struct Host {
     /// Stable id of the instance in a cloud provider, when imported by an integration.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub cloud_id: Option<String>,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub created_at: Millis,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub updated_at: Millis,
+    #[cfg_attr(feature = "specta", specta(type = Option<f64>))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_connected_at: Option<Millis>,
 }
@@ -202,8 +207,10 @@ pub struct Identity {
     pub password: Option<SecretRef>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub keys: Vec<KeyId>,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub created_at: Millis,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub updated_at: Millis,
 }
@@ -288,8 +295,10 @@ pub struct KeyMeta {
     /// OpenSSH certificate (`*-cert.pub` contents) paired with this key.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub certificate: Option<String>,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub created_at: Millis,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub updated_at: Millis,
 }
@@ -309,6 +318,7 @@ impl KeyMeta {
 pub struct SnippetPackage {
     pub id: PackageId,
     pub label: String,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub created_at: Millis,
 }
@@ -330,8 +340,10 @@ pub struct Snippet {
     pub targets: Vec<HostId>,
     #[serde(default)]
     pub run_count: u32,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub created_at: Millis,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub updated_at: Millis,
 }
@@ -449,8 +461,10 @@ pub struct PortForwardRule {
     pub dest_port: Option<u16>,
     #[serde(default)]
     pub auto_start: bool,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub created_at: Millis,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub updated_at: Millis,
 }
@@ -516,6 +530,7 @@ pub struct KnownHost {
     pub marker: Option<KnownHostMarker>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment: Option<String>,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub added_at: Millis,
 }
@@ -609,8 +624,10 @@ pub struct WorkspaceTemplate {
     /// Column fractions for the grid layout (sum to 1.0).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub column_sizes: Vec<f32>,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub created_at: Millis,
+    #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
     pub updated_at: Millis,
 }
@@ -636,11 +653,17 @@ pub struct CloudIntegration {
     pub provider: CloudProvider,
     pub group: GroupId,
     /// Provider-specific, non-secret settings (region, service, ip type, subscription...).
+    /// Values are strings by convention.
     #[serde(default)]
+    #[cfg_attr(
+        feature = "specta",
+        specta(type = std::collections::BTreeMap<String, String>)
+    )]
     pub settings: serde_json::Map<String, serde_json::Value>,
     pub credentials: SecretRef,
     #[serde(default)]
     pub sync_credentials: bool,
+    #[cfg_attr(feature = "specta", specta(type = Option<f64>))]
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub last_sync_at: Option<Millis>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
