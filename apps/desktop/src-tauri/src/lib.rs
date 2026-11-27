@@ -20,6 +20,7 @@ mod error;
 mod keystore;
 mod mobile;
 mod net;
+mod prefs;
 mod sessions;
 mod state;
 

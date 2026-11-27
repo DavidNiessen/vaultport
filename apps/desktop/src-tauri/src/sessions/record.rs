@@ -3,6 +3,7 @@
 //! history. Failures here never interrupt the terminal session.
 
 use crate::commands::logs::{HISTORY, LOG_KEY_PURPOSE, load_index, logs_dir, save_index};
+use crate::prefs::LoggingPrefs;
 use crate::state::AppState;
 use core_model::HostId;
 use session_log::{CastHeader, LogId, LogMetadata, LogWriter, RetentionPolicy, WriterOptions};
@@ -37,7 +38,7 @@ pub struct Recorder {
 }
 
 impl Recorder {
-    /// Starts recording if session logging is enabled (Settings → Security → logs).
+    /// Starts recording if session logging is enabled (Settings → Security → Session logs).
     pub fn start(
         app: &AppHandle,
         host_id: Option<HostId>,
@@ -49,13 +50,8 @@ impl Recorder {
         let started_at = now_ms();
         let writer = (|| -> Option<LogWriter<BufWriter<File>>> {
             let state = app.state::<AppState>();
-            let enabled = state
-                .with_vault(|v| Ok(v.get_settings("logging")?))
-                .ok()
-                .flatten()
-                .and_then(|j| j.get("enabled").and_then(serde_json::Value::as_bool))
-                .unwrap_or(true);
-            if !enabled {
+            let prefs: LoggingPrefs = crate::prefs::load(app, crate::prefs::LOGGING);
+            if !prefs.enabled {
                 return None;
             }
             let key = state
