@@ -451,6 +451,7 @@
     "lockOnBackground": "Sperren, wenn die App im Hintergrund ist",
     "lockOnBackgroundHint": "Smartphones und Tablets",
     "lockOnSleep": "Sperren, wenn der Computer in den Ruhezustand geht",
+    "lockOnSleepHint": "Sperrt, sobald der Computer wieder aufwacht",
     "minutes_one": "{{count}} Minute",
     "minutes_other": "{{count}} Minuten",
     "never": "Nie",

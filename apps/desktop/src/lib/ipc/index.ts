@@ -92,6 +92,15 @@ export async function onVaultChanged(cb: (e: VaultChanged) => void): Promise<Unl
   });
 }
 
+export const VAULT_LOCKED = 'vault://locked';
+
+/** Subscribes to locks the core performs on its own (e.g. after the computer slept). */
+export async function onVaultLocked(cb: () => void): Promise<UnlistenFn> {
+  return listen(VAULT_LOCKED, () => {
+    cb();
+  });
+}
+
 /** Generates a UUIDv7-style id on the client (used for new entities before saving). */
 export function newId(): string {
   const bytes = new Uint8Array(16);

@@ -278,6 +278,7 @@ function Security({
   onStatus: (s: VaultStatus) => void;
 }) {
   const { t } = useTranslation();
+  const platform = usePlatform();
   const { settings, update } = useSettings<SecuritySettings>('security', DEFAULT_SECURITY_SETTINGS);
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
@@ -306,13 +307,15 @@ function Security({
             ))}
           </Select>
         </Row>
-        <Row label={t('settings.lockOnSleep')}>
-          <Switch
-            label={t('settings.lockOnSleep')}
-            checked={settings.lockOnSleep}
-            onCheckedChange={(v) => update({ lockOnSleep: v })}
-          />
-        </Row>
+        {!platform.mobile ? (
+          <Row label={t('settings.lockOnSleep')} description={t('settings.lockOnSleepHint')}>
+            <Switch
+              label={t('settings.lockOnSleep')}
+              checked={settings.lockOnSleep}
+              onCheckedChange={(v) => update({ lockOnSleep: v })}
+            />
+          </Row>
+        ) : null}
         <Row
           label={t('settings.lockOnBackground')}
           description={t('settings.lockOnBackgroundHint')}

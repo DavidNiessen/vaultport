@@ -451,6 +451,7 @@
     "lockOnBackground": "Lock when the app is in the background",
     "lockOnBackgroundHint": "Phones and tablets",
     "lockOnSleep": "Lock when the computer sleeps",
+    "lockOnSleepHint": "Locks as soon as the computer wakes up",
     "minutes_one": "{{count}} minute",
     "minutes_other": "{{count}} minutes",
     "never": "Never",
