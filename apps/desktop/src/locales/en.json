@@ -430,7 +430,6 @@
   "settings": {
     "about": "About",
     "aboutText": "A free, open-source and serverless SSH client. Your data is encrypted on your devices and only synced to storage you control.",
-    "accent": "Accent color",
     "ai": "Local AI",
     "allow": "Allow",
     "appTheme": "Theme",
@@ -472,6 +471,16 @@
     "osc52": "Remote clipboard writes (OSC 52)",
     "osc52Hint": "Lets programs like tmux and vim copy to your clipboard",
     "passwordChanged": "Master password changed",
+    "preset": "Color preset",
+    "presetHint": "Sets the accent and the glow. Works with both light and dark themes.",
+    "presets": {
+      "ember": "Ember",
+      "glacier": "Glacier",
+      "iris": "Iris",
+      "mono": "Mono",
+      "moss": "Moss",
+      "rose": "Rose"
+    },
     "remoteTitles": "Let programs set the tab title",
     "removePassword": "Remove password",
     "rightClickPaste": "Right-click to paste",

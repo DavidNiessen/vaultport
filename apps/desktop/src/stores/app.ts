@@ -3,6 +3,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import { DEFAULT_PRESET, isPreset, type PresetId } from '@/lib/presets';
+
 export type VaultSection =
   'hosts' | 'keychain' | 'forwarding' | 'snippets' | 'knownHosts' | 'logs' | 'settings';
 
@@ -69,7 +71,7 @@ export const SFTP_TAB = 'sftp';
 
 interface AppState {
   theme: ThemePref;
-  accent: string;
+  preset: PresetId;
   section: VaultSection;
   selected: { kind: 'host' | 'group'; id: string } | null;
   currentGroup: string | null;
@@ -82,7 +84,7 @@ interface AppState {
   newTabOpen: boolean;
 
   setTheme: (t: ThemePref) => void;
-  setAccent: (c: string) => void;
+  setPreset: (p: PresetId) => void;
   setSection: (s: VaultSection) => void;
   select: (s: AppState['selected']) => void;
   setCurrentGroup: (g: string | null) => void;
@@ -102,7 +104,7 @@ export const useApp = create<AppState>()(
   persist(
     (set, get) => ({
       theme: 'system',
-      accent: '#6366f1',
+      preset: DEFAULT_PRESET,
       section: 'hosts',
       selected: null,
       currentGroup: null,
@@ -115,7 +117,7 @@ export const useApp = create<AppState>()(
       newTabOpen: false,
 
       setTheme: (theme) => set({ theme }),
-      setAccent: (accent) => set({ accent }),
+      setPreset: (preset) => set({ preset }),
       setSection: (section) => set({ section, selected: null, activeTab: VAULT_TAB }),
       select: (selected) => set({ selected }),
       setCurrentGroup: (currentGroup) => set({ currentGroup, selected: null }),
@@ -161,11 +163,20 @@ export const useApp = create<AppState>()(
     }),
     {
       name: 'vaultport:ui',
-      version: 1,
+      version: 2,
+      // Version 1 stored a free accent colour; colour presets replaced it.
+      migrate: (persisted) => {
+        const state = { ...(persisted as Partial<AppState> & { accent?: string }) };
+        delete state.accent;
+        return {
+          ...state,
+          preset: isPreset(state.preset) ? state.preset : DEFAULT_PRESET,
+        } as AppState;
+      },
       // Only persist harmless view preferences; never tabs/sessions.
       partialize: (s) => ({
         theme: s.theme,
-        accent: s.accent,
+        preset: s.preset,
         hostView: s.hostView,
         section: s.section,
       }),

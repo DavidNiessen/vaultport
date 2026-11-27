@@ -14,20 +14,18 @@ import { DEFAULT_SECURITY_SETTINGS, type SecuritySettings } from '../features/se
 import { LockScreen } from '../features/vault-lock/LockScreen';
 import { Shell } from './Shell';
 
-/** Applies theme, accent and platform attributes to the document root. */
+/** Applies theme, colour preset and platform attributes to the document root. */
 function useDocumentTheme() {
   const theme = useApp((s) => s.theme);
-  const accent = useApp((s) => s.accent);
+  const preset = useApp((s) => s.preset);
   const scheme = useColorScheme(theme);
   const platform = usePlatform();
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.theme = scheme;
+    root.dataset.preset = preset;
     root.dataset.platform = platform.kind;
-    root.style.setProperty('--accent', accent);
-    root.style.setProperty('--accent-hover', `color-mix(in oklab, ${accent} 88%, white)`);
-    root.style.setProperty('--accent-soft', `color-mix(in oklab, ${accent} 16%, transparent)`);
-  }, [scheme, accent, platform.kind]);
+  }, [scheme, preset, platform.kind]);
   return scheme;
 }
 

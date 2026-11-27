@@ -4,6 +4,7 @@ import { openUrl } from '@tauri-apps/plugin-opener';
 import {
   Bot,
   Brain,
+  Check,
   Cloud,
   Info,
   Keyboard,
@@ -23,6 +24,7 @@ import { Card, Row } from '@/components/ui/misc';
 import { cn } from '@/lib/cn';
 import { commands, errorMessage, type VaultStatus } from '@/lib/ipc';
 import { formatShortcut, useBreakpoint, usePlatform } from '@/lib/platform';
+import { PRESETS, type PresetId } from '@/lib/presets';
 import { useSettings } from '@/lib/queries';
 import { useApp, type ThemePref } from '@/stores/app';
 
@@ -38,16 +40,51 @@ import { DEFAULT_SECURITY_SETTINGS, type SecuritySettings } from './security';
 type Section =
   'appearance' | 'terminal' | 'security' | 'sync' | 'ai' | 'agents' | 'shortcuts' | 'about';
 
-const ACCENTS = [
-  '#6366f1',
-  '#0ea5e9',
-  '#10b981',
-  '#f59e0b',
-  '#ef4444',
-  '#ec4899',
-  '#8b5cf6',
-  '#64748b',
-];
+/** Colour preset tiles: a tiny window with the preset's glow, an accent pill and its name. */
+function PresetPicker({ value, onChange }: { value: PresetId; onChange: (p: PresetId) => void }) {
+  const { t } = useTranslation();
+  return (
+    <div
+      role="radiogroup"
+      aria-label={t('settings.preset')}
+      className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-6"
+    >
+      {PRESETS.map((p) => {
+        const active = value === p.id;
+        return (
+          <button
+            key={p.id}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            onClick={() => onChange(p.id)}
+            className={cn(
+              'group flex flex-col gap-2 rounded-[14px] border p-1.5 text-left transition-colors duration-150',
+              active
+                ? 'border-accent bg-accent-soft'
+                : 'border-border hover:border-border-strong hover:bg-surface-3',
+            )}
+          >
+            <span
+              className="relative flex h-16 items-end overflow-hidden rounded-[10px] p-2"
+              style={{
+                background: `radial-gradient(80% 90% at 15% 0%, ${p.glow[0]}55, transparent 70%), radial-gradient(70% 80% at 100% 100%, ${p.glow[1]}44, transparent 70%), #0d1115`,
+              }}
+              aria-hidden
+            >
+              <span className="h-2 w-10 rounded-full" style={{ background: p.swatch }} />
+              <span className="ml-1 h-2 w-5 rounded-full bg-white/25" />
+            </span>
+            <span className="flex items-center justify-between px-1 pb-0.5 text-[13px] font-bold">
+              {t(`settings.presets.${p.id}`)}
+              {active ? <Check className="text-accent-text size-3.5" aria-hidden /> : null}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 function ThemePreview({
   id,
@@ -94,7 +131,7 @@ function ThemePreview({
 
 function Appearance() {
   const { t, i18n } = useTranslation();
-  const { theme, setTheme, accent, setAccent } = useApp();
+  const { theme, setTheme, preset, setPreset } = useApp();
   return (
     <Card title={t('settings.appearance')}>
       <Row label={t('settings.appTheme')}>
@@ -109,24 +146,11 @@ function Appearance() {
           ]}
         />
       </Row>
-      <Row label={t('settings.accent')}>
-        <div className="flex gap-1.5">
-          {ACCENTS.map((c) => (
-            <button
-              key={c}
-              type="button"
-              aria-label={c}
-              aria-pressed={accent === c}
-              onClick={() => setAccent(c)}
-              className={cn(
-                'size-6 rounded-full ring-2 ring-offset-2 ring-offset-[var(--surface-2)]',
-                accent === c ? 'ring-text' : 'ring-transparent',
-              )}
-              style={{ background: c }}
-            />
-          ))}
-        </div>
-      </Row>
+      <div className="py-2">
+        <div className="text-[13px] font-semibold">{t('settings.preset')}</div>
+        <div className="text-muted mt-0.5 text-xs">{t('settings.presetHint')}</div>
+        <PresetPicker value={preset} onChange={setPreset} />
+      </div>
       <Row label={t('settings.language')}>
         <Select
           aria-label={t('settings.language')}

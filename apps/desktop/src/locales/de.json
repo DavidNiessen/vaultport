@@ -430,7 +430,6 @@
   "settings": {
     "about": "Über",
     "aboutText": "Ein freier, quelloffener und serverloser SSH-Client. Deine Daten werden auf deinen Geräten verschlüsselt und nur mit Speicher synchronisiert, den du kontrollierst.",
-    "accent": "Akzentfarbe",
     "ai": "Lokale KI",
     "allow": "Erlauben",
     "appTheme": "Design",
@@ -472,6 +471,16 @@
     "osc52": "Zwischenablage-Schreiben durch Server (OSC 52)",
     "osc52Hint": "Erlaubt Programmen wie tmux und vim, in deine Zwischenablage zu kopieren",
     "passwordChanged": "Master-Passwort geändert",
+    "preset": "Farbschema",
+    "presetHint": "Bestimmt Akzentfarbe und Leuchten. Funktioniert im hellen und dunklen Design.",
+    "presets": {
+      "ember": "Glut",
+      "glacier": "Gletscher",
+      "iris": "Iris",
+      "mono": "Mono",
+      "moss": "Moos",
+      "rose": "Rosé"
+    },
     "remoteTitles": "Programme dürfen den Tab-Titel setzen",
     "removePassword": "Passwort entfernen",
     "rightClickPaste": "Rechtsklick fügt ein",
