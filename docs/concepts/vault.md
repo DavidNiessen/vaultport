@@ -35,6 +35,7 @@ On Android, device unlock needs a key-store bridge that is not wired up in the c
 When the vault locks, decrypted data is wiped from memory and open sessions are closed. ssh-client locks the vault:
 
 - after a period of inactivity (15 minutes by default, configurable or _never_),
+- when the computer wakes from sleep (desktop, on by default; **Settings → Security → Lock when the computer sleeps**) — ssh-client notices the suspend as soon as it runs again, before you can use it,
 - when the app moves to the background (phones and tablets, on by default),
 - when you press <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>L</kbd> or choose **Lock vault**.
 

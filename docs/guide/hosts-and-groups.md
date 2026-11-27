@@ -60,7 +60,9 @@ While connected, the tab's status dot shows the state: connecting, connected (wi
 
 ## The local terminal
 
-On desktop, <kbd>Mod</kbd>+<kbd>L</kbd> opens your local shell in a new tab.
+On desktop, <kbd>Mod</kbd>+<kbd>L</kbd> opens your local shell in a new tab. It starts your login shell (`$SHELL`, or Windows PowerShell on Windows). To use another program, enter it under **Settings → Terminal → Local shell**, for example `/opt/homebrew/bin/fish` or `pwsh.exe`; leave the field empty for the system default.
+
+With **Shell integration** on, local bash, zsh and fish shells load ssh-client's integration script automatically, without changes to your dotfiles. Your usual startup files are still read.
 
 ## Terminal features
 
@@ -71,3 +73,13 @@ On desktop, <kbd>Mod</kbd>+<kbd>L</kbd> opens your local shell in a new tab.
 - **Remote titles**: let programs set the tab title.
 - Copy on select, right-click to paste, Option as Meta key (macOS), cursor style and blink, scrollback size (10 000 lines by default).
 - **Shell integration**: if the remote shell emits the common shell-integration escape sequences (OSC 133 or OSC 633 prompt and command marks, OSC 7 working directory), ssh-client records each command in the host's [history](/guide/snippets#command-history). Password prompts are detected so that what you type there is never recorded.
+
+## Shell integration, OS detection and history import
+
+These switches are under **Settings → Terminal**.
+
+- **Shell integration** (off by default) loads ssh-client's integration script into [local shells](#the-local-terminal). For SSH sessions it sends the variable `SSH_CLIENT_SHELL_INTEGRATION=1` with the shell request. The scripts for bash, zsh and fish are in [`crates/term-intel/scripts`](https://github.com/davidniessen/ssh-client/tree/main/crates/term-intel/scripts). They do nothing unless that variable is set, so you can source one from your remote dotfile (for example `~/.bashrc`). The server must accept the variable (`AcceptEnv SSH_CLIENT_SHELL_INTEGRATION` in `sshd_config`); otherwise export it yourself before sourcing the script.
+- **Detect remote operating system** (on by default) checks `/etc/os-release` or `uname` after you log in to a saved host whose operating system is not set, and fills it in so the host shows the right icon. An operating system you picked yourself is never changed.
+- **Import remote shell history** (off by default) reads the end of `~/.bash_history`, `~/.zsh_history` and `~/.local/share/fish/fish_history` once per saved host and adds the commands to the host's [history](/guide/snippets#command-history).
+
+Detection and import each open a short-lived extra SSH channel in the background after the terminal is up. Turn them off for servers that allow only one session per connection (`MaxSessions 1`). They are not used for Mosh sessions.
