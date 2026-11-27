@@ -10,11 +10,11 @@
 </p>
 
 <p align="center">
-<a href="https://github.com/DavidNiessen/vaultport/actions/runs/46026680957"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-ci-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-ci-light.svg"><img alt="ci: running" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-ci-dark.svg" height="28"></picture></a>
+<a href="https://github.com/DavidNiessen/vaultport/actions/runs/46057280910"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-ci-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-ci-light.svg"><img alt="release please: passing" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-ci-dark.svg" height="28"></picture></a>
 <a href="https://github.com/DavidNiessen/vaultport/issues"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-issues-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-issues-light.svg"><img alt="issues: 0 open" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-issues-dark.svg" height="28"></picture></a>
 <a href="https://github.com/DavidNiessen/vaultport/stargazers"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-stars-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-stars-light.svg"><img alt="stars: 0" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-stars-dark.svg" height="28"></picture></a>
-<a href="https://github.com/DavidNiessen/vaultport/graphs/contributors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-contributors-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-contributors-light.svg"><img alt="contributors: 1" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-contributors-dark.svg" height="28"></picture></a>
-<a href="https://github.com/DavidNiessen/vaultport/pulls"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-light.svg"><img alt="pull requests: 11 open" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-dark.svg" height="28"></picture></a>
+<a href="https://github.com/DavidNiessen/vaultport/graphs/contributors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-contributors-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-contributors-light.svg"><img alt="contributors: 2" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-contributors-dark.svg" height="28"></picture></a>
+<a href="https://github.com/DavidNiessen/vaultport/pulls"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-light.svg"><img alt="pull requests: 9 open" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-dark.svg" height="28"></picture></a>
 </p>
 
 <div align="center">
@@ -182,7 +182,7 @@ docker/test-servers/ OpenSSH and friends for integration tests
 </div>
 
 <p align="center">
-<a href="https://github.com/DavidNiessen/vaultport/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-light.svg"><img alt="124 commits to DavidNiessen/vaultport in the last year" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-dark.svg" width="100%"></picture></a>
+<a href="https://github.com/DavidNiessen/vaultport/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-light.svg"><img alt="140 commits to DavidNiessen/vaultport in the last year" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-dark.svg" width="100%"></picture></a>
 </p>
 
 <div align="center">
@@ -203,7 +203,7 @@ Issues and pull requests are welcome.
 </div>
 
 <p align="center">
-<a href="https://github.com/DavidNiessen/vaultport/graphs/contributors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-light.svg"><img alt="1 contributors to DavidNiessen/vaultport" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-dark.svg" width="100%"></picture></a>
+<a href="https://github.com/DavidNiessen/vaultport/graphs/contributors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-light.svg"><img alt="2 contributors to DavidNiessen/vaultport" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-dark.svg" width="100%"></picture></a>
 </p>
 
 <div align="center">
@@ -214,7 +214,3 @@ Vaultport is free software under the [GNU General Public License v3.0 or later](
 Third-party licenses are listed in [LICENSES](LICENSES) and in each release's SBOM.
 
 </div>
-
-<p align="center">
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/footer-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/footer-light.svg"><img alt="footer" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/footer-dark.svg" width="100%"></picture>
-</p>
