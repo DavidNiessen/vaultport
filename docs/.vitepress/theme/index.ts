@@ -3,7 +3,8 @@ import type { Theme } from 'vitepress';
 // The default theme's CSS must load before ours so our tokens override its variables.
 import DefaultTheme from 'vitepress/theme-without-fonts';
 
-import '@fontsource-variable/inter';
+import '@fontsource-variable/manrope';
+import '@fontsource-variable/archivo/wdth.css';
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/500.css';
 import '@fontsource/jetbrains-mono/600.css';

@@ -60,7 +60,7 @@ export default defineConfig({
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}logo.svg` }],
     ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: `${base}favicon-32.png` }],
     ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: `${base}apple-touch-icon.png` }],
-    ['meta', { name: 'theme-color', content: '#0b0d14' }],
+    ['meta', { name: 'theme-color', content: '#0b0f12' }],
     ['meta', { name: 'color-scheme', content: 'dark light' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:site_name', content: NAME }],
