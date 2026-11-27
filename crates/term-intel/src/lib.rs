@@ -6,6 +6,7 @@
 //! * [`scripts`]: small opt-in bash / zsh / fish snippets that make a remote shell emit those
 //!   sequences.
 //! * [`history`]: bash / zsh / fish history import and a frecency-ranked [`HistoryIndex`].
+//! * [`tokenize`]: quote-aware shell tokenizer used by completion and risk rating.
 //! * [`vt`]: incremental VT escape scanner and ANSI stripper.
 //!
 //! All parsers are incremental, robust to arbitrary input splits, never panic on untrusted
@@ -16,6 +17,7 @@
 pub mod history;
 pub mod scripts;
 pub mod shell;
+pub mod tokenize;
 pub mod vt;
 
 pub use history::{HistoryEntry, HistoryFormat, HistoryIndex, HistoryItem};
