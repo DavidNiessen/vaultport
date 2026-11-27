@@ -1,0 +1,31 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Test-only sshd configuration. Deliberately permissive for forwarding; never use in production.
+Port 22
+ListenAddress 0.0.0.0
+
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_ecdsa_key
+HostKey /etc/ssh/ssh_host_rsa_key
+HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub
+
+PermitRootLogin no
+UsePAM yes
+PasswordAuthentication yes
+KbdInteractiveAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile .ssh/authorized_keys
+TrustedUserCAKeys /etc/ssh/user_ca.pub
+MaxAuthTries 30
+
+AllowTcpForwarding yes
+GatewayPorts clientspecified
+AllowAgentForwarding yes
+PermitOpen any
+AcceptEnv LANG LC_* SSHC_*
+X11Forwarding no
+
+Subsystem sftp internal-sftp
+LogLevel VERBOSE
+
+Match User bob
+    AuthenticationMethods publickey,password

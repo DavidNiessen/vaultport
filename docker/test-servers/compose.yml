@@ -1,0 +1,32 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Manual playground matching the integration test fixture:
+#
+#   docker compose -f docker/test-servers/compose.yml up -d --build
+#   ssh -p 2222 alice@127.0.0.1                      # password: alice-password
+#   ssh -J alice@127.0.0.1:2222 alice@sshd-b         # jump host chain
+#
+# The integration tests do NOT use this file; they start their own uniquely named containers
+# with the same image (see crates/ssh-engine/tests/support/mod.rs).
+name: ssh-client-test
+
+services:
+  sshd-a:
+    build: ./sshd
+    image: ssh-client-test-sshd:1
+    hostname: sshd-a
+    ports:
+      - "127.0.0.1:2222:22"
+    environment:
+      HOST_PRINCIPALS: "localhost,127.0.0.1,sshd-a"
+    networks: [sshnet]
+
+  # Only reachable through sshd-a (jump host tests).
+  sshd-b:
+    image: ssh-client-test-sshd:1
+    hostname: sshd-b
+    depends_on: [sshd-a]
+    networks: [sshnet]
+
+networks:
+  sshnet: {}
