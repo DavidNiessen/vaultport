@@ -11,11 +11,31 @@ description: Download ssh-client for Windows, macOS, Linux, iOS, iPadOS and Andr
 
 ## Verify your download
 
-Every release is built in GitHub Actions from a tagged commit. Each file is published with a SHA-256 checksum in `SHA256SUMS.txt`, a Sigstore (cosign) signature and a GitHub build-provenance attestation, and the release carries an SPDX SBOM (`sbom.spdx.json`). All of them are on the [releases page](https://github.com/davidniessen/ssh-client/releases).
+Every release is built by the [release workflow](https://github.com/davidniessen/ssh-client/blob/main/.github/workflows/release.yml) in GitHub Actions from a tagged commit. Next to the installers, each release has:
 
-### 1. Check the SHA-256 checksum
+| File                           | What it is                                                                            |
+| ------------------------------ | ------------------------------------------------------------------------------------- |
+| `SHA256SUMS.txt`               | SHA-256 checksums of every file in the release                                        |
+| `SHA256SUMS.txt.sigstore.json` | Keyless Sigstore (cosign) signature of `SHA256SUMS.txt`, made by the release workflow |
+| `sbom.spdx.json`               | Software bill of materials (SPDX) of the source tree                                  |
+| `*.sig`, `latest.json`         | Signatures and manifest for the desktop self-updater (when updater signing is set up) |
 
-Download `SHA256SUMS.txt` into the same folder as the installer, then:
+Every file listed in `SHA256SUMS.txt` also has a GitHub build-provenance attestation. All of them are on the [releases page](https://github.com/davidniessen/ssh-client/releases).
+
+### 1. Verify the checksum file's signature
+
+The signature is keyless: it is bound to the release workflow's GitHub identity, not to a long-lived key. With [cosign](https://docs.sigstore.dev/cosign/system_config/installation/) 2.x, download `SHA256SUMS.txt` and `SHA256SUMS.txt.sigstore.json` and run:
+
+```bash
+cosign verify-blob SHA256SUMS.txt \
+  --bundle SHA256SUMS.txt.sigstore.json \
+  --certificate-identity-regexp '^https://github\.com/davidniessen/ssh-client/\.github/workflows/release\.yml@' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com
+```
+
+### 2. Check your file against the checksums
+
+Put `SHA256SUMS.txt` in the same folder as the installer, then:
 
 ```bash
 # Linux
@@ -30,31 +50,19 @@ shasum -a 256 -c SHA256SUMS.txt --ignore-missing
 Get-FileHash .\ssh-client_<version>_x64-setup.exe -Algorithm SHA256
 ```
 
-### 2. Verify the build provenance
+Together, steps 1 and 2 prove that your file is exactly what the release workflow published.
 
-With the [GitHub CLI](https://cli.github.com/), confirm that the file was built by this repository's release workflow:
+### 3. Verify the build provenance (optional)
+
+With the [GitHub CLI](https://cli.github.com/), confirm directly that a file was built in this repository's GitHub Actions:
 
 ```bash
 gh attestation verify ssh-client_<version>_amd64.AppImage --repo davidniessen/ssh-client
 ```
 
-### 3. Verify the Sigstore signature
-
-Signatures are keyless: they are bound to the release workflow's GitHub identity instead of a long-lived key. With [cosign](https://docs.sigstore.dev/cosign/system_config/installation/):
-
-```bash
-cosign verify-blob ssh-client_<version>_amd64.AppImage \
-  --signature ssh-client_<version>_amd64.AppImage.sig \
-  --certificate ssh-client_<version>_amd64.AppImage.pem \
-  --certificate-identity-regexp '^https://github\.com/davidniessen/ssh-client/' \
-  --certificate-oidc-issuer https://token.actions.githubusercontent.com
-```
-
-If a release ships a Sigstore bundle (`*.sigstore.json`) instead of separate `.sig` and `.pem` files, pass it with `--bundle <file>` instead of `--signature` and `--certificate`.
-
 ### Updates
 
-Desktop builds can update themselves from GitHub Releases. Updates are only checked when you click **Settings → About → Check for updates**, and each update is verified against the project's signing key before it is installed. On phones and tablets, install the new APK or IPA over the old one; your vault is kept.
+Desktop builds include a self-updater that reads `latest.json` from the latest GitHub release. It only checks when you click **Settings → About → Check for updates**, and it verifies each update's signature against the public key built into the app before installing it. On phones and tablets, install the new APK or IPA over the old one; your vault is kept.
 
 ### Prefer to build it yourself?
 
