@@ -5,6 +5,8 @@
  */
 import type { ITheme } from '@xterm/xterm';
 
+import { findPreset, type PresetId } from '@/lib/presets';
+
 export interface TerminalTheme {
   id: string;
   name: string;
@@ -276,3 +278,25 @@ export const TERMINAL_FONTS = [
   'DejaVu Sans Mono',
   'Ubuntu Mono',
 ] as const;
+
+/**
+ * The default themes follow the app: the dark one takes the window background, and both take
+ * the colour preset for the cursor and selection. Other themes are used as they are.
+ */
+export function themeColors(
+  id: string | null | undefined,
+  appScheme: 'dark' | 'light',
+  preset: PresetId,
+): TerminalTheme['colors'] {
+  const theme = findTheme(id, appScheme);
+  if (theme.id !== DEFAULT_DARK_THEME && theme.id !== DEFAULT_LIGHT_THEME) return theme.colors;
+  const p = findPreset(preset);
+  const accent = theme.dark ? p.swatch : p.light;
+  return {
+    ...theme.colors,
+    ...(theme.dark ? { background: p.bg } : {}),
+    cursor: accent,
+    cursorAccent: theme.dark ? p.bg : '#ffffff',
+    selectionBackground: `${accent}${theme.dark ? '40' : '30'}`,
+  };
+}
