@@ -4,6 +4,12 @@
   "kind": "project",
   "profile": {
     "login": "DavidNiessen",
+    "location": {
+      "city": "",
+      "latitude": 37.77,
+      "longitude": -122.42,
+      "timezone": "America/Los_Angeles"
+    },
     "links": [
       {
         "icon": "website",
@@ -35,8 +41,8 @@
     "headingFont": "space-grotesk",
     "radius": 14,
     "border": 1,
-    "texture": "grid",
-    "motion": "subtle",
+    "texture": "lines",
+    "motion": "full",
     "surface": true
   },
   "layout": [
@@ -72,13 +78,13 @@
           "type": "shields",
           "options": {
             "badges": [
-              "license",
               "ci",
+              "issues",
               "stars",
               "contributors",
-              "issues"
+              "prs"
             ],
-            "style": "rounded",
+            "style": "outline",
             "color": "accent",
             "icons": true,
             "custom": []
@@ -358,7 +364,11 @@
         {
           "id": "commit-activity",
           "type": "commit-activity",
-          "options": {}
+          "options": {
+            "label": "commit activity",
+            "style": "bars",
+            "last": true
+          }
         }
       ]
     },
