@@ -646,6 +646,19 @@
     "vault": "Vault"
   },
   "terminal": {
+    "autocomplete": {
+      "label": "Suggestions",
+      "hint": "Tab to insert · ↑↓ to choose · Esc to close",
+      "kind": {
+        "path": "path",
+        "value": "value",
+        "subcommand": "subcommand",
+        "option": "option",
+        "command": "command",
+        "snippet": "snippet",
+        "history": "history"
+      }
+    },
     "connecting": "Connecting to {{target}}…",
     "connectionFailed": "Connection failed",
     "copiedByRemote": "Copied by the remote program",

@@ -53,6 +53,29 @@ test('opens a terminal session and runs a command', async ({ page, isMobile }) =
   await expect.poll(text).toContain('deploy\n');
 });
 
+test('suggests completions while typing and inserts one with Tab', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'needs a hardware keyboard');
+  await unlock(page);
+  await page
+    .getByRole('button', { name: /router/ })
+    .first()
+    .dblclick();
+  const text = () =>
+    page.evaluate(() => (window as unknown as { __terminalText: () => string }).__terminalText());
+  await expect.poll(text, { timeout: 10_000 }).toContain('Welcome to router');
+  await page.keyboard.type('git ch');
+  const popup = page.getByTestId('autocomplete');
+  await expect(popup.getByRole('option', { name: /checkout/ })).toBeVisible();
+  await expect(popup.getByRole('option', { name: /cherry-pick/ })).toBeVisible();
+  await page.keyboard.press('ArrowDown');
+  await page.keyboard.press('Tab');
+  await expect(popup).toBeHidden();
+  await expect.poll(text).toContain('$ git cherry-pick ');
+  await page.keyboard.press('Escape');
+  await page.keyboard.type('\r');
+  await expect.poll(text).toContain('git: command not found');
+});
+
 test('creates a snippet', async ({ page, isMobile }) => {
   test.skip(isMobile, 'covered by the desktop layout');
   await unlock(page);

@@ -2,6 +2,7 @@
 //! Per-session side channels: encrypted session logs, shell-integration tracking and command
 //! history. Failures here never interrupt the terminal session.
 
+use crate::commands::complete::CompletionState;
 use crate::commands::logs::{LOG_KEY_PURPOSE, load_index, logs_dir, save_index, update_history};
 use crate::prefs::LoggingPrefs;
 use crate::state::AppState;
@@ -93,6 +94,9 @@ impl Recorder {
             match ev {
                 ShellEvent::CommandExecuted { command: Some(cmd) } => {
                     if !cmd.trim().is_empty() && self.history.len() < 10_000 {
+                        self.app
+                            .state::<CompletionState>()
+                            .record(self.host_id, &cmd);
                         self.history.push(cmd);
                     }
                 }
@@ -163,6 +167,7 @@ impl Recorder {
                         index.record(cmd, Some(ts));
                     }
                 })?;
+                self.app.state::<CompletionState>().stored(host_id);
             }
             Ok(())
         });

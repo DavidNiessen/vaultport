@@ -176,3 +176,29 @@ export function mockSessionClose(args: Record<string, unknown>): null {
   sessions.delete(args.id as string);
   return null;
 }
+
+const MOCK_COMMANDS = ['df', 'docker', 'git', 'kubectl', 'ls', 'systemctl', 'uname', 'uptime'];
+const MOCK_GIT = ['checkout', 'cherry-pick', 'clone', 'commit', 'pull', 'push', 'status'];
+
+/** A small stand-in for the term-intel completer: commands, then `git` subcommands. */
+export function mockTermComplete(args: Record<string, unknown>) {
+  const req = args.req as { line: string; cursor: number };
+  const before = req.line.slice(0, req.cursor);
+  const words = before.split(/\s+/);
+  const current = words[words.length - 1] ?? '';
+  const pool =
+    words.length === 1 ? MOCK_COMMANDS : words.length === 2 && words[0] === 'git' ? MOCK_GIT : [];
+  const kind = words.length === 1 ? 'command' : 'subcommand';
+  return {
+    items: pool
+      .filter((w) => w.startsWith(current) && w !== current)
+      .map((w) => ({
+        text: w,
+        label: w,
+        description: null,
+        kind,
+        deleteBefore: current.length,
+        deleteAfter: 0,
+      })),
+  };
+}

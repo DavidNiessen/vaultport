@@ -183,6 +183,11 @@ impl FilesState {
         }
     }
 
+    /// The SFTP session already open for `host_id`, without connecting or waiting.
+    pub fn cached(&self, host_id: &str) -> Option<Arc<dyn FileSystem>> {
+        self.remotes.try_lock().ok()?.get(host_id).cloned()
+    }
+
     /// Drops cached SFTP sessions (on vault lock).
     pub async fn reset(&self) {
         self.remotes.lock().await.clear();

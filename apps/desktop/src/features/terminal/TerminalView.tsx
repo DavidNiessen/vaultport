@@ -21,17 +21,26 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
 import { EMPTY } from '@/lib/empty';
-import { commands, errorMessage, isTauri, type SessionEvent } from '@/lib/ipc';
+import { commands, errorMessage, isTauri, type PathSource, type SessionEvent } from '@/lib/ipc';
 import { useBreakpoint, useColorScheme } from '@/lib/platform';
 import { useHosts, useSettings } from '@/lib/queries';
 import { useApp, type TerminalTab } from '@/stores/app';
 
 import { AccessoryBar } from './AccessoryBar';
+import { AutocompletePopup } from './autocomplete/AutocompletePopup';
+import { attachAutocomplete, type Autocomplete, type PopupView } from './autocomplete/controller';
 import { AuthPromptDialog, HostKeyDialog, type PendingPrompt } from './Prompts';
 import { highlightKeywords } from './highlight';
 import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from './settings';
 import { findTheme } from './themes';
 import { terminalRegistry } from './registry';
+
+/** Where path suggestions can be listed for this tab. */
+function pathSource(tab: TerminalTab): PathSource {
+  if (tab.protocol === 'local') return 'local';
+  if ((tab.protocol === 'ssh' || tab.protocol === 'mosh') && tab.hostId) return 'remote';
+  return 'none';
+}
 
 function decodeBase64(b64: string): Uint8Array {
   const bin = atob(b64);
@@ -42,7 +51,10 @@ function decodeBase64(b64: string): Uint8Array {
 
 export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolean }) {
   const { t } = useTranslation();
+  const rootRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const acRef = useRef<Autocomplete | null>(null);
+  const [acView, setAcView] = useState<PopupView | null>(null);
   const termRef = useRef<Terminal | null>(null);
   const fitRef = useRef<FitAddon | null>(null);
   const searchRef = useRef<SearchAddon | null>(null);
@@ -141,13 +153,17 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         void writeText(term.getSelection());
       }
     });
-    term.onData((data) => {
-      // Broadcast input to every pane of the workspace when enabled.
+    const broadcastPanes = () => {
       const ws = useApp
         .getState()
         .tabs.find((x) => x.kind === 'workspace' && x.panes.includes(tab.id));
-      if (ws?.kind === 'workspace' && ws.broadcast) {
-        for (const pane of ws.panes) {
+      return ws?.kind === 'workspace' && ws.broadcast ? ws.panes : null;
+    };
+    // Sends input to the session, or to every pane of the workspace when broadcasting.
+    const send = (data: string) => {
+      const panes = broadcastPanes();
+      if (panes) {
+        for (const pane of panes) {
           const sid =
             pane === tab.id
               ? sessionRef.current
@@ -158,6 +174,28 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       }
       const id = sessionRef.current;
       if (id) void commands.sessionWrite(id, data).catch(() => undefined);
+    };
+    const ac = attachAutocomplete(term, {
+      // Other panes have different lines, so completing while broadcasting would garble them.
+      enabled: () => settingsRef.current.autocomplete && !broadcastPanes(),
+      request: async (input, cwd) =>
+        (
+          await commands.termComplete({
+            hostId: tab.hostId ?? null,
+            line: input.line,
+            cursor: input.cursor,
+            cwd,
+            paths: pathSource(tab),
+          })
+        ).items,
+      send,
+      onView: setAcView,
+      root: () => rootRef.current,
+    });
+    acRef.current = ac;
+    term.onData((data) => {
+      ac.noteInput(data);
+      send(data);
     });
     term.onBinary((data) => {
       const id = sessionRef.current;
@@ -171,6 +209,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       if (title && settingsRef.current.remoteTitles) updateTab(tab.id, { title });
     });
     term.attachCustomKeyEventHandler((e) => {
+      if (ac.handleKey(e)) return false;
       if (e.type !== 'keydown') return true;
       const mod = e.ctrlKey || e.metaKey;
       if (mod && e.shiftKey && e.key.toLowerCase() === 'f') {
@@ -207,6 +246,8 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     requestAnimationFrame(() => fit.fit());
     return () => {
       ro.disconnect();
+      ac.dispose();
+      acRef.current = null;
       terminalRegistry.delete(tab.id);
       term.dispose();
       termRef.current = null;
@@ -325,6 +366,10 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   }, [tab.id, attempt]);
 
   useEffect(() => {
+    if (!active || !settings.autocomplete) acRef.current?.close();
+  }, [active, settings.autocomplete]);
+
+  useEffect(() => {
     if (active) {
       requestAnimationFrame(() => {
         fitRef.current?.fit();
@@ -369,7 +414,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   const background = findTheme(themeId, scheme).colors.background;
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col" style={{ background }}>
+    <div ref={rootRef} className="relative flex h-full min-h-0 flex-col" style={{ background }}>
       {searchOpen ? (
         <div className="bg-surface-2 absolute top-2 right-3 z-10 flex items-center gap-1 rounded-xl p-1 shadow-[var(--shadow)]">
           <Input
@@ -431,6 +476,14 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
             .catch(() => undefined);
         }}
       />
+
+      {acView ? (
+        <AutocompletePopup
+          view={acView}
+          onPick={(i) => acRef.current?.pick(i)}
+          onHover={(i) => acRef.current?.hover(i)}
+        />
+      ) : null}
 
       {tab.status === 'connecting' && !prompt ? (
         <div className="pointer-events-none absolute inset-x-0 top-0 flex justify-center pt-6">

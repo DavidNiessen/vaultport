@@ -24,7 +24,7 @@ import type {
   HostConfig,
 } from './index';
 import { emptyConfig } from './index';
-import { mockSessionClose, mockSessionOpen, mockSessionWrite } from './mockShell';
+import { mockSessionClose, mockSessionOpen, mockSessionWrite, mockTermComplete } from './mockShell';
 
 type Handler = (args: Record<string, unknown>) => unknown;
 
@@ -366,6 +366,7 @@ const handlers: Record<string, Handler> = {
   transfer_list: () => [],
   sync_list_targets: () => [],
   history_list: () => [],
+  term_complete: mockTermComplete,
   ai_status: () => ({
     state: 'notInstalled',
     modelName: 'Qwen2.5-Coder-1.5B-Instruct (Q4_K_M)',
