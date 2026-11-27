@@ -5,7 +5,7 @@ name: Release
 # workflow still publishes unsigned artifacts, and every artifact is covered by SHA-256
 # checksums, a Sigstore signature, an SBOM and a GitHub build-provenance attestation.
 #
-# Secrets (all optional, see docs/development/release.md):
+# Secrets (all optional, see docs/development/releasing.md):
 #   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD, TAURI_UPDATER_PUBKEY
 #   APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY, APPLE_ID,
 #   APPLE_PASSWORD, APPLE_TEAM_ID, IOS_PROVISIONING_PROFILE
@@ -202,6 +202,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Android refuses to install an unsigned release APK, so publish nothing without a key.
+          if [ "$HAS_ANDROID_KEYSTORE" != 'true' ]; then
+            echo "::warning::ANDROID_KEYSTORE is not set; skipping the Android upload (unsigned APKs cannot be installed)."
+            exit 0
+          fi
           v="${{ inputs.version }}"
           out=apps/desktop/src-tauri/gen/android/app/build/outputs
           apk=$(find "$out/apk" -name '*universal*release*.apk' | head -1)
