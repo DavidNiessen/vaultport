@@ -34,6 +34,7 @@ mod error;
 ))]
 pub mod fido2;
 mod pin;
+pub mod platform;
 pub mod pubkey;
 mod signer;
 pub mod sk;

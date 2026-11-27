@@ -35,6 +35,7 @@ ctap-hid-fido2 = { version = "3.6", optional = true }
 [target.'cfg(any(target_os = "macos", target_os = "ios"))'.dependencies]
 core-foundation = "0.10"
 security-framework = { version = "3.7", default-features = false, features = ["OSX_10_15"] }
+security-framework-sys = "2.17"
 
 [target.'cfg(windows)'.dependencies]
 windows = { version = "0.62", features = [

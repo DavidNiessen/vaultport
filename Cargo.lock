@@ -929,6 +929,7 @@ dependencies = [
  "hex",
  "p256",
  "security-framework",
+ "security-framework-sys",
  "sha2",
  "ssh-key",
  "thiserror",
