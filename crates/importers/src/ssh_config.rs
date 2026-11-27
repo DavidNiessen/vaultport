@@ -10,7 +10,8 @@
 //! before the first `Host` line) are put into one group, [`DEFAULTS_GROUP_LABEL`], that all
 //! imported hosts belong to, so they are inherited exactly like other group defaults. Other
 //! wildcard blocks (e.g. `Host *.prod.example.com`) are applied directly to the matching
-//! concrete hosts; if they match none, a warning is emitted.
+//! concrete hosts; if they match none, a warning is emitted. Port forwards and `ProxyJump`
+//! are always attached to each host (never to the group), since they are per connection.
 //!
 //! * `Match` blocks (other than `Match all`) are skipped with a warning.
 //! * `Include` is resolved through a caller-supplied callback ([`parse_with_includes`]),
@@ -22,7 +23,7 @@
 //!   chain is prepended, mirroring how OpenSSH connects to it.
 //! * `ProxyCommand` is not supported (warning).
 
-use crate::bundle::{ImportBundle, KeyCache, KeyFileFormat, WarningKind};
+use crate::bundle::{ImportBundle, KeyCache, KeyFileFormat, WarningKind, truncate_for_display};
 use crate::common::{parse_port, split_host_port};
 use crate::error::ImportError;
 use crate::finalize::finalize;
@@ -452,12 +453,13 @@ impl Parser<'_> {
         }
         let mut cur = cur;
         for path in args {
+            let shown = truncate_for_display(path, 120);
             if depth + 1 > MAX_INCLUDE_DEPTH {
                 loc.warn(
                     b,
                     WarningKind::Include,
                     format!(
-                        "Include {path:?} nested deeper than {MAX_INCLUDE_DEPTH} levels; skipped"
+                        "Include {shown:?} nested deeper than {MAX_INCLUDE_DEPTH} levels; skipped"
                     ),
                 );
                 continue;
@@ -466,7 +468,7 @@ impl Parser<'_> {
                 loc.warn(
                     b,
                     WarningKind::Limit,
-                    format!("more than {MAX_INCLUDES} includes; {path:?} skipped"),
+                    format!("more than {MAX_INCLUDES} includes; {shown:?} skipped"),
                 );
                 continue;
             }
@@ -475,7 +477,7 @@ impl Parser<'_> {
                 loc.warn(
                     b,
                     WarningKind::Include,
-                    format!("Include {path:?} could not be resolved"),
+                    format!("Include {shown:?} could not be resolved"),
                 );
                 continue;
             };
@@ -484,7 +486,7 @@ impl Parser<'_> {
                 loc.warn(
                     b,
                     WarningKind::Limit,
-                    format!("Include {path:?} exceeds the total size limit; skipped"),
+                    format!("Include {shown:?} exceeds the total size limit; skipped"),
                 );
                 continue;
             }
@@ -497,8 +499,12 @@ impl Parser<'_> {
                 && self.blocks.len() < MAX_BLOCKS
                 && let Some(enclosing) = self.blocks.get(cur)
             {
-                let mut cont = enclosing.clone();
-                cont.settings.clear();
+                let cont = Block {
+                    kind: enclosing.kind.clone(),
+                    guards: enclosing.guards.clone(),
+                    line: enclosing.line,
+                    settings: Vec::new(),
+                };
                 self.blocks.push(cont);
                 cur = self.blocks.len() - 1;
             }
@@ -1152,7 +1158,10 @@ impl<'a> Builder<'a> {
                     WarningKind::Invalid,
                     None,
                     Some(label),
-                    format!("invalid ProxyJump hop {hop:?}; jump chain removed"),
+                    format!(
+                        "invalid ProxyJump hop {:?}; jump chain removed",
+                        truncate_for_display(hop, 120)
+                    ),
                 );
                 return Vec::new();
             };

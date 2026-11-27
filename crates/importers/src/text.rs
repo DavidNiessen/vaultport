@@ -57,7 +57,8 @@ fn decode_utf16(bytes: &[u8], conv: fn([u8; 2]) -> u16) -> Result<Decoded<'stati
             "odd number of bytes in UTF-16 input".into(),
         ));
     }
-    let units = bytes.chunks_exact(2).map(|c| conv([c[0], c[1]]));
+    let (chunks, _) = bytes.as_chunks::<2>();
+    let units = chunks.iter().map(|c| conv(*c));
     let text: Result<String, _> = char::decode_utf16(units).collect();
     text.map(|t| Decoded {
         text: Cow::Owned(t),

@@ -15,7 +15,9 @@
 //! * `SshHostKeys` entries (`rsa2@22:host`, `ssh-ed25519@22:host`, `ecdsa-sha2-nistp256@...`,
 //!   `dss@...`) are converted from PuTTY's numeric format to known hosts.
 
-use crate::bundle::{ImportBundle, KeyCache, KeyFileFormat, SecretKind, WarningKind};
+use crate::bundle::{
+    ImportBundle, KeyCache, KeyFileFormat, SecretKind, WarningKind, truncate_for_display,
+};
 use crate::common::{HostDraft, Protocol, split_host_port};
 use crate::error::ImportError;
 use crate::finalize::finalize;
@@ -277,7 +279,10 @@ fn build_sessions(b: &mut ImportBundle, names: &[String], sessions: &[Session]) 
                     WarningKind::Unsupported,
                     line,
                     item,
-                    format!("{other} sessions are not supported; skipped"),
+                    format!(
+                        "{} sessions are not supported; skipped",
+                        truncate_for_display(other, 32)
+                    ),
                 );
                 continue;
             }
