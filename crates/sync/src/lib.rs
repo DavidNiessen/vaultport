@@ -18,7 +18,8 @@
 //!
 //! * Persistence of [`SyncState`] (one per backend; [`SyncState::load`]/[`SyncState::save`]
 //!   keep it in the vault as a device-local settings document).
-//! * Backend credentials (stored as vault secrets).
+//! * Backend credentials (stored as vault secrets) and the [`backends::GitTransport`] for Git
+//!   over SSH, using its own SSH engine.
 //! * Scheduling (sync on change / on a timer) and surfacing [`engine::Issue`]s to the user.
 
 #![forbid(unsafe_code)]
