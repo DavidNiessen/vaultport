@@ -214,6 +214,60 @@ export function HostsView({ onImport }: { onImport: () => void }) {
       return n;
     });
 
+  // Tag filter and grid/list toggle: next to the search field, or below it on phones.
+  const viewControls = (
+    <div className="flex shrink-0 items-center gap-1.5">
+      <DropdownMenu
+        trigger={
+          <Button
+            size={tagFilter.length ? 'md' : 'icon'}
+            variant={tagFilter.length ? 'accent' : 'secondary'}
+            aria-label={t('hosts.filterTags')}
+            className="h-11 min-w-11"
+          >
+            <Tag className="size-4" />
+            {tagFilter.length ? tagFilter.length : null}
+          </Button>
+        }
+        items={
+          tags.length === 0
+            ? [{ label: t('hosts.noTags'), disabled: true }]
+            : [
+                ...tags.map((tag) => ({
+                  label: `${tagFilter.includes(tag) ? '✓ ' : ''}${tag}`,
+                  onSelect: () =>
+                    setTagFilter(
+                      tagFilter.includes(tag)
+                        ? tagFilter.filter((x) => x !== tag)
+                        : [...tagFilter, tag],
+                    ),
+                })),
+                { separator: true as const },
+                { label: t('hosts.clearTags'), onSelect: () => setTagFilter([]) },
+              ]
+        }
+      />
+      <Segmented
+        ariaLabel={t('hosts.layout')}
+        value={hostView}
+        onChange={setHostView}
+        options={[
+          {
+            value: 'grid',
+            label: <span className="sr-only">{t('hosts.gridView')}</span>,
+            icon: <LayoutGrid />,
+          },
+          {
+            value: 'list',
+            label: <span className="sr-only">{t('hosts.listView')}</span>,
+            icon: <List />,
+          },
+        ]}
+        className="h-11 [&_button]:h-9 [&_button]:px-3"
+      />
+    </div>
+  );
+
   const hostCard = (h: Host) => {
     const isSelected = selected?.id === h.id || multi.has(h.id);
     const protocol = hostProtocol(h);
@@ -380,56 +434,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
               <ArrowRight className="size-3.5" />
             </Button>
           </form>
-          <div className="flex shrink-0 items-center gap-1.5">
-            <DropdownMenu
-              trigger={
-                <Button
-                  size={tagFilter.length ? 'md' : 'icon'}
-                  variant={tagFilter.length ? 'accent' : 'secondary'}
-                  aria-label={t('hosts.filterTags')}
-                  className="h-11 min-w-11"
-                >
-                  <Tag className="size-4" />
-                  {tagFilter.length ? tagFilter.length : null}
-                </Button>
-              }
-              items={
-                tags.length === 0
-                  ? [{ label: t('hosts.noTags'), disabled: true }]
-                  : [
-                      ...tags.map((tag) => ({
-                        label: `${tagFilter.includes(tag) ? '✓ ' : ''}${tag}`,
-                        onSelect: () =>
-                          setTagFilter(
-                            tagFilter.includes(tag)
-                              ? tagFilter.filter((x) => x !== tag)
-                              : [...tagFilter, tag],
-                          ),
-                      })),
-                      { separator: true as const },
-                      { label: t('hosts.clearTags'), onSelect: () => setTagFilter([]) },
-                    ]
-              }
-            />
-            <Segmented
-              ariaLabel={t('hosts.layout')}
-              value={hostView}
-              onChange={setHostView}
-              options={[
-                {
-                  value: 'grid',
-                  label: <span className="sr-only">{t('hosts.gridView')}</span>,
-                  icon: <LayoutGrid />,
-                },
-                {
-                  value: 'list',
-                  label: <span className="sr-only">{t('hosts.listView')}</span>,
-                  icon: <List />,
-                },
-              ]}
-              className="h-11 [&_button]:h-9 [&_button]:px-3"
-            />
-          </div>
+          {phone ? null : viewControls}
         </div>
         {quick ? (
           <p className="text-muted mt-2 flex items-center gap-1.5 text-xs">
@@ -442,6 +447,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
             {phone ? (
               <CreateButton onHost={createHost} onGroup={createGroup} onImport={onImport} />
             ) : null}
+            {phone ? <div className="ml-auto">{viewControls}</div> : null}
             {path.length > 0 ? (
               <nav
                 aria-label={t('hosts.breadcrumb')}

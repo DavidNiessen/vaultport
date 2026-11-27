@@ -105,7 +105,9 @@ export function VaultNav({
           <>
             <span className="min-w-0 flex-1 truncate text-left">{label}</span>
             {count ? (
-              <span className="text-subtle text-[12px] font-bold tabular-nums">{count}</span>
+              <span className="text-subtle text-[12px] font-bold tabular-nums" aria-hidden>
+                {count}
+              </span>
             ) : null}
           </>
         )}
