@@ -1,0 +1,303 @@
+name: Release
+
+# Builds, signs and publishes all platforms for a release created by release-please (or a
+# manually dispatched tag). Signing is optional: when the corresponding secrets are absent the
+# workflow still publishes unsigned artifacts, and every artifact is covered by SHA-256
+# checksums, a Sigstore signature, an SBOM and a GitHub build-provenance attestation.
+#
+# Secrets (all optional, see docs/development/release.md):
+#   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD, TAURI_UPDATER_PUBKEY
+#   APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY, APPLE_ID,
+#   APPLE_PASSWORD, APPLE_TEAM_ID, IOS_PROVISIONING_PROFILE
+#   WINDOWS_CERTIFICATE, WINDOWS_CERTIFICATE_PASSWORD
+#   ANDROID_KEYSTORE, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+      version:
+        type: string
+        required: true
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (e.g. v0.1.0)
+        required: true
+      version:
+        description: Version without the v prefix (e.g. 0.1.0)
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+jobs:
+  desktop:
+    name: Desktop (${{ matrix.name }})
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x64
+            os: ubuntu-24.04
+            args: ''
+          - name: Linux arm64
+            os: ubuntu-24.04-arm
+            args: ''
+          - name: Windows x64
+            os: windows-2025
+            args: ''
+          - name: Windows arm64
+            os: windows-11-arm
+            args: '--target aarch64-pc-windows-msvc'
+            target: aarch64-pc-windows-msvc
+          - name: macOS universal
+            os: macos-15
+            args: '--target universal-apple-darwin --features metal'
+            target: aarch64-apple-darwin,x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    env:
+      HAS_WINDOWS_CERT: ${{ secrets.WINDOWS_CERTIFICATE != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libxdo-dev libayatana-appindicator3-dev \
+            librsvg2-dev libudev-dev patchelf cmake clang
+      - name: Install Rust targets
+        shell: bash
+        run: |
+          rustup show active-toolchain || rustup toolchain install
+          if [ -n "${{ matrix.target }}" ]; then
+            IFS=',' read -ra T <<< "${{ matrix.target }}"
+            rustup target add "${T[@]}"
+          fi
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: release-${{ matrix.name }}
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Enable signed updater artifacts
+        id: updater
+        shell: bash
+        env:
+          PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
+          KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -n "$PUBKEY" ] && [ -n "$KEY" ]; then
+            cfg=$(jq -cn --arg pk "$PUBKEY" '{bundle:{createUpdaterArtifacts:true},plugins:{updater:{pubkey:$pk}}}')
+            echo "args=--config '$cfg'" >> "$GITHUB_OUTPUT"
+            echo "json=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Updater signing key not configured; building without updater artifacts."
+            echo "json=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Import Windows code-signing certificate
+        if: runner.os == 'Windows' && env.HAS_WINDOWS_CERT == 'true'
+        shell: pwsh
+        env:
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+        run: |
+          $bytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE)
+          [IO.File]::WriteAllBytes("$env:RUNNER_TEMP\cert.pfx", $bytes)
+          $pw = ConvertTo-SecureString $env:WINDOWS_CERTIFICATE_PASSWORD -AsPlainText -Force
+          $cert = Import-PfxCertificate -FilePath "$env:RUNNER_TEMP\cert.pfx" -CertStoreLocation Cert:\CurrentUser\My -Password $pw
+          Remove-Item "$env:RUNNER_TEMP\cert.pfx"
+          $cfg = @{ bundle = @{ windows = @{ certificateThumbprint = $cert.Thumbprint; digestAlgorithm = 'sha256'; timestampUrl = 'http://timestamp.digicert.com' } } } | ConvertTo-Json -Compress -Depth 5
+          Set-Content -Path apps/desktop/src-tauri/tauri.windows-signing.json -Value $cfg
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        with:
+          projectPath: apps/desktop
+          tauriScript: pnpm tauri
+          tagName: ${{ inputs.tag }}
+          releaseName: ssh-client ${{ inputs.version }}
+          releaseDraft: false
+          uploadUpdaterJson: ${{ steps.updater.outputs.json == 'true' }}
+          updaterJsonPreferNsis: true
+          args: ${{ matrix.args }} ${{ steps.updater.outputs.args }} ${{ runner.os == 'Windows' && hashFiles('apps/desktop/src-tauri/tauri.windows-signing.json') != '' && '--config apps/desktop/src-tauri/tauri.windows-signing.json' || '' }}
+
+  android:
+    name: Android
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      HAS_ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      - name: Install NDK and Rust targets
+        run: |
+          sdkmanager --install "ndk;27.2.12479018" "platforms;android-35" "build-tools;35.0.0"
+          echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/27.2.12479018" >> "$GITHUB_ENV"
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android i686-linux-android
+          sudo apt-get update && sudo apt-get install -y cmake clang
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: release-android
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Initialise Android project
+        working-directory: apps/desktop
+        run: |
+          if [ ! -d src-tauri/gen/android ]; then pnpm tauri android init --ci; fi
+      - name: Configure release signing
+        if: env.HAS_ANDROID_KEYSTORE == 'true'
+        working-directory: apps/desktop/src-tauri/gen/android
+        env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          echo "$ANDROID_KEYSTORE" | base64 -d > "$RUNNER_TEMP/release.jks"
+          {
+            echo "storeFile=$RUNNER_TEMP/release.jks"
+            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "keyPassword=$ANDROID_KEY_PASSWORD"
+          } > keystore.properties
+      - name: Build APK and AAB
+        working-directory: apps/desktop
+        run: pnpm tauri android build --apk --aab -- --no-default-features
+      - name: Upload to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          v="${{ inputs.version }}"
+          out=apps/desktop/src-tauri/gen/android/app/build/outputs
+          apk=$(find "$out/apk" -name '*universal*release*.apk' | head -1)
+          aab=$(find "$out/bundle" -name '*universal*release*.aab' | head -1)
+          cp "$apk" "ssh-client_${v}_android-universal.apk"
+          cp "$aab" "ssh-client_${v}_android-universal.aab"
+          gh release upload "${{ inputs.tag }}" "ssh-client_${v}_android-universal.apk" "ssh-client_${v}_android-universal.aab" --clobber
+
+  ios:
+    name: iOS
+    runs-on: macos-15
+    permissions:
+      contents: write
+    env:
+      HAS_IOS_SIGNING: ${{ secrets.APPLE_TEAM_ID != '' && secrets.IOS_PROVISIONING_PROFILE != '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+      - run: |
+          rustup show active-toolchain || rustup toolchain install
+          rustup target add aarch64-apple-ios aarch64-apple-ios-sim
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: release-ios
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Initialise iOS project
+        working-directory: apps/desktop
+        run: |
+          if [ ! -d src-tauri/gen/apple ]; then pnpm tauri ios init --ci; fi
+      - name: Build signed IPA
+        if: env.HAS_IOS_SIGNING == 'true'
+        working-directory: apps/desktop
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          IOS_PROVISIONING_PROFILE: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+          IOS_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pnpm tauri ios build --export-method app-store-connect -- --features metal
+          ipa=$(find src-tauri/gen/apple/build -name '*.ipa' | head -1)
+          cp "$ipa" "../../ssh-client_${{ inputs.version }}_ios.ipa"
+          gh release upload "${{ inputs.tag }}" "../../ssh-client_${{ inputs.version }}_ios.ipa" --clobber
+      - name: Verify the iOS build (unsigned, simulator)
+        if: env.HAS_IOS_SIGNING != 'true'
+        working-directory: apps/desktop
+        run: pnpm tauri ios build --target aarch64-sim --debug -- --no-default-features
+
+  provenance:
+    name: Checksums, SBOM, signatures and provenance
+    needs: [desktop, android, ios]
+    if: always() && needs.desktop.result == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.tag }}
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir dist
+          gh release download "${{ inputs.tag }}" --dir dist --skip-existing
+          rm -f dist/SHA256SUMS.txt dist/*.sigstore.json dist/sbom.spdx.json
+          ls -la dist
+      - name: SBOM
+        uses: anchore/sbom-action@dfcb83b97731532d72be422cbc51ee64adb6fd56 # v0.24.4
+        with:
+          path: .
+          format: spdx-json
+          output-file: dist/sbom.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum -- * | grep -v ' latest.json$' > SHA256SUMS.txt && cat SHA256SUMS.txt
+      - uses: sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab # v4.1.4
+      - name: Sign checksums with Sigstore (keyless)
+        working-directory: dist
+        run: cosign sign-blob --yes --bundle SHA256SUMS.txt.sigstore.json SHA256SUMS.txt
+      - name: Build provenance attestation
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-checksums: dist/SHA256SUMS.txt
+      - name: Upload checksums, signature and SBOM
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${{ inputs.tag }}" dist/SHA256SUMS.txt dist/SHA256SUMS.txt.sigstore.json dist/sbom.spdx.json --clobber
