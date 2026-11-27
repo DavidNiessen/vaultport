@@ -104,3 +104,14 @@ impl fmt::Debug for TelnetOption {
         fmt::Display::fmt(self, f)
     }
 }
+
+/// TERMINAL-TYPE / NEW-ENVIRON subnegotiation verbs.
+pub(crate) mod sub {
+    pub const IS: u8 = 0;
+    pub const SEND: u8 = 1;
+    // NEW-ENVIRON type bytes.
+    pub const VAR: u8 = 0;
+    pub const VALUE: u8 = 1;
+    pub const ESC: u8 = 2;
+    pub const USERVAR: u8 = 3;
+}
