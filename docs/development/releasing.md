@@ -65,7 +65,7 @@ Every secret is optional: without it the corresponding signing step is skipped a
 | Secret                                                                                       | Used by             | Purpose                                                                                        |
 | -------------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------- |
 | `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`                            | desktop jobs        | Sign updater bundles (minisign key from `tauri signer generate`)                               |
-| `TAURI_UPDATER_PUBKEY`                                                                       | desktop jobs        | The matching public key, injected into the app at build time (see below)                       |
+| `TAURI_UPDATER_PUBKEY`                                                                       | desktop jobs        | Optional: the matching public key, overriding the one committed in `tauri.conf.json`           |
 | `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`                                            | macOS and iOS jobs  | Base64-encoded `.p12` signing certificate and its password                                     |
 | `APPLE_SIGNING_IDENTITY`                                                                     | macOS job           | The certificate's identity, for example `Developer ID Application: … (TEAMID)`                 |
 | `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`                                                | macOS job (and iOS) | Notarization with an app-specific password; `APPLE_TEAM_ID` also enables the iOS build         |
@@ -87,7 +87,7 @@ Android only installs signed APKs. Without the `ANDROID_KEYSTORE*` secrets the j
 https://github.com/davidniessen/ssh-client/releases/latest/download/latest.json
 ```
 
-with an empty `pubkey` and `bundle.createUpdaterArtifacts: false`. That is deliberate: the release workflow turns updater artifacts on and injects the public key at build time, but only when both `TAURI_UPDATER_PUBKEY` and `TAURI_SIGNING_PRIVATE_KEY` are set. To enable updates:
+with an empty `pubkey` and `bundle.createUpdaterArtifacts: false`. The release workflow turns updater artifacts on when `TAURI_SIGNING_PRIVATE_KEY` is set and a public key is available, either committed in `tauri.conf.json` (preferred) or from the optional `TAURI_UPDATER_PUBKEY` secret, which overrides the committed key. To enable updates:
 
 1. Generate a key pair once, on a trusted machine:
 
@@ -96,7 +96,7 @@ with an empty `pubkey` and `bundle.createUpdaterArtifacts: false`. That is delib
    ```
 
 2. Store the **private key** file's content as `TAURI_SIGNING_PRIVATE_KEY` and its password as `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
-3. Store the **public key** (the content of `~/.tauri/ssh-client.key.pub`) as `TAURI_UPDATER_PUBKEY`. Alternatively commit it to `plugins.updater.pubkey` in `tauri.conf.json`; it is not secret.
+3. Commit the **public key** (the content of `~/.tauri/ssh-client.key.pub`) to `plugins.updater.pubkey` in `tauri.conf.json`. It is not secret, and committing it makes every build verify updates with it. Alternatively store it as the `TAURI_UPDATER_PUBKEY` secret.
 4. Back up the private key offline. If it is lost, installed apps can no longer verify updates and users must reinstall manually.
 
 Releases built without these secrets have no `latest.json`, and **Check for updates** reports that no update is available.

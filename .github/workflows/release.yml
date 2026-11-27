@@ -100,9 +100,14 @@ jobs:
           PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
           KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         run: |
-          if [ -n "$PUBKEY" ] && [ -n "$KEY" ]; then
+          # The public key is normally committed in tauri.conf.json; the secret overrides it.
+          committed=$(jq -r '.plugins.updater.pubkey // ""' apps/desktop/src-tauri/tauri.conf.json)
+          if [ -n "$KEY" ] && [ -n "$PUBKEY" ]; then
             cfg=$(jq -cn --arg pk "$PUBKEY" '{bundle:{createUpdaterArtifacts:true},plugins:{updater:{pubkey:$pk}}}')
             echo "args=--config '$cfg'" >> "$GITHUB_OUTPUT"
+            echo "json=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "$KEY" ] && [ -n "$committed" ]; then
+            echo "args=--config '{\"bundle\":{\"createUpdaterArtifacts\":true}}'" >> "$GITHUB_OUTPUT"
             echo "json=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice::Updater signing key not configured; building without updater artifacts."
