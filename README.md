@@ -21,13 +21,32 @@
 
 [Website & docs](https://vaultport.niessen.dev/) · [Download](https://vaultport.niessen.dev/download) · [llms.txt](https://vaultport.niessen.dev/llms.txt) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
-![Hosts view](.github/screenshots/hosts.png)
+<p align="center">
+  <img src=".github/screenshots/terminal.png" alt="A terminal session in the see-through Pulse theme, with the snippets side panel open" width="100%" />
+  <br />
+  <sub><b>Pulse</b>, the default terminal theme: see-through over the app's living background glow, side panel included.</sub>
+</p>
 
 <table>
   <tr>
-    <td><img src=".github/screenshots/terminal.png" alt="Terminal session" /></td>
-    <td><img src=".github/screenshots/agent-approval.png" alt="Approving an AI agent's command" /></td>
-    <td width="22%"><img src=".github/screenshots/phone.png" alt="Phone layout" /></td>
+    <td width="50%" valign="top">
+      <img src=".github/screenshots/hosts.png" alt="The hosts view with groups, tags and the omnibox" />
+      <p align="center"><sub><b>Vault</b> · hosts, groups and tags in an encrypted vault</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src=".github/screenshots/workspace.png" alt="A workspace with four terminals and broadcast input" />
+      <p align="center"><sub><b>Workspaces</b> · split terminals with broadcast input</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src=".github/screenshots/agent-approval.png" alt="Approving a command an AI agent wants to run" />
+      <p align="center"><sub><b>AI agents</b> · every action waits for your approval</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src=".github/screenshots/phones.png" alt="The hosts list and a terminal on a phone" />
+      <p align="center"><sub><b>Phones &amp; tablets</b> · the same vault, touch-first</sub></p>
+    </td>
   </tr>
 </table>
 
@@ -61,7 +80,7 @@
 | Sync              | End-to-end encrypted, conflict-free sync through a folder (iCloud Drive, Dropbox, Syncthing…), WebDAV or S3-compatible storage, encrypted `.vaultport` backups, QR pairing.                                                                                        |
 | Local AI          | Optional command generation with a small model that downloads automatically and runs fully on the device. Suggestions are inserted, never executed.                                                                                                               |
 | AI agents         | Built-in [MCP](https://modelcontextprotocol.io) server: Claude Code, Claude Desktop, Cursor, VS Code or Codex can list hosts, run commands, read and write files and manage tunnels — locally, without seeing credentials, with your approval in the app.         |
-| Design            | Native-feeling custom title bar per OS, dark/light themes, keyboard-first with a command palette, responsive from phone to desktop, English and German.                                                                                                           |
+| Design            | Native-feeling custom title bar per OS, dark/light themes and colour presets, a see-through default terminal theme over a living background glow, keyboard-first with a command palette, responsive from phone to desktop, English and German.                    |
 
 ## Security at a glance
 
