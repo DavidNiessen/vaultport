@@ -32,6 +32,7 @@ use core_model::{
     KeyId, PortForwardRule, RuleId,
 };
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 
 /// Maximum `Include` nesting depth.
 pub const MAX_INCLUDE_DEPTH: usize = 8;
@@ -178,7 +179,7 @@ enum BlockKind {
     /// Options before the first `Host`/`Match` line.
     Global,
     /// `Host` block; patterns are lowercase.
-    Host(Vec<String>),
+    Host(Rc<[String]>),
     /// `Match all`.
     MatchAll,
     /// Any other `Match` (ignored) or an invalid `Host` line.
@@ -190,7 +191,7 @@ struct Block {
     kind: BlockKind,
     /// Host patterns of enclosing blocks at the time this block's file was included. OpenSSH
     /// only reads an `Include` for hosts that match the enclosing block.
-    guards: Vec<Vec<String>>,
+    guards: Vec<Rc<[String]>>,
     line: usize,
     settings: Vec<Setting>,
 }
@@ -202,7 +203,12 @@ impl Block {
             BlockKind::Host(p) => p.iter().map(String::len).sum(),
             _ => 0,
         };
-        let guards: usize = self.guards.iter().flatten().map(String::len).sum();
+        let guards: usize = self
+            .guards
+            .iter()
+            .flat_map(|g| g.iter())
+            .map(String::len)
+            .sum();
         ((own + guards + 1) as u64).saturating_mul((len + 1) as u64)
     }
 
@@ -686,7 +692,7 @@ fn host_block_kind(b: &mut ImportBundle, loc: Loc<'_>, args: &[String]) -> Block
         );
         return BlockKind::Ignored;
     }
-    BlockKind::Host(patterns)
+    BlockKind::Host(patterns.into())
 }
 
 fn yes_no(v: &str) -> Option<bool> {
@@ -949,7 +955,7 @@ impl<'a> Builder<'a> {
                     );
                 }
             } else if let BlockKind::Host(patterns) = &blk.kind {
-                for p in patterns {
+                for p in patterns.iter() {
                     let list = by_alias.entry(p.as_str()).or_default();
                     if list.last() != Some(&i) {
                         list.push(i);
@@ -1182,7 +1188,7 @@ fn build(b: &mut ImportBundle, blocks: &[Block]) {
     let mut aliases: Vec<&str> = Vec::new();
     'blocks: for (i, blk) in blocks.iter().enumerate() {
         if let BlockKind::Host(patterns) = &blk.kind {
-            for p in patterns {
+            for p in patterns.iter() {
                 if aliases.len() >= MAX_HOSTS {
                     break 'blocks;
                 }
