@@ -12,7 +12,7 @@
  * Design tokens ("Pulse"), in three layers:
  *   1. Theme values: neutrals and text per light/dark theme, then a colour preset
  *      (data-preset on <html>) that sets the accent, the ambient glow and, in dark mode, a tint
- *      of the neutrals. Glacier is the default preset.
+ *      of the neutrals. Iris is the default preset.
  *   2. Semantic Tailwind colors (@theme inline): bg, surface-*, text, muted, accent, primary…
  *      Components only ever use these names, never raw hex values.
  *   3. Component tokens: radii, fonts, elevation and motion.
@@ -89,7 +89,6 @@
  * on it stays readable), two glow colours (as RGB triplets) and, in dark mode, tinted neutrals.
  * Keep in sync with PRESETS in src/lib/presets.ts.
  */
-:root,
 [data-preset='glacier'] {
   --accent: #6fe3d9;
   --accent-hover: #93ece4;
@@ -98,14 +97,14 @@
   --glow-1: 70 190 200;
   --glow-2: 80 120 220;
 }
-[data-theme='light'][data-preset='glacier'],
-[data-theme='light']:not([data-preset]) {
+[data-theme='light'][data-preset='glacier'] {
   --accent: #0b7d74;
   --accent-hover: #096a62;
   --accent-fg: #ffffff;
   --accent-text: #0b6b63;
 }
 
+:root,
 [data-preset='iris'] {
   --accent: #b3a6ff;
   --accent-hover: #c6bcff;
@@ -114,7 +113,8 @@
   --glow-1: 130 110 255;
   --glow-2: 90 140 230;
 }
-[data-theme='dark'][data-preset='iris'] {
+[data-theme='dark'][data-preset='iris'],
+:root:not([data-preset]):not([data-theme='light']) {
   --bg: #0d0c12;
   --sidebar: #100f16;
   --surface-1: #15141c;
@@ -122,7 +122,8 @@
   --surface-3: #1f1e29;
   --surface-4: #2a2836;
 }
-[data-theme='light'][data-preset='iris'] {
+[data-theme='light'][data-preset='iris'],
+[data-theme='light']:not([data-preset]) {
   --accent: #5b47e0;
   --accent-hover: #4b37cf;
   --accent-fg: #ffffff;
