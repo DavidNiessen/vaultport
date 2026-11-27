@@ -9,7 +9,7 @@ export const LANGUAGES = ['en', 'de'] as const;
 
 function detect(): string {
   try {
-    const saved = localStorage.getItem('ssh-client:lang');
+    const saved = localStorage.getItem('vaultport:lang');
     if (saved && (LANGUAGES as readonly string[]).includes(saved)) return saved;
   } catch {
     // storage may be unavailable
@@ -29,7 +29,7 @@ export async function initI18n(): Promise<void> {
   i18n.on('languageChanged', (lng) => {
     document.documentElement.lang = lng;
     try {
-      localStorage.setItem('ssh-client:lang', lng);
+      localStorage.setItem('vaultport:lang', lng);
     } catch {
       // ignore
     }

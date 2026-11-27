@@ -5,7 +5,7 @@ description: Encrypted, tamper-evident recordings of SSH, Telnet, serial and loc
 
 # Session logs
 
-ssh-client records the output of your terminal sessions — SSH, Telnet, serial and local — into **encrypted session logs**, so you can look up what a command printed yesterday or keep a record of maintenance work.
+Vaultport records the output of your terminal sessions — SSH, Telnet, serial and local — into **encrypted session logs**, so you can look up what a command printed yesterday or keep a record of maintenance work.
 
 Session logging is on by default. Open **Logs** in the vault to browse them.
 

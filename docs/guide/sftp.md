@@ -33,7 +33,7 @@ Drag files between the panes — or select them and choose **Copy to other pane*
 
 ## Edit locally
 
-**Edit locally** downloads a remote file into a private temporary folder (mode `0700`, files `0600`) and opens it with your default application. When you save, ssh-client notices the change and offers to upload it.
+**Edit locally** downloads a remote file into a private temporary folder (mode `0700`, files `0600`) and opens it with your default application. When you save, Vaultport notices the change and offers to upload it.
 
 - The upload **refuses to overwrite** the remote file if it changed on the server since you opened it, so you do not clobber someone else's edit.
 - Remote permissions are preserved, and the upload uses the same part-file-and-rename approach.

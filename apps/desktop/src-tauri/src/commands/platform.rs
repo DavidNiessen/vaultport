@@ -73,7 +73,7 @@ pub fn platform_info() -> PlatformInfo {
         arch: std::env::consts::ARCH.to_owned(),
         version: env!("CARGO_PKG_VERSION").to_owned(),
         decoration_layout: decoration_layout(),
-        native_decorations: std::env::var_os("SSH_CLIENT_NATIVE_DECORATIONS").is_some() || mobile,
+        native_decorations: std::env::var_os("VAULTPORT_NATIVE_DECORATIONS").is_some() || mobile,
         local_terminal: !mobile,
     }
 }

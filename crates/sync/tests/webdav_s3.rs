@@ -405,7 +405,7 @@ fn s3_backend(server: &MockServer, secret: &str) -> S3Backend {
             endpoint: server.uri(),
             region: "us-east-1".into(),
             bucket: BUCKET.into(),
-            prefix: "ssh-client/".into(),
+            prefix: "vaultport/".into(),
             addressing: Addressing::Path,
             conditional_writes: true,
         },
@@ -437,7 +437,7 @@ async fn s3_backend_operations() {
             .lock()
             .unwrap()
             .objects
-            .contains_key("ssh-client/v/s/0.seg")
+            .contains_key("vaultport/v/s/0.seg")
     );
     let list = b.list("v/").await.unwrap();
     assert_eq!(list.len(), 5);

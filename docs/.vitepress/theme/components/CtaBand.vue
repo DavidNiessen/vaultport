@@ -11,7 +11,7 @@ import { withBase } from 'vitepress';
     <p class="sub">Free and open source, on every device you use.</p>
     <div class="actions">
       <a class="btn primary" :href="withBase('/download')">
-        <Download :size="18" aria-hidden="true" /> Download ssh-client
+        <Download :size="18" aria-hidden="true" /> Download Vaultport
       </a>
       <a class="btn secondary" :href="withBase('/guide/')">
         <BookOpen :size="18" aria-hidden="true" /> Read the docs

@@ -36,7 +36,7 @@ Tunnels and SFTP panes share a pool of SSH connections, so several tunnels or fi
 
 ## Binding to other interfaces
 
-By default local and dynamic forwards listen on `127.0.0.1`. You can bind to another address such as `0.0.0.0`, and ssh-client will warn you: **the tunnel is then reachable from other machines on your network** — for a dynamic forward, that is an open proxy into the remote network. For remote forwards, binding to non-loopback addresses on the server also requires `GatewayPorts` in the server's `sshd_config`.
+By default local and dynamic forwards listen on `127.0.0.1`. You can bind to another address such as `0.0.0.0`, and Vaultport will warn you: **the tunnel is then reachable from other machines on your network** — for a dynamic forward, that is an open proxy into the remote network. For remote forwards, binding to non-loopback addresses on the server also requires `GatewayPorts` in the server's `sshd_config`.
 
 ## Importing forwards
 

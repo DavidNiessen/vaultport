@@ -1,6 +1,6 @@
 ---
 title: Vault cryptography
-description: Envelope encryption with XChaCha20-Poly1305, Argon2id and OS key-store key wrapping, associated data, subkeys and the operation log of the ssh-client vault.
+description: Envelope encryption with XChaCha20-Poly1305, Argon2id and OS key-store key wrapping, associated data, subkeys and the operation log of the Vaultport vault.
 ---
 
 # Vault cryptography
@@ -32,9 +32,9 @@ device key (OS key store) ──────────┘                 │
 - The **vault key** (VK) is generated randomly when the vault is created and never stored in the clear.
 - It is stored **wrapped** (encrypted) by one or both of:
   - a key-encryption key derived from the **master password** with Argon2id;
-  - a random 256-bit **device key** kept in the OS key store — macOS/iOS Keychain, Windows Credential Manager (DPAPI), or the Secret Service on Linux.
+  - a random 256-bit **device key** kept in the OS key store — macOS/iOS Keychain (this-device-only on iOS), Windows Credential Manager (DPAPI), the Secret Service on Linux, or on Android wrapped by an AES-256-GCM key that lives in the Android Keystore (StrongBox when available).
 - At least one wrap always exists. Changing the master password re-wraps the VK; it does not re-encrypt the data.
-- Each wrap is authenticated with associated data `ssh-client/vk-wrap/v1|<method>|<vault id>`.
+- Each wrap is authenticated with associated data `vaultport/vk-wrap/v1|<method>|<vault id>`.
 
 ## Argon2id parameters
 
@@ -50,8 +50,8 @@ Parameters and the random 16-byte salt are stored next to the wrapped key. When 
 Data is stored as an append-only log of **operations** plus materialized **documents**, both encrypted with the VK. Associated data binds every ciphertext to its place:
 
 ```text
-ops:        ssh-client/op/v1|<vault id>|<op id>
-documents:  ssh-client/doc/v1|<vault id>|<record id>
+ops:        vaultport/op/v1|<vault id>|<op id>
+documents:  vaultport/doc/v1|<vault id>|<record id>
 ```
 
 A ciphertext copied to another record, another op or another vault fails authentication.
@@ -64,7 +64,7 @@ Passwords, private keys and tokens are separate secret records. They are decrypt
 
 ## Subkeys
 
-Other components never use the VK directly. They derive domain-separated subkeys with HKDF-SHA256 (`info = "ssh-client/subkey/v1|<purpose>"` or `"ssh-client/sync/<purpose>/v1"`, `salt = vault id`):
+Other components never use the VK directly. They derive domain-separated subkeys with HKDF-SHA256 (`info = "vaultport/subkey/v1|<purpose>"` or `"vaultport/sync/<purpose>/v1"`, `salt = vault id`):
 
 - **session logs** — see [Session logs](/guide/session-logs),
 - **sync segments**, **exports** and **pairing** — see [Sync protocol](/security/sync).

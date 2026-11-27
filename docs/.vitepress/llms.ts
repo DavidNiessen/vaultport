@@ -78,7 +78,10 @@ export function toPortableMarkdown(body: string, siteUrl: string): string {
     const line = raw;
     if (/^\s*(```|~~~)/.test(line)) {
       inFence = !inFence;
-      out.push(quote ? `> ${line}` : line);
+      // Code-group tabs (```json [Title]) become a bold label above a plain fence.
+      const tab = /^(\s*(?:```|~~~)[\w-]*)\s+\[([^\]]+)\]\s*$/.exec(line);
+      const lines = tab ? [`**${tab[2] ?? ''}**`, '', tab[1] ?? ''] : [line];
+      for (const l of lines) out.push(quote ? `> ${l}`.trimEnd() : l);
       continue;
     }
     if (inFence) {

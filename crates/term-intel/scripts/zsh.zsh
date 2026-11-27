@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# ssh-client shell integration for zsh >= 5.1 (opt-in).
+# Vaultport shell integration for zsh >= 5.1 (opt-in).
 # Emits OSC 7 (cwd), OSC 133 A/B/C/D and OSC 633 E (command line). Safe to source twice.
-if [[ -o interactive && -n ${SSH_CLIENT_SHELL_INTEGRATION-} && -z ${__sshc_si-} ]]; then
+if [[ -o interactive && -n ${VAULTPORT_SHELL_INTEGRATION-} && -z ${__sshc_si-} ]]; then
   typeset -g __sshc_si=1 __sshc_ran=
   __sshc_osc7() {
     emulate -L zsh

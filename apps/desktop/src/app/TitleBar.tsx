@@ -95,11 +95,11 @@ function SessionTab({ tab, index, active }: { tab: Tab; index: number; active: b
     }
   };
   const onDragStart = (e: DragEvent) => {
-    e.dataTransfer.setData('application/x-ssh-client-tab', String(index));
+    e.dataTransfer.setData('application/x-vaultport-tab', String(index));
     e.dataTransfer.effectAllowed = 'move';
   };
   const onDrop = (e: DragEvent) => {
-    const from = Number(e.dataTransfer.getData('application/x-ssh-client-tab'));
+    const from = Number(e.dataTransfer.getData('application/x-vaultport-tab'));
     setDragOver(false);
     if (!Number.isNaN(from) && from !== index) moveTab(from, index);
   };

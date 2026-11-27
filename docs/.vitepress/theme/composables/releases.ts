@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /**
  * Latest release lookup through the public GitHub REST API, straight from the visitor's
- * browser (no proxy, no token). Assets are classified by the file names tauri-action produces.
+ * browser (no proxy, no token). Assets are classified by the file names that
+ * `.github/workflows/release.yml` publishes (tauri-action for desktop, renamed APK/IPA for mobile,
+ * plus `SHA256SUMS.txt`, its Sigstore bundle `SHA256SUMS.txt.sigstore.json` and
+ * `sbom.spdx.json`). Updater files (`*.sig`, `*.app.tar.gz`, `latest.json`) are ignored.
  */
 import { onMounted, ref, type Ref } from 'vue';
 
@@ -171,8 +174,9 @@ export interface ReleaseInfo {
   prerelease: boolean;
   installers: MatchedAsset[];
   checksums: GithubAsset | null;
+  /** Sigstore bundle signing `SHA256SUMS.txt`. */
+  checksumsBundle: GithubAsset | null;
   sbom: GithubAsset | null;
-  signatures: GithubAsset[];
   assetCount: number;
 }
 
@@ -182,12 +186,17 @@ export type ReleaseState =
   | { status: 'none' }
   | { status: 'unavailable'; reason: 'rate-limited' | 'offline' | 'error' };
 
-const SIGNATURE = /\.(sig|asc|pem|crt|bundle|sigstore\.json|intoto\.jsonl)$/i;
+/** Signatures and other companions that must never be offered as an installer. */
+const NOT_INSTALLER = /\.(sig|asc|pem|crt|bundle|sigstore\.json|intoto\.jsonl|tar\.gz)$/i;
 
 export function classifyRelease(release: GithubRelease): ReleaseInfo {
   const installers: MatchedAsset[] = [];
   for (const kind of ASSET_KINDS) {
-    const asset = release.assets.find((a) => !SIGNATURE.test(a.name) && kind.pattern.test(a.name));
+    const matches = release.assets.filter(
+      (a) => !NOT_INSTALLER.test(a.name) && kind.pattern.test(a.name),
+    );
+    // WiX builds one MSI per language (en-US, de-DE); offer the English one by default.
+    const asset = matches.find((a) => /_en-US\.msi$/i.test(a.name)) ?? matches[0];
     if (asset) installers.push({ kind, asset });
   }
   return {
@@ -199,8 +208,9 @@ export function classifyRelease(release: GithubRelease): ReleaseInfo {
     prerelease: release.prerelease,
     installers,
     checksums: release.assets.find((a) => /^SHA256SUMS(\.txt)?$/i.test(a.name)) ?? null,
+    checksumsBundle:
+      release.assets.find((a) => /^SHA256SUMS(\.txt)?\.sigstore\.json$/i.test(a.name)) ?? null,
     sbom: release.assets.find((a) => /\.spdx\.json$/i.test(a.name)) ?? null,
-    signatures: release.assets.filter((a) => SIGNATURE.test(a.name)),
     assetCount: release.assets.length,
   };
 }
@@ -217,7 +227,7 @@ export function formatBytes(bytes: number): string {
   return `${value.toFixed(value >= 100 || unit === 0 ? 0 : 1)} ${units[unit] ?? 'B'}`;
 }
 
-const CACHE_KEY = 'ssh-client:latest-release:v1';
+const CACHE_KEY = 'vaultport:latest-release:v1';
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
 function readCache(): GithubRelease | null | undefined {

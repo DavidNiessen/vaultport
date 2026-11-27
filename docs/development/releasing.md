@@ -1,65 +1,115 @@
 ---
 title: Release process
-description: How ssh-client releases are versioned, built, signed, attested and published, and which repository secrets and settings the pipeline needs.
+description: How Vaultport is versioned with release-please and built, signed, attested and published by the release workflow, including every repository secret it reads and the updater setup.
 ---
 
 # Release process
 
-## Versioning
+Releases are fully automated by GitHub Actions. This page describes the workflows in `.github/workflows/` as they are.
 
-Versions follow [Semantic Versioning](https://semver.org/) and are derived from [Conventional Commits](/development/contributing#commit-messages) by **release-please**: merged `feat` commits bump the minor version, `fix` and `perf` the patch version, and `!` / `BREAKING CHANGE:` the major version. release-please keeps a release pull request open with the version bump and the generated changelog; merging it tags the release.
+## Workflows at a glance
 
-The workspace version lives in the root `Cargo.toml` (`[workspace.package] version`) and `apps/desktop/package.json`; `tauri.conf.json` reads the app version from `package.json`.
+| Workflow                      | Trigger                                                              | What it does                                                                                                                                                                                          |
+| ----------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ci.yml`                      | pushes to `main`, pull requests, merge queue                         | Prettier, ESLint, `tsc`, Vitest, Playwright (mocked core), `cargo fmt`/`clippy`/`test`, generated bindings check, `cargo deny`, `pnpm audit`, gitleaks, dependency review, Conventional Commits check |
+| `build.yml`                   | pushes to `main`, app pull requests                                  | Unsigned test bundles (Linux x64, Windows x64, macOS arm64) and a debug Android APK as workflow artifacts (kept 7 days)                                                                               |
+| `release-please.yml`          | pushes to `main`, manual                                             | Maintains the release pull request; when it is merged, tags the release and calls `release.yml`                                                                                                       |
+| `release.yml`                 | called by release-please, or manual with an existing tag             | Builds, signs and uploads all platforms, then publishes checksums, signature, SBOM and attestations                                                                                                   |
+| `docs.yml`                    | `docs/` changes on `main`, pull requests, releases, manual, callable | Builds this website and deploys it to GitHub Pages                                                                                                                                                    |
+| `integration.yml`             | protocol pull requests, nightly, manual                              | SSH/SFTP engine tests against OpenSSH in Docker, Telnet and Mosh protocol tests                                                                                                                       |
+| `fuzz.yml`                    | parser pull requests, nightly, manual                                | `cargo-fuzz` targets for the parsers                                                                                                                                                                  |
+| `codeql.yml`, `scorecard.yml` | pushes, pull requests (CodeQL) and weekly                            | Static analysis and OpenSSF Scorecard                                                                                                                                                                 |
 
-## Build matrix
+## Versioning with release-please
 
-Tagged releases are built on GitHub-hosted runners with [`tauri-action`](https://github.com/tauri-apps/tauri-action). The expected artifacts:
+[release-please](https://github.com/googleapis/release-please) reads the [Conventional Commits](/development/contributing#commit-messages) on `main` and keeps a release pull request open with the next version and a generated `CHANGELOG.md`.
 
-| Platform | Files                                                                                                                        |
-| -------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Windows  | `ssh-client_<v>_x64-setup.exe`, `ssh-client_<v>_x64_en-US.msi`, `…_arm64-setup.exe`                                          |
-| macOS    | `ssh-client_<v>_universal.dmg`                                                                                               |
-| Linux    | `ssh-client_<v>_amd64.AppImage`, `ssh-client_<v>_amd64.deb`, `ssh-client-<v>-1.x86_64.rpm`, and `aarch64` / `arm64` variants |
-| Android  | `ssh-client_<v>_android-universal.apk`                                                                                       |
-| iOS      | `ssh-client_<v>_ios.ipa`                                                                                                     |
+- Configuration: `release-please-config.json` (release type `simple`, tags `v<version>`), current version in `.release-please-manifest.json`.
+- Before 1.0, `feat` commits bump the minor version (`bump-minor-pre-major`) and everything else the patch version.
+- The version is written to the root `Cargo.toml` (`workspace.package.version`), `apps/desktop/package.json` (which `tauri.conf.json` reads) and `docs/package.json`.
+- Changelog sections: Features, Bug Fixes, Performance, Security and Documentation; other types are hidden.
 
-Alongside them, each release carries `SHA256SUMS.txt`, Sigstore signatures (`*.sig`), GitHub build-provenance attestations and an SPDX SBOM (`sbom.spdx.json`). The [download page](/download) recognizes these names automatically, so keep them stable.
+Merging the release pull request creates the tag and GitHub release, and the `release` job of `release-please.yml` calls `release.yml` with the tag and version.
 
-## Signing and attestation
+To rebuild an existing tag by hand, run **Actions → Release → Run workflow** with the tag (for example `v0.1.0`) and the version (`0.1.0`).
 
-- **Checksums:** `SHA256SUMS.txt` covers every artifact.
-- **Sigstore:** artifacts are signed keyless with `cosign`, using the workflow's GitHub OIDC identity — no signing key to manage.
-- **Provenance:** `actions/attest-build-provenance` records how and from which commit each file was built (`gh attestation verify`).
-- **Updater:** desktop self-updates are verified with the Tauri updater's minisign key; the private key signs the update bundles in CI, the public key is compiled into the app.
-- **Platform signing:** with the secrets below configured, macOS builds are code-signed and notarized, Windows installers are Authenticode-signed, and Android and iOS packages are signed with the project's keys.
+## What `release.yml` builds
 
-## Required secrets
+| Job                                        | Runner             | Output                                                                                                                                                                         |
+| ------------------------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Desktop (Linux x64)                        | `ubuntu-24.04`     | `vaultport_<v>_amd64.AppImage`, `vaultport_<v>_amd64.deb`, `vaultport-<v>-1.x86_64.rpm`                                                                                        |
+| Desktop (Linux arm64)                      | `ubuntu-24.04-arm` | `vaultport_<v>_aarch64.AppImage`, `vaultport_<v>_arm64.deb`, `vaultport-<v>-1.aarch64.rpm`                                                                                     |
+| Desktop (Windows x64)                      | `windows-2025`     | `vaultport_<v>_x64-setup.exe`, `vaultport_<v>_x64_en-US.msi`, `vaultport_<v>_x64_de-DE.msi`                                                                                    |
+| Desktop (Windows arm64)                    | `windows-11-arm`   | `vaultport_<v>_arm64-setup.exe`, `vaultport_<v>_arm64_en-US.msi`, `vaultport_<v>_arm64_de-DE.msi`                                                                              |
+| Desktop (macOS universal)                  | `macos-15`         | `vaultport_<v>_universal.dmg` (built with Metal GPU support for local AI)                                                                                                      |
+| Android                                    | `ubuntu-24.04`     | `vaultport_<v>_android-universal.apk`, `vaultport_<v>_android-universal.aab` (built without local AI)                                                                          |
+| iOS                                        | `macos-15`         | `vaultport_<v>_ios.ipa` (App Store Connect export) — only when iOS signing is configured; otherwise an unsigned simulator build is compiled as a check and nothing is uploaded |
+| Checksums, SBOM, signatures and provenance | `ubuntu-24.04`     | `SHA256SUMS.txt`, `SHA256SUMS.txt.sigstore.json`, `sbom.spdx.json`, build-provenance attestations                                                                              |
 
-Configure these as repository (or `release` environment) secrets. The names follow the conventions of `tauri-action` and the Tauri mobile tooling; check `.github/workflows/` for the exact set your workflow version uses.
+The desktop jobs use [`tauri-action`](https://github.com/tauri-apps/tauri-action), which uploads the bundles to the release under the names above. When updater signing is configured they also produce updater bundles with `.sig` files (for example `vaultport_universal.app.tar.gz.sig`) and a `latest.json` manifest; the Windows entries in `latest.json` point to the NSIS installer.
 
-| Secret                                                                                       | Used for                                                         |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`                            | Signing updater bundles (`tauri signer generate`)                |
-| `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`                                            | Developer ID certificate (base64 `.p12`) for macOS               |
-| `APPLE_SIGNING_IDENTITY`                                                                     | The certificate's identity name                                  |
-| `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`                                                | Notarization (app-specific password)                             |
-| `WINDOWS_CERTIFICATE`, `WINDOWS_CERTIFICATE_PASSWORD`                                        | Optional Authenticode signing (base64 `.pfx`)                    |
-| `ANDROID_KEYSTORE`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | Signing the APK (base64 keystore)                                |
-| `IOS_CERTIFICATE`, `IOS_CERTIFICATE_PASSWORD`, `IOS_MOBILE_PROVISION`                        | Signing the IPA (distribution certificate, provisioning profile) |
+The final job runs once the desktop builds succeed (mobile failures do not block it). It downloads every release asset, then:
 
-Not secrets, but required permissions: the release job needs `contents: write` (upload assets), `id-token: write` (Sigstore and attestations) and `attestations: write`. If release-please should trigger CI on its release PRs, give it a GitHub App or fine-grained token instead of the default `GITHUB_TOKEN`.
+1. generates an SPDX **SBOM** of the source tree with Syft (`anchore/sbom-action`) → `sbom.spdx.json`;
+2. writes **`SHA256SUMS.txt`** for every asset except `latest.json`;
+3. signs `SHA256SUMS.txt` **keylessly with cosign**, using the workflow's GitHub OIDC identity → `SHA256SUMS.txt.sigstore.json`;
+4. creates a **build-provenance attestation** for every file listed in `SHA256SUMS.txt` (`actions/attest-build-provenance`);
+5. uploads the checksums, the signature bundle and the SBOM to the release.
 
-::: warning Updater configuration
-Self-updates only work once the updater public key and endpoint are configured under `plugins.updater` in `apps/desktop/src-tauri/tauri.conf.json` and `bundle.createUpdaterArtifacts` is enabled. Never commit the private key.
+The [download page](/download) recognizes exactly these file names, so keep them stable. Users verify a download as described in [Verify your download](/download#verify-your-download).
+
+## Repository secrets
+
+Every secret is optional: without it the corresponding signing step is skipped and the artifacts are published unsigned (checksums, Sigstore signature, SBOM and attestations are always produced). Configure them under **Settings → Secrets and variables → Actions**; `release-please.yml` passes them to `release.yml` with `secrets: inherit`.
+
+| Secret                                                                                       | Used by             | Purpose                                                                                        |
+| -------------------------------------------------------------------------------------------- | ------------------- | ---------------------------------------------------------------------------------------------- |
+| `TAURI_SIGNING_PRIVATE_KEY`, `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`                            | desktop jobs        | Sign updater bundles (minisign key from `tauri signer generate`)                               |
+| `TAURI_UPDATER_PUBKEY`                                                                       | desktop jobs        | Optional: the matching public key, overriding the one committed in `tauri.conf.json`           |
+| `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`                                            | macOS and iOS jobs  | Base64-encoded `.p12` signing certificate and its password                                     |
+| `APPLE_SIGNING_IDENTITY`                                                                     | macOS job           | The certificate's identity, for example `Developer ID Application: … (TEAMID)`                 |
+| `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID`                                                | macOS job (and iOS) | Notarization with an app-specific password; `APPLE_TEAM_ID` also enables the iOS build         |
+| `IOS_PROVISIONING_PROFILE`                                                                   | iOS job             | Provisioning profile for the App Store Connect export; with `APPLE_TEAM_ID` it enables the IPA |
+| `WINDOWS_CERTIFICATE`, `WINDOWS_CERTIFICATE_PASSWORD`                                        | Windows jobs        | Base64-encoded `.pfx` for Authenticode signing (SHA-256, DigiCert timestamp)                   |
+| `ANDROID_KEYSTORE`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD` | Android job         | Base64-encoded release keystore and its credentials                                            |
+
+No secret is needed for Sigstore or attestations; the jobs request `id-token: write` and `attestations: write`.
+
+::: warning Android without a keystore
+Android only installs signed APKs. Without the `ANDROID_KEYSTORE*` secrets the job uploads an unsigned release APK, which phones refuse to install. Configure the keystore before the first public release, and keep it safe: updates must be signed with the same key.
 :::
 
-## The website
+## Setting up the self-updater
 
-The website is rebuilt and deployed to GitHub Pages by `.github/workflows/docs.yml` on every push to `main` that touches `docs/`, on demand, and whenever a release is **published**, so the download page and its static fallbacks stay current. Pull requests that touch `docs/` get a build-only check. Enable Pages with the **GitHub Actions** source in the repository settings.
+`apps/desktop/src-tauri/tauri.conf.json` already points the updater at
 
-## Checklist
+```text
+https://github.com/DavidNiessen/vaultport/releases/latest/download/latest.json
+```
 
-1. Merge the release-please pull request.
-2. Wait for the release workflow to attach all artifacts, checksums, signatures, attestations and the SBOM.
-3. Spot-check one artifact per platform with the [verification commands](/download#verify-your-download).
-4. Publish the release (if it was created as a draft). The docs workflow redeploys the site.
+with an empty `pubkey` and `bundle.createUpdaterArtifacts: false`. The release workflow turns updater artifacts on when `TAURI_SIGNING_PRIVATE_KEY` is set and a public key is available, either committed in `tauri.conf.json` (preferred) or from the optional `TAURI_UPDATER_PUBKEY` secret, which overrides the committed key. To enable updates:
+
+1. Generate a key pair once, on a trusted machine:
+
+   ```bash
+   pnpm --filter @vaultport/desktop tauri signer generate -w ~/.tauri/vaultport.key
+   ```
+
+2. Store the **private key** file's content as `TAURI_SIGNING_PRIVATE_KEY` and its password as `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
+3. Commit the **public key** (the content of `~/.tauri/vaultport.key.pub`) to `plugins.updater.pubkey` in `tauri.conf.json`. It is not secret, and committing it makes every build verify updates with it. Alternatively store it as the `TAURI_UPDATER_PUBKEY` secret.
+4. Back up the private key offline. If it is lost, installed apps can no longer verify updates and users must reinstall manually.
+
+Releases built without these secrets have no `latest.json`, and **Check for updates** reports that no update is available.
+
+## Publishing the website
+
+`docs.yml` deploys this site to GitHub Pages on pushes to `main` that touch `docs/`, on manual runs and on `release: published`. Releases created by release-please with the default `GITHUB_TOKEN` do not trigger other workflows, so the workflow can also be called from another workflow (`workflow_call`) — for example as a job after `release` in `release-please.yml`. The download page fetches release data live in the browser, so it is current even without a redeploy.
+
+Enable Pages once under **Settings → Pages → Source: GitHub Actions**.
+
+## Release checklist
+
+1. Review and merge the release-please pull request.
+2. Watch the **Release Please** run: all desktop jobs must pass; check the Android and iOS jobs.
+3. Confirm the release lists the installers, `SHA256SUMS.txt`, `SHA256SUMS.txt.sigstore.json` and `sbom.spdx.json` (and `latest.json` if updater signing is configured).
+4. Spot-check one artifact per platform with the [verification commands](/download#verify-your-download).

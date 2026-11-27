@@ -1,15 +1,15 @@
 ---
 title: Contributing
-description: Ground rules, commit conventions, the Developer Certificate of Origin and the pull-request checklist for contributing to ssh-client.
+description: Ground rules, commit conventions, the Developer Certificate of Origin and the pull-request checklist for contributing to Vaultport.
 ---
 
 # Contributing
 
-Thanks for helping build a secure, serverless SSH client! The canonical guide is [`CONTRIBUTING.md`](https://github.com/davidniessen/ssh-client/blob/main/CONTRIBUTING.md); this page summarizes it.
+Thanks for helping build a secure, serverless SSH client! The canonical guide is [`CONTRIBUTING.md`](https://github.com/DavidNiessen/vaultport/blob/main/CONTRIBUTING.md); this page summarizes it.
 
 ## Ground rules
 
-- Follow the [Code of Conduct](https://github.com/davidniessen/ssh-client/blob/main/CODE_OF_CONDUCT.md).
+- Follow the [Code of Conduct](https://github.com/DavidNiessen/vaultport/blob/main/CODE_OF_CONDUCT.md).
 - Security issues go through the [private reporting process](/security/disclosure), never public issues.
 - Every feature must work **without a server operated by this project**.
 - Secrets (keys, passwords, tokens) must never cross the IPC boundary into the web UI.
@@ -29,7 +29,7 @@ All [quality gates](/development/building#quality-gates) must pass in CI.
 
 ## Commit messages
 
-ssh-client uses [Conventional Commits](https://www.conventionalcommits.org/). Releases, version bumps and the changelog are generated from them.
+Vaultport uses [Conventional Commits](https://www.conventionalcommits.org/). Releases, version bumps and the changelog are generated from them.
 
 ```text
 feat(sftp): resume interrupted uploads
@@ -45,7 +45,7 @@ By contributing you certify the [DCO](https://developercertificate.org/). Sign o
 
 ## Licensing
 
-ssh-client is licensed under **GPL-3.0-or-later**, and by contributing you agree that your contributions are licensed the same way. Source files carry an SPDX header:
+Vaultport is licensed under **GPL-3.0-or-later**, and by contributing you agree that your contributions are licensed the same way. Source files carry an SPDX header:
 
 ```ts
 // SPDX-License-Identifier: GPL-3.0-or-later
@@ -55,4 +55,4 @@ New dependencies must use a license compatible with GPL-3.0-or-later; `cargo den
 
 ## Governance
 
-Maintainers review and merge pull requests, triage issues, cut releases and handle security reports. Larger changes — new protocols, storage format changes, cryptography, new network-facing features — start as an Architecture Decision Record and need maintainer approval. See [`GOVERNANCE.md`](https://github.com/davidniessen/ssh-client/blob/main/GOVERNANCE.md).
+Maintainers review and merge pull requests, triage issues, cut releases and handle security reports. Larger changes — new protocols, storage format changes, cryptography, new network-facing features — start as an Architecture Decision Record and need maintainer approval. See [`GOVERNANCE.md`](https://github.com/DavidNiessen/vaultport/blob/main/GOVERNANCE.md).

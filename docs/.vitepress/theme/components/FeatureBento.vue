@@ -3,6 +3,7 @@
 import {
   AppWindow,
   ArrowLeftRight,
+  Bot,
   Braces,
   CloudDownload,
   Fingerprint,
@@ -291,7 +292,7 @@ const QR_MODULES = (() => {
 
       <!-- Session logs -->
       <FeatureCard
-        class="span-4"
+        class="span-5"
         :icon="ScrollText"
         title="Encrypted session logs"
         href="/guide/session-logs"
@@ -307,31 +308,13 @@ const QR_MODULES = (() => {
         </template>
       </FeatureCard>
 
-      <!-- Local AI -->
-      <FeatureCard
-        class="span-4"
-        :icon="Sparkles"
-        title="Optional, fully local AI"
-        href="/guide/local-ai"
-        :delay="60"
-      >
-        Off by default. Turn plain language into a shell command with a small model that runs
-        on-device. Nothing you type leaves your computer, and nothing runs without you.
-        <template #visual>
-          <div class="ai">
-            <p class="ai-q">find the 10 largest files in /var/log</p>
-            <p class="ai-a mono">du -ah /var/log | sort -rh | head -n 10</p>
-          </div>
-        </template>
-      </FeatureCard>
-
       <!-- Title bars -->
       <FeatureCard
-        class="span-4"
+        class="span-7"
         :icon="AppWindow"
         title="Feels native everywhere"
         href="/guide/"
-        :delay="120"
+        :delay="80"
       >
         A custom title bar with tabs that follows each OS: traffic lights on macOS, Fluent caption
         buttons on Windows, and your GNOME button layout on Linux.
@@ -340,6 +323,48 @@ const QR_MODULES = (() => {
             <div class="bar mac"><span /><span /><span /><em>macOS</em></div>
             <div class="bar win"><em>Windows</em><i>—</i><i>☐</i><i>✕</i></div>
             <div class="bar gnome"><em>Linux</em><b>−</b><b>□</b><b>×</b></div>
+          </div>
+        </template>
+      </FeatureCard>
+
+      <!-- AI agents -->
+      <FeatureCard
+        class="span-7"
+        :icon="Bot"
+        title="AI agents, on your terms"
+        href="/guide/ai-agents"
+      >
+        Let Claude Code, Cursor, VS Code or Codex work with your servers over MCP. Agents never see
+        your keys or passwords, and every change waits for your approval — off by default, local
+        only.
+        <template #visual>
+          <div class="approve">
+            <p class="approve-title"><Bot :size="15" /> Claude Code wants to act</p>
+            <p class="approve-sub">Run command <span class="dim">on</span> prod-eu-1</p>
+            <p class="approve-cmd mono">sudo systemctl reload nginx</p>
+            <div class="approve-actions">
+              <span class="btn-ghost">Deny</span>
+              <span class="btn-ghost">Allow for this session</span>
+              <span class="btn-solid">Allow once</span>
+            </div>
+          </div>
+        </template>
+      </FeatureCard>
+
+      <!-- Local AI -->
+      <FeatureCard
+        class="span-5"
+        :icon="Sparkles"
+        title="Optional, fully local AI"
+        href="/guide/local-ai"
+        :delay="80"
+      >
+        Off by default. Turn plain language into a shell command with a small model that runs
+        on-device. Nothing you type leaves your computer, and nothing runs without you.
+        <template #visual>
+          <div class="ai">
+            <p class="ai-q">find the 10 largest files in /var/log</p>
+            <p class="ai-a mono">du -ah /var/log | sort -rh | head -n 10</p>
           </div>
         </template>
       </FeatureCard>
@@ -907,6 +932,78 @@ const QR_MODULES = (() => {
   color: var(--sc-success);
   font-size: 9px;
   vertical-align: 2px;
+}
+
+/* AI agents */
+.approve {
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--vp-c-bg-elv);
+  box-shadow:
+    0 0 0 1px var(--sc-border-strong),
+    0 18px 36px -18px rgb(0 0 0 / 0.45);
+}
+
+.approve p {
+  margin: 0;
+}
+
+.approve-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--vp-c-text-1);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.approve-title svg {
+  color: var(--sc-accent);
+}
+
+.approve-sub {
+  margin-top: 4px !important;
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+}
+
+.approve-cmd {
+  margin-top: 10px !important;
+  padding: 9px 12px;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #0d1017;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
+  color: #7be2ee;
+  font-size: 12.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.approve-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.approve-actions span {
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.btn-ghost {
+  box-shadow: inset 0 0 0 1px var(--sc-border-strong);
+  color: var(--vp-c-text-2);
+}
+
+.btn-solid {
+  background: #6366f1;
+  color: #fff;
 }
 
 /* AI */

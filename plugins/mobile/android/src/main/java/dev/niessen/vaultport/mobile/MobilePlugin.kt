@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-package dev.niessen.sshclient.mobile
+package dev.niessen.vaultport.mobile
 
 import android.app.Activity
 import android.content.Context
@@ -57,7 +57,7 @@ class SignArgs {
 }
 
 /**
- * Native services used by the ssh-client Rust core. Nothing here is callable from the web UI:
+ * Native services used by the vaultport Rust core. Nothing here is callable from the web UI:
  * the plugin registers no Tauri commands, only mobile plugin entry points used from Rust.
  */
 @TauriPlugin
@@ -234,7 +234,7 @@ class MobilePlugin(private val activity: Activity) : Plugin(activity) {
                     },
                 )
                 val info = BiometricPrompt.PromptInfo.Builder()
-                    .setTitle("ssh-client")
+                    .setTitle("vaultport")
                     .setSubtitle(args.reason)
                     .setNegativeButtonText("Cancel")
                     .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
@@ -260,8 +260,8 @@ class MobilePlugin(private val activity: Activity) : Plugin(activity) {
 
     companion object {
         private const val ANDROID_KEYSTORE = "AndroidKeyStore"
-        private const val WRAP_ALIAS = "ssh-client-secure-store"
-        private const val PREFS = "ssh-client-secure-store"
+        private const val WRAP_ALIAS = "vaultport-secure-store"
+        private const val PREFS = "vaultport-secure-store"
         private const val AES_GCM = "AES/GCM/NoPadding"
     }
 }

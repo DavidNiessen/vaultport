@@ -4,7 +4,7 @@
 //! The vault does not expose its key directly. The sync crate obtains it through the public
 //! pairing API (wrap with an ephemeral random transfer key, unwrap again) and never uses it
 //! directly for its own ciphertexts: every container format gets its own HKDF-SHA256 subkey
-//! (`info = "ssh-client/sync/<purpose>/v1"`, `salt = vault id`), so segment, export and
+//! (`info = "vaultport/sync/<purpose>/v1"`, `salt = vault id`), so segment, export and
 //! pairing ciphertexts are domain-separated from the vault's own records and ops.
 
 use crate::error::SyncError;
@@ -24,8 +24,8 @@ pub(crate) enum Purpose {
 impl Purpose {
     fn info(self) -> &'static [u8] {
         match self {
-            Self::Segment => b"ssh-client/sync/segment/v1",
-            Self::Export => b"ssh-client/sync/export/v1",
+            Self::Segment => b"vaultport/sync/segment/v1",
+            Self::Export => b"vaultport/sync/export/v1",
         }
     }
 }

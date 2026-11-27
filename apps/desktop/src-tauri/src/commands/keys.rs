@@ -240,7 +240,7 @@ pub async fn key_enroll_fido2(
     {
         let pin = crate::net::ui_pin(Asker::Global(app.clone()));
         let options = hw_keys::fido2::EnrollOptions {
-            user_name: "ssh-client".into(),
+            user_name: "vaultport".into(),
             ..hw_keys::fido2::EnrollOptions::default()
         };
         let enrollment = hw_keys::fido2::enroll(&options, pin.as_ref())

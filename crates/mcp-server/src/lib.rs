@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! A small, dependency-light [Model Context Protocol](https://modelcontextprotocol.io) server.
 //!
-//! It implements the subset ssh-client needs to expose **tools** to AI agents:
+//! It implements the subset vaultport needs to expose **tools** to AI agents:
 //!
 //! * the lifecycle (`initialize`, `notifications/initialized`, `ping`),
 //! * `tools/list` and `tools/call`, with requests handled concurrently,

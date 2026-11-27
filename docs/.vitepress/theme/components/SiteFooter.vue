@@ -41,7 +41,7 @@ const columns = [
       <div class="brand">
         <a class="name" :href="withBase('/')">
           <img :src="withBase('/logo.svg')" alt="" width="28" height="28" />
-          ssh-client
+          Vaultport
         </a>
         <p class="tag">A secure, serverless SSH client. No account, no cloud, no telemetry.</p>
       </div>

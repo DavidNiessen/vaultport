@@ -364,7 +364,7 @@ pub async fn sync_now(
     Ok(summary)
 }
 
-/// Exports the vault to an encrypted `.sshvault` file.
+/// Exports the vault to an encrypted `.vaultport` file.
 #[tauri::command]
 #[specta::specta]
 pub async fn sync_export_file(
@@ -392,7 +392,7 @@ pub async fn sync_export_file(
     .map_err(|e| CmdError::internal(e.to_string()))?
 }
 
-/// Restores an encrypted `.sshvault` file as a new local vault named `name`, protected by
+/// Restores an encrypted `.vaultport` file as a new local vault named `name`, protected by
 /// the same passphrase as the file (it can be changed afterwards).
 #[tauri::command]
 #[specta::specta]

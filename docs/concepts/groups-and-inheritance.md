@@ -5,11 +5,11 @@ description: Nestable groups whose settings are inherited per parameter by every
 
 # Groups & inheritance
 
-ssh-client organizes hosts in **groups**. Groups can be nested (for example `Production › EU › Web`), and — unlike plain folders — they carry **settings** that apply to every host and subgroup below them.
+Vaultport organizes hosts in **groups**. Groups can be nested (for example `Production › EU › Web`), and — unlike plain folders — they carry **settings** that apply to every host and subgroup below them.
 
 ## How inheritance works
 
-Every host and every group has a _sparse_ configuration: it only stores the settings you actually changed at that level. When you connect, ssh-client resolves each setting **individually** by walking up from the host:
+Every host and every group has a _sparse_ configuration: it only stores the settings you actually changed at that level. When you connect, Vaultport resolves each setting **individually** by walking up from the host:
 
 1. If the host sets the value, use it.
 2. Otherwise use the value from the closest parent group that sets it.

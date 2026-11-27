@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Async SSH client engine for ssh-client, built on [`russh`] with pure-Rust cryptography
+//! Async SSH client engine for vaultport, built on [`russh`] with pure-Rust cryptography
 //! (`ring` + RustCrypto; no OpenSSL, no aws-lc) so it builds for desktop and mobile alike.
 //!
 //! The crate is app-agnostic: storage, prompts and hardware keys are supplied by the app

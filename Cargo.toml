@@ -8,8 +8,8 @@ edition = "2024"
 rust-version = "1.90"
 license = "GPL-3.0-or-later"
 authors = ["David Niessen"]
-repository = "https://github.com/davidniessen/ssh-client"
-homepage = "https://github.com/davidniessen/ssh-client"
+repository = "https://github.com/DavidNiessen/vaultport"
+homepage = "https://github.com/DavidNiessen/vaultport"
 publish = false
 
 [workspace.lints.rust]

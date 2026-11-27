@@ -110,7 +110,7 @@ fn create_blocking(label: &str) -> Result<PlatformKeyInfo> {
     let mut suffix = [0u8; 8];
     fill_random(&mut suffix)?;
     let name = format!(
-        "ssh-client {} {}",
+        "vaultport {} {}",
         sanitize_label(label),
         hex::encode(suffix)
     );

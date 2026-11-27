@@ -20,7 +20,7 @@ body:
     attributes:
       label: Serverless check
       options:
-        - label: This feature can work without any server operated by the ssh-client project.
+        - label: This feature can work without any server operated by the Vaultport project.
           required: true
   - type: textarea
     id: alternatives

@@ -1,11 +1,11 @@
 ---
 title: Architecture
-description: A tour of the ssh-client code base — the Tauri app, the React UI and the Rust crates for the vault, protocols, sync, importers, cloud inventory and local AI.
+description: A tour of the Vaultport code base — the Tauri app, the React UI and the Rust crates for the vault, protocols, sync, importers, cloud inventory and local AI.
 ---
 
 # Architecture
 
-ssh-client is a monorepo with a Cargo workspace (`crates/*` and the Tauri app) and a pnpm workspace (`apps/*`, `docs`).
+Vaultport is a monorepo with a Cargo workspace (`crates/*` and the Tauri app) and a pnpm workspace (`apps/*`, `docs`).
 
 ```text
 apps/desktop/            Tauri 2 app (desktop + iOS + Android)
@@ -26,7 +26,9 @@ crates/
 ├── importers            OpenSSH, known_hosts, PuTTY, MobaXterm, SecureCRT, CSV
 ├── cloud-inventory      AWS, DigitalOcean, Azure inventory
 ├── hw-keys              FIDO2 and platform-bound keys
-└── local-ai             optional on-device command generation
+├── local-ai             optional on-device command generation
+└── mcp-server           minimal Model Context Protocol server (tools over JSON-RPC)
+plugins/mobile/          native Android (Kotlin) and iOS (Swift) services
 docs/                    this website (VitePress)
 docker/test-servers/     OpenSSH servers for integration tests
 ```
@@ -90,7 +92,7 @@ Encrypted, chunked asciicast v2 recording with tamper detection, search, export,
 
 ### `sync`
 
-Serverless sync through folder, WebDAV, S3 and Git backends with encrypted, hash-chained segment files, integrity issue reporting and compaction; encrypted `.sshvault` export; QR-code pairing. See [Sync protocol](/security/sync).
+Serverless sync through folder, WebDAV, S3 and Git backends with encrypted, hash-chained segment files, integrity issue reporting and compaction; encrypted `.vaultport` export; QR-code pairing. See [Sync protocol](/security/sync).
 
 ### `importers`
 
@@ -108,12 +110,18 @@ FIDO2 `sk-*` keys over CTAP2/USB HID and platform-bound keys (Secure Enclave, Wi
 
 A pinned model catalog, a verifying resumable downloader, a llama.cpp engine behind the `llama` feature, grammar-constrained prompting and output validation. See [Local AI](/guide/local-ai).
 
+### `mcp-server`
+
+A small, dependency-light [Model Context Protocol](https://modelcontextprotocol.io) server: the lifecycle (`initialize`, `ping`), `tools/list` and `tools/call` with concurrent requests and cancellation, over newline-delimited JSON-RPC on any async stream (stdio, a Unix socket or a named pipe). The app implements the tools; see [AI agents](/guide/ai-agents).
+
 ## The app shell (`src-tauri`)
 
 - **Commands** for vault lifecycle, entities, sessions, files, forwarding, keys, logs, import, cloud, sync, AI and updates. TypeScript bindings are generated with `tauri-specta`.
 - A **session manager** runs SSH, Mosh, Telnet, serial and local PTY sessions and streams their events to the UI.
 - A **connection pool** shares SSH connections between SFTP panes and port forwards.
-- The **key store** module keeps device unlock keys in Keychain, Credential Manager or Secret Service.
+- The **key store** module keeps device unlock keys in Keychain, Credential Manager or Secret Service, and on Android through the mobile plugin.
+- The **mobile plugin** (`plugins/mobile`, Kotlin and Swift) provides the Android Keystore secure store and hardware keys, the Android keep-alive foreground service and screen privacy. It exposes no commands to the web UI.
+- The **agent** module serves AI agents over the Model Context Protocol (see [AI agents](/guide/ai-agents)); `vaultport mcp` is the stdio relay that MCP clients start.
 - **Recorders** write session logs and collect command history.
 
 ## The UI (`apps/desktop/src`)

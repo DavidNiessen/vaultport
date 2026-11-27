@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `ssh-client mcp`: the stdio MCP server that AI tools start.
+//! `vaultport mcp`: the stdio MCP server that AI tools start.
 //!
 //! It relays stdin/stdout to the running app's agent socket after presenting the access
 //! token. If the app is not running it is started (agent access must have been enabled in
@@ -27,7 +27,7 @@ pub fn run() -> i32 {
         match relay().await {
             Ok(()) => 0,
             Err(e) => {
-                eprintln!("ssh-client mcp: {e}");
+                eprintln!("vaultport mcp: {e}");
                 1
             }
         }
@@ -46,11 +46,11 @@ fn enabled(data_dir: &Path) -> bool {
 
 async fn relay() -> std::io::Result<()> {
     let Some(data_dir) = endpoint::default_data_dir() else {
-        return placeholder("ssh-client could not find its data directory.").await;
+        return placeholder("Vaultport could not find its data directory.").await;
     };
     if !enabled(&data_dir) {
         return placeholder(
-            "Agent access is turned off. Ask the user to open ssh-client → Settings → AI agents \
+            "Agent access is turned off. Ask the user to open Vaultport → Settings → AI agents \
              and turn on \"Allow AI agents\", then reconnect this MCP server.",
         )
         .await;
@@ -68,8 +68,8 @@ async fn relay() -> std::io::Result<()> {
                 }
                 if tokio::time::Instant::now() > deadline {
                     return placeholder(
-                        "ssh-client is not running and could not be started. Ask the user to \
-                         open ssh-client, then reconnect this MCP server.",
+                        "Vaultport is not running and could not be started. Ask the user to \
+                         open Vaultport, then reconnect this MCP server.",
                     )
                     .await;
                 }
@@ -151,7 +151,7 @@ fn launch_app() {
     let _ = cmd.spawn();
 }
 
-/// Serves a single `status` tool that explains why ssh-client is unavailable.
+/// Serves a single `status` tool that explains why Vaultport is unavailable.
 async fn placeholder(message: &'static str) -> std::io::Result<()> {
     struct Placeholder(&'static str);
 
@@ -159,9 +159,9 @@ async fn placeholder(message: &'static str) -> std::io::Result<()> {
     impl mcp_server::Handler for Placeholder {
         fn tools(&self) -> Vec<mcp_server::Tool> {
             vec![mcp_server::Tool {
-                name: "ssh_client_status".into(),
-                title: Some("ssh-client status".into()),
-                description: "Explains why ssh-client's tools are unavailable.".into(),
+                name: "vaultport_status".into(),
+                title: Some("Vaultport status".into()),
+                description: "Explains why Vaultport's tools are unavailable.".into(),
                 input_schema: serde_json::json!({"type": "object", "properties": {}}),
                 output_schema: None,
                 annotations: Some(mcp_server::ToolAnnotations {
@@ -182,8 +182,8 @@ async fn placeholder(message: &'static str) -> std::io::Result<()> {
     }
 
     let info = mcp_server::ServerInfo {
-        name: "ssh-client".into(),
-        title: "ssh-client (unavailable)".into(),
+        name: "vaultport".into(),
+        title: "Vaultport (unavailable)".into(),
         version: env!("CARGO_PKG_VERSION").into(),
         instructions: Some(message.into()),
     };

@@ -8,12 +8,12 @@
 #
 # The integration tests do NOT use this file; they start their own uniquely named containers
 # with the same image (see crates/ssh-engine/tests/support/mod.rs).
-name: ssh-client-test
+name: vaultport-test
 
 services:
   sshd-a:
     build: ./sshd
-    image: ssh-client-test-sshd:1
+    image: vaultport-test-sshd:1
     hostname: sshd-a
     ports:
       - '127.0.0.1:2222:22'
@@ -23,7 +23,7 @@ services:
 
   # Only reachable through sshd-a (jump host tests).
   sshd-b:
-    image: ssh-client-test-sshd:1
+    image: vaultport-test-sshd:1
     hostname: sshd-b
     depends_on: [sshd-a]
     networks: [sshnet]

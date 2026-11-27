@@ -5,7 +5,7 @@ description: Sync your encrypted vault between devices through a folder, WebDAV 
 
 # Sync, backup & pairing
 
-ssh-client has no cloud of its own. To use the same vault on several devices, you point it at **storage you already control**. That storage only ever receives encrypted, integrity-protected files.
+Vaultport has no cloud of its own. To use the same vault on several devices, you point it at **storage you already control**. That storage only ever receives encrypted, integrity-protected files.
 
 Open **Settings → Sync & backup**.
 
@@ -25,7 +25,7 @@ Credentials for the storage are stored as vault secrets that stay on this device
 Press **Sync now** to sync a target. Each sync downloads the changes of your other devices, merges them, and uploads this device's new changes. The list shows when each target last synced and any problem it found.
 
 ::: info Git
-The sync engine contains a complete Git backend (pure Rust, no `git` binary, objects on a dedicated `ssh-client-sync` branch), but the Git-over-SSH transport is not connected in the app yet. Adding a Git target works; syncing it currently reports that it is not supported. Use a folder, WebDAV or S3 meanwhile.
+The sync engine contains a complete Git backend (pure Rust, no `git` binary, objects on a dedicated `vaultport-sync` branch), but the Git-over-SSH transport is not connected in the app yet. Adding a Git target works; syncing it currently reports that it is not supported. Use a folder, WebDAV or S3 meanwhile.
 :::
 
 ## Conflict-free by design
@@ -36,7 +36,7 @@ The vault is a CRDT: every change is an operation with a timestamp from a hybrid
 
 Only immutable **segment files**, one series per device, named by vault id, device id and counter. Each segment is encrypted with XChaCha20-Poly1305 under a key derived from your vault key, and chained to the device's previous segment by a SHA-256 hash.
 
-The storage provider therefore cannot read your data, and it cannot forge, reorder or silently drop changes either: ssh-client detects and reports missing segments (gaps), rollbacks to an older state, tampered files and forks, and stops applying that device's changes until the problem is resolved. Details are in the [sync protocol](/security/sync).
+The storage provider therefore cannot read your data, and it cannot forge, reorder or silently drop changes either: Vaultport detects and reports missing segments (gaps), rollbacks to an older state, tampered files and forks, and stops applying that device's changes until the problem is resolved. Details are in the [sync protocol](/security/sync).
 
 Conflict copies made by sync tools and unexpected files are ignored.
 
@@ -63,7 +63,7 @@ Someone who sees _both_ the QR code and the pairing code can obtain your vault k
 
 ## Encrypted backups
 
-**Export** writes the whole vault to one `.sshvault` file, protected by a passphrase of its own (at least 8 characters). The file is encrypted with Argon2id and XChaCha20-Poly1305, and any modification is detected.
+**Export** writes the whole vault to one `.vaultport` file, protected by a passphrase of its own (at least 8 characters). The file is encrypted with Argon2id and XChaCha20-Poly1305, and any modification is detected.
 
 To restore, choose **Restore from backup** on the lock screen (or **Import** in Sync & backup) and pick the file. It becomes a new vault on this device, protected by the backup passphrase, which you can change afterwards. Because the file contains the vault's own operations, a restored vault is the same replica and can keep syncing with your other devices.
 

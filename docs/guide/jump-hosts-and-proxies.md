@@ -7,7 +7,7 @@ description: Reach servers through one or more bastion hosts (ProxyJump) and thr
 
 ## Jump hosts (ProxyJump)
 
-Many networks only allow SSH through a **bastion** (jump host). In the host editor, **Jump hosts → Add jump host** lets you pick one or more saved hosts; ssh-client connects through them **in order**.
+Many networks only allow SSH through a **bastion** (jump host). In the host editor, **Jump hosts → Add jump host** lets you pick one or more saved hosts; Vaultport connects through them **in order**.
 
 ```text
 you ──▶ bastion-eu ──▶ bastion-internal ──▶ 10.0.0.5
@@ -15,7 +15,7 @@ you ──▶ bastion-eu ──▶ bastion-internal ──▶ 10.0.0.5
 
 How it works:
 
-- ssh-client connects to the first hop, then opens a `direct-tcpip` channel through it to the next hop, and so on — the same mechanism as OpenSSH's `ProxyJump`. No agent or port forward is needed on the bastion.
+- Vaultport connects to the first hop, then opens a `direct-tcpip` channel through it to the next hop, and so on — the same mechanism as OpenSSH's `ProxyJump`. No agent or port forward is needed on the bastion.
 - **Every hop** gets its own host-key verification and authentication with that hop's own credentials, so each bastion can use a different user and key.
 - The connect timeout applies per hop and pauses while a prompt (for example a host-key confirmation or a security-key touch) waits for you.
 
@@ -42,4 +42,4 @@ Host names are always sent to the proxy **unresolved**, so DNS resolution happen
 
 ## Combining both
 
-Proxy and jump hosts combine: the proxy is used to reach the first hop, then the chain continues through SSH. Every host-key check and every authentication still happens end-to-end between ssh-client and each SSH server — the proxy only sees encrypted SSH traffic.
+Proxy and jump hosts combine: the proxy is used to reach the first hop, then the chain continues through SSH. Every host-key check and every authentication still happens end-to-end between Vaultport and each SSH server — the proxy only sees encrypted SSH traffic.

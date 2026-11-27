@@ -109,7 +109,7 @@ impl EditSession {
             .file_name(remote_path)
             .ok_or_else(|| FsError::UnsafePath(remote_path.to_owned()))?;
         let dir = tempfile::Builder::new()
-            .prefix("ssh-client-edit-")
+            .prefix("vaultport-edit-")
             .tempdir_in(parent)
             .map_err(|e| FsError::io(&e, &parent.to_string_lossy()))?;
         restrict(dir.path(), 0o700).await?;

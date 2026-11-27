@@ -3,7 +3,7 @@
 //!
 //! When the user turns it on (Settings → AI agents), the app listens on a local socket that
 //! only the current user can open (a `0600` Unix socket in the app data directory, or a
-//! local-only named pipe on Windows). AI tools start `ssh-client mcp`, a stdio MCP server that
+//! local-only named pipe on Windows). AI tools start `vaultport mcp`, a stdio MCP server that
 //! relays to that socket after presenting a random token stored next to it.
 //!
 //! Guarantees:
@@ -396,7 +396,7 @@ pub fn rotate_token(app: &AppHandle) -> CmdResult<()> {
 pub fn status(app: &AppHandle) -> AgentStatus {
     let state = app.state::<Arc<AgentState>>();
     let command = std::env::current_exe()
-        .map_or_else(|_| "ssh-client".to_owned(), |p| p.display().to_string());
+        .map_or_else(|_| "vaultport".to_owned(), |p| p.display().to_string());
     let (listening, error) = {
         let l = state.listener.lock();
         (

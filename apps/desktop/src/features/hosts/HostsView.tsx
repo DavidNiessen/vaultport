@@ -54,7 +54,7 @@ import {
   newHost,
 } from './model';
 
-const DRAG_HOSTS = 'application/x-ssh-client-hosts';
+const DRAG_HOSTS = 'application/x-vaultport-hosts';
 
 export function HostsView({ onImport }: { onImport: () => void }) {
   const { t } = useTranslation();

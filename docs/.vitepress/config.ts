@@ -5,14 +5,14 @@ import { generateAiFiles } from './llms';
 import { nav, sidebar } from './nav';
 import { DESCRIPTION, NAME, REPO_URL, TAGLINE } from './site';
 
-/** `/ssh-client/` on GitHub Pages; override with DOCS_BASE (e.g. `/` for a custom domain). */
+/** Served at the root of the custom domain; override with DOCS_BASE (e.g. `/vaultport/` without one). */
 function normalizeBase(value: string): string {
   const trimmed = value.trim().replace(/^\/+|\/+$/g, '');
   return trimmed ? `/${trimmed}/` : '/';
 }
 
-const base = normalizeBase(process.env.DOCS_BASE ?? '/ssh-client/');
-const origin = (process.env.DOCS_ORIGIN ?? 'https://davidniessen.github.io').replace(/\/+$/, '');
+const base = normalizeBase(process.env.DOCS_BASE ?? '/');
+const origin = (process.env.DOCS_ORIGIN ?? 'https://vaultport.niessen.dev').replace(/\/+$/, '');
 const siteUrl = `${origin}${base}`;
 const ogImage = `${siteUrl}og.png`;
 
@@ -40,6 +40,7 @@ const jsonLd = {
     'FIDO2 security keys, Secure Enclave and Windows Hello keys',
     'Post-quantum key exchange (mlkem768x25519-sha256)',
     'Optional on-device AI command generation, off by default',
+    'Local MCP server for AI agents with per-action approval, off by default',
   ],
 };
 
@@ -118,7 +119,7 @@ export default defineConfig({
     nav,
     sidebar,
     outline: { level: [2, 3], label: 'On this page' },
-    socialLinks: [{ icon: 'github', link: REPO_URL, ariaLabel: 'ssh-client on GitHub' }],
+    socialLinks: [{ icon: 'github', link: REPO_URL, ariaLabel: 'Vaultport on GitHub' }],
     editLink: {
       pattern: `${REPO_URL}/edit/main/docs/:path`,
       text: 'Edit this page on GitHub',

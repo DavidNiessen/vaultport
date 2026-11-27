@@ -1,11 +1,11 @@
 ---
 title: FAQ
-description: Frequently asked questions about ssh-client — cost, accounts, privacy, sync, recovery, security keys, platforms and contributing.
+description: Frequently asked questions about Vaultport — cost, accounts, privacy, sync, recovery, security keys, platforms and contributing.
 ---
 
 # Frequently asked questions
 
-## Is ssh-client free?
+## Is Vaultport free?
 
 Yes. It is free and open source under the GNU GPL v3.0 or later. There are no paid tiers, no accounts and no feature gates.
 
@@ -13,7 +13,7 @@ Yes. It is free and open source under the GNU GPL v3.0 or later. There are no pa
 
 No. There is nothing to sign up for. Install the app, create a vault, connect.
 
-## Does ssh-client collect any data?
+## Does Vaultport collect any data?
 
 No. There is no telemetry, analytics or crash reporting, and no server operated by the project. The app only connects to the hosts you configure, the sync storage and cloud APIs you set up, GitHub Releases when you click _Check for updates_, and Hugging Face if you choose to download the local AI model.
 
@@ -31,11 +31,11 @@ Your vault is a CRDT: every change is a small encrypted operation, and devices e
 
 ## Can my sync provider read my data?
 
-No. It only stores encrypted segment files. It also cannot forge, reorder or roll back your data unnoticed — ssh-client detects and reports such tampering.
+No. It only stores encrypted segment files. It also cannot forge, reorder or roll back your data unnoticed — Vaultport detects and reports such tampering.
 
 ## Can I use iCloud Drive, Dropbox, Google Drive or OneDrive?
 
-Yes, through the **synced folder** target: choose a folder that the provider's app keeps in sync. ssh-client ignores conflict copies those tools sometimes create.
+Yes, through the **synced folder** target: choose a folder that the provider's app keeps in sync. Vaultport ignores conflict copies those tools sometimes create.
 
 ## Is Git sync supported?
 
@@ -49,13 +49,17 @@ Yes. The hybrid `mlkem768x25519-sha256` key exchange (the OpenSSH 9.9+ default) 
 
 Yes. FIDO2 security keys work as `sk-ssh-ed25519@openssh.com` or `sk-ecdsa-sha2-nistp256@openssh.com` keys (servers need OpenSSH 8.4+). Enrollment is available in the desktop apps. See [SSH keys & hardware keys](/guide/keys).
 
-## Does ssh-client use my existing `~/.ssh/config` and keys?
+## Does Vaultport use my existing `~/.ssh/config` and keys?
 
 It does not read them live, but you can [import](/guide/importing) your config — including `Include` files, `ProxyJump`, forwards and `IdentityFile` keys — and your `known_hosts` in one step. On desktop, if a host has no keys configured, your system SSH agent is used.
 
 ## Is the AI feature sending my terminal to the cloud?
 
 No. Local AI is off by default, and when enabled it runs a small model entirely on your device. Nothing you type is sent anywhere, and generated commands are never run automatically. See [Local AI](/guide/local-ai).
+
+## Can Claude Code, Cursor or other AI agents use Vaultport?
+
+Yes, on desktop, if you allow it. Turn on **Settings → AI agents** and add Vaultport as an MCP server to your tool. Agents can list hosts and read files, and — after you approve each change in the app — run commands, write files and start tunnels. They never see your passwords or keys. Keep in mind that whatever the agent reads from your servers goes to the AI tool's model. See [AI agents (MCP)](/guide/ai-agents).
 
 ## Is autocomplete AI-based?
 
@@ -65,7 +69,7 @@ No. Autocomplete is a deterministic engine based on your history, snippets, path
 
 Windows 10 and 11 (x64, ARM64), macOS 13+ (Apple silicon and Intel), Linux (x86_64 and aarch64; AppImage, deb, rpm), iOS and iPadOS 16+, and Android 8.0+. See [Installation](/guide/installation).
 
-## Why isn't ssh-client in the App Store or Play Store?
+## Why isn't Vaultport in the App Store or Play Store?
 
 Releases are published on GitHub. On iOS you can sideload the IPA or use TestFlight when a beta is offered; on Android you install the APK directly.
 

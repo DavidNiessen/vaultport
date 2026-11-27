@@ -38,7 +38,7 @@ import { useHosts } from '@/lib/queries';
 
 import { useSftpStore, type PaneSource } from './store';
 
-const DRAG = 'application/x-ssh-client-files';
+const DRAG = 'application/x-vaultport-files';
 
 export function formatSize(n: number | null): string {
   if (n === null) return '—';

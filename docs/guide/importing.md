@@ -5,7 +5,7 @@ description: Import hosts, groups, keys, port forwards and known hosts from Open
 
 # Importing
 
-**Hosts → Import → File** brings your existing setup into the vault. Choose a file and ssh-client **detects the format** (UTF-8 or UTF-16 with BOM), shows a summary — hosts, groups, keys and known hosts imported, plus any warnings — and you are done. Imports add to your vault; within one import, hosts are de-duplicated by address, port and username.
+**Hosts → Import → File** brings your existing setup into the vault. Choose a file and Vaultport **detects the format** (UTF-8 or UTF-16 with BOM), shows a summary — hosts, groups, keys and known hosts imported, plus any warnings — and you are done. Imports add to your vault; within one import, hosts are de-duplicated by address, port and username.
 
 ## Supported formats
 

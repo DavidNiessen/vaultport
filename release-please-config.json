@@ -22,7 +22,7 @@
   ],
   "packages": {
     ".": {
-      "package-name": "ssh-client",
+      "package-name": "vaultport",
       "changelog-path": "CHANGELOG.md",
       "extra-files": [
         { "type": "toml", "path": "Cargo.toml", "jsonpath": "$.workspace.package.version" },

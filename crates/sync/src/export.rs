@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Self-contained encrypted vault files (`.sshvault`).
+//! Self-contained encrypted vault files (`.vaultport`).
 //!
 //! # Format (version 1)
 //!
 //! ```text
-//! "SSHVAULT"                  8 bytes magic
+//! "VAULTPRT"                  8 bytes magic
 //! version                     u16, big endian (= 1)
 //! header length               u32, big endian
 //! header                      JSON: { vaultId, kdf: { memoryKib, iterations, parallelism,
@@ -15,7 +15,7 @@
 //! * `wrappedKey` is the vault key wrapped (via [`Vault::export_wrapped_key`]) with
 //!   `Argon2id(passphrase, kdf)`; the KDF parameters and salt travel in the header.
 //! * The payload key is an HKDF subkey of the vault key; its AAD is
-//!   `"ssh-client/export/v1|" || SHA-256(header)`, so any change to the header (or the
+//!   `"vaultport/export/v1|" || SHA-256(header)`, so any change to the header (or the
 //!   payload) is detected.
 //! * The ops inside are the vault's own sealed ops, so importing yields exactly the same
 //!   CRDT state, and the imported replica can keep syncing with the original devices.
@@ -28,7 +28,7 @@ use std::path::Path;
 use uuid::Uuid;
 use vault::{CreateOptions, KdfParams, SealedOp, Vault, unwrap_exported_key};
 
-const MAGIC: &[u8; 8] = b"SSHVAULT";
+const MAGIC: &[u8; 8] = b"VAULTPRT";
 /// Current file format version.
 pub const EXPORT_VERSION: u16 = 1;
 const MAX_HEADER: usize = 64 * 1024;
@@ -44,7 +44,7 @@ struct Header {
 }
 
 fn payload_aad(header: &[u8]) -> Vec<u8> {
-    let mut aad = b"ssh-client/export/v1|".to_vec();
+    let mut aad = b"vaultport/export/v1|".to_vec();
     aad.extend_from_slice(&Sha256::digest(header));
     aad
 }
@@ -103,7 +103,7 @@ pub struct ExportInfo {
 }
 
 fn parse(bytes: &[u8]) -> Result<(Header, &[u8], &[u8]), SyncError> {
-    let bad = || SyncError::Format("not an ssh-client vault file".into());
+    let bad = || SyncError::Format("not a Vaultport vault file".into());
     let rest = bytes.strip_prefix(MAGIC.as_slice()).ok_or_else(bad)?;
     let (version, rest) = rest.split_at_checked(2).ok_or_else(bad)?;
     let version = u16::from_be_bytes([version[0], version[1]]);

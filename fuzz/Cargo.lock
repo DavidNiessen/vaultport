@@ -902,21 +902,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ssh-client-fuzz"
-version = "0.0.0"
-dependencies = [
- "importers",
- "libfuzzer-sys",
- "mosh-proto",
- "serde_json",
- "session-log",
- "telnet-proto",
- "term-intel",
- "uuid",
- "vault",
-]
-
-[[package]]
 name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1093,6 +1078,21 @@ dependencies = [
  "tracing",
  "uuid",
  "zeroize",
+]
+
+[[package]]
+name = "vaultport-fuzz"
+version = "0.0.0"
+dependencies = [
+ "importers",
+ "libfuzzer-sys",
+ "mosh-proto",
+ "serde_json",
+ "session-log",
+ "telnet-proto",
+ "term-intel",
+ "uuid",
+ "vault",
 ]
 
 [[package]]

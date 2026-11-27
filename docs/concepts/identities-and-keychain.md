@@ -37,14 +37,14 @@ A host or group can also carry its own username, password and key list ("Custom 
 
 ## Authentication order
 
-On connect, ssh-client tries, in this order:
+On connect, Vaultport tries, in this order:
 
 1. the keys configured for the host (directly or through its identity);
 2. on desktop, if no keys are configured: your **system SSH agent** (`$SSH_AUTH_SOCK` on macOS and Linux; the Windows OpenSSH agent pipe or Pageant on Windows);
 3. the stored password, if any;
 4. keyboard-interactive authentication, for example one-time codes.
 
-Servers that require several methods in a row (`AuthenticationMethods publickey,password`) are handled. If a password or key passphrase is needed but not stored, ssh-client asks for it in a prompt.
+Servers that require several methods in a row (`AuthenticationMethods publickey,password`) are handled. If a password or key passphrase is needed but not stored, Vaultport asks for it in a prompt.
 
 ## Where secrets go
 

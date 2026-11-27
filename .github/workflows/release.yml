@@ -5,7 +5,7 @@ name: Release
 # workflow still publishes unsigned artifacts, and every artifact is covered by SHA-256
 # checksums, a Sigstore signature, an SBOM and a GitHub build-provenance attestation.
 #
-# Secrets (all optional, see docs/development/release.md):
+# Secrets (all optional, see docs/development/releasing.md):
 #   TAURI_SIGNING_PRIVATE_KEY, TAURI_SIGNING_PRIVATE_KEY_PASSWORD, TAURI_UPDATER_PUBKEY
 #   APPLE_CERTIFICATE, APPLE_CERTIFICATE_PASSWORD, APPLE_SIGNING_IDENTITY, APPLE_ID,
 #   APPLE_PASSWORD, APPLE_TEAM_ID, IOS_PROVISIONING_PROFILE
@@ -100,9 +100,14 @@ jobs:
           PUBKEY: ${{ secrets.TAURI_UPDATER_PUBKEY }}
           KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
         run: |
-          if [ -n "$PUBKEY" ] && [ -n "$KEY" ]; then
+          # The public key is normally committed in tauri.conf.json; the secret overrides it.
+          committed=$(jq -r '.plugins.updater.pubkey // ""' apps/desktop/src-tauri/tauri.conf.json)
+          if [ -n "$KEY" ] && [ -n "$PUBKEY" ]; then
             cfg=$(jq -cn --arg pk "$PUBKEY" '{bundle:{createUpdaterArtifacts:true},plugins:{updater:{pubkey:$pk}}}')
             echo "args=--config '$cfg'" >> "$GITHUB_OUTPUT"
+            echo "json=true" >> "$GITHUB_OUTPUT"
+          elif [ -n "$KEY" ] && [ -n "$committed" ]; then
+            echo "args=--config '{\"bundle\":{\"createUpdaterArtifacts\":true}}'" >> "$GITHUB_OUTPUT"
             echo "json=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice::Updater signing key not configured; building without updater artifacts."
@@ -137,7 +142,7 @@ jobs:
           projectPath: apps/desktop
           tauriScript: pnpm tauri
           tagName: ${{ inputs.tag }}
-          releaseName: ssh-client ${{ inputs.version }}
+          releaseName: Vaultport ${{ inputs.version }}
           releaseDraft: false
           uploadUpdaterJson: ${{ steps.updater.outputs.json == 'true' }}
           updaterJsonPreferNsis: true
@@ -202,13 +207,18 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Android refuses to install an unsigned release APK, so publish nothing without a key.
+          if [ "$HAS_ANDROID_KEYSTORE" != 'true' ]; then
+            echo "::warning::ANDROID_KEYSTORE is not set; skipping the Android upload (unsigned APKs cannot be installed)."
+            exit 0
+          fi
           v="${{ inputs.version }}"
           out=apps/desktop/src-tauri/gen/android/app/build/outputs
           apk=$(find "$out/apk" -name '*universal*release*.apk' | head -1)
           aab=$(find "$out/bundle" -name '*universal*release*.aab' | head -1)
-          cp "$apk" "ssh-client_${v}_android-universal.apk"
-          cp "$aab" "ssh-client_${v}_android-universal.aab"
-          gh release upload "${{ inputs.tag }}" "ssh-client_${v}_android-universal.apk" "ssh-client_${v}_android-universal.aab" --clobber
+          cp "$apk" "vaultport_${v}_android-universal.apk"
+          cp "$aab" "vaultport_${v}_android-universal.aab"
+          gh release upload "${{ inputs.tag }}" "vaultport_${v}_android-universal.apk" "vaultport_${v}_android-universal.aab" --clobber
 
   ios:
     name: iOS
@@ -249,8 +259,8 @@ jobs:
         run: |
           pnpm tauri ios build --export-method app-store-connect -- --features metal
           ipa=$(find src-tauri/gen/apple/build -name '*.ipa' | head -1)
-          cp "$ipa" "../../ssh-client_${{ inputs.version }}_ios.ipa"
-          gh release upload "${{ inputs.tag }}" "../../ssh-client_${{ inputs.version }}_ios.ipa" --clobber
+          cp "$ipa" "../../vaultport_${{ inputs.version }}_ios.ipa"
+          gh release upload "${{ inputs.tag }}" "../../vaultport_${{ inputs.version }}_ios.ipa" --clobber
       - name: Verify the iOS build (unsigned, simulator)
         if: env.HAS_IOS_SIGNING != 'true'
         working-directory: apps/desktop

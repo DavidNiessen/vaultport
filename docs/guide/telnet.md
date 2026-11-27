@@ -5,7 +5,7 @@ description: Connect to network equipment and legacy systems over Telnet (RFC 85
 
 # Telnet
 
-Some switches, routers, embedded devices and legacy systems still only speak Telnet. ssh-client includes a Telnet client for them.
+Some switches, routers, embedded devices and legacy systems still only speak Telnet. Vaultport includes a Telnet client for them.
 
 ::: danger Telnet is unencrypted
 Everything — including your username and password — travels in clear text. Only use Telnet on trusted networks, for example a dedicated management VLAN, or through an SSH tunnel.
@@ -22,7 +22,7 @@ CSV, MobaXterm, PuTTY and SecureCRT imports create Telnet hosts automatically wh
 
 ## What is supported
 
-ssh-client implements RFC 854 with RFC 1143 "Q method" option negotiation, which cannot get stuck in negotiation loops. Supported options:
+Vaultport implements RFC 854 with RFC 1143 "Q method" option negotiation, which cannot get stuck in negotiation loops. Supported options:
 
 | Option            | RFC  | Purpose                             |
 | ----------------- | ---- | ----------------------------------- |

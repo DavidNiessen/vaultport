@@ -7437,60 +7437,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ssh-client"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "base64 0.22.1",
- "cloud-inventory",
- "core-model",
- "dirs 6.0.0",
- "futures",
- "getrandom 0.3.4",
- "hw-keys",
- "importers",
- "keyring",
- "local-ai",
- "log",
- "mcp-server",
- "mosh-proto",
- "parking_lot",
- "portable-pty",
- "qrcode",
- "serde",
- "serde_json",
- "serial-io",
- "session-log",
- "sftp-engine",
- "specta",
- "specta-typescript",
- "ssh-engine",
- "sync",
- "tauri",
- "tauri-build",
- "tauri-plugin-clipboard-manager",
- "tauri-plugin-dialog",
- "tauri-plugin-log",
- "tauri-plugin-opener",
- "tauri-plugin-os",
- "tauri-plugin-process",
- "tauri-plugin-single-instance",
- "tauri-plugin-ssh-client-mobile",
- "tauri-plugin-updater",
- "tauri-plugin-window-state",
- "tauri-specta",
- "telnet-proto",
- "term-intel",
- "thiserror 2.0.21",
- "tokio",
- "tracing",
- "uuid",
- "vault",
- "window-vibrancy",
- "zeroize",
-]
-
-[[package]]
 name = "ssh-encoding"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8136,16 +8082,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tauri-plugin-ssh-client-mobile"
-version = "0.1.0"
-dependencies = [
- "serde",
- "tauri",
- "tauri-plugin",
- "thiserror 2.0.21",
-]
-
-[[package]]
 name = "tauri-plugin-updater"
 version = "2.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8177,6 +8113,16 @@ dependencies = [
  "url",
  "windows-sys 0.61.2",
  "zip",
+]
+
+[[package]]
+name = "tauri-plugin-vaultport-mobile"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -8919,6 +8865,60 @@ dependencies = [
  "thiserror 2.0.21",
  "tracing",
  "uuid",
+ "zeroize",
+]
+
+[[package]]
+name = "vaultport"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "base64 0.22.1",
+ "cloud-inventory",
+ "core-model",
+ "dirs 6.0.0",
+ "futures",
+ "getrandom 0.3.4",
+ "hw-keys",
+ "importers",
+ "keyring",
+ "local-ai",
+ "log",
+ "mcp-server",
+ "mosh-proto",
+ "parking_lot",
+ "portable-pty",
+ "qrcode",
+ "serde",
+ "serde_json",
+ "serial-io",
+ "session-log",
+ "sftp-engine",
+ "specta",
+ "specta-typescript",
+ "ssh-engine",
+ "sync",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-clipboard-manager",
+ "tauri-plugin-dialog",
+ "tauri-plugin-log",
+ "tauri-plugin-opener",
+ "tauri-plugin-os",
+ "tauri-plugin-process",
+ "tauri-plugin-single-instance",
+ "tauri-plugin-updater",
+ "tauri-plugin-vaultport-mobile",
+ "tauri-plugin-window-state",
+ "tauri-specta",
+ "telnet-proto",
+ "term-intel",
+ "thiserror 2.0.21",
+ "tokio",
+ "tracing",
+ "uuid",
+ "vault",
+ "window-vibrancy",
  "zeroize",
 ]
 

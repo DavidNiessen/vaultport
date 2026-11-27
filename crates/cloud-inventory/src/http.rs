@@ -20,7 +20,7 @@ pub fn default_client() -> Result<reqwest::Client, InventoryError> {
         .redirect(reqwest::redirect::Policy::none())
         .connect_timeout(Duration::from_secs(15))
         .timeout(Duration::from_secs(60))
-        .user_agent(concat!("ssh-client/", env!("CARGO_PKG_VERSION")))
+        .user_agent(concat!("vaultport/", env!("CARGO_PKG_VERSION")))
         .build()
         .map_err(InventoryError::from)
 }

@@ -74,7 +74,7 @@ export function useSessions(): SessionActions {
         activate(SFTP_TAB);
       },
       openSerialPicker: () => {
-        window.dispatchEvent(new CustomEvent('ssh-client:serial-picker'));
+        window.dispatchEvent(new CustomEvent('vaultport:serial-picker'));
       },
     }),
     [openTab, activate],

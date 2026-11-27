@@ -58,7 +58,7 @@ fn http_client() -> Result<reqwest::Client, SyncError> {
         .redirect(reqwest::redirect::Policy::none())
         .connect_timeout(Duration::from_secs(15))
         .timeout(Duration::from_secs(300))
-        .user_agent(concat!("ssh-client/", env!("CARGO_PKG_VERSION")))
+        .user_agent(concat!("vaultport/", env!("CARGO_PKG_VERSION")))
         .build()
         .map_err(SyncError::from)
 }
@@ -77,7 +77,7 @@ fn status_error(name: &str, resp: &Buffered) -> SyncError {
 
 impl WebDavBackend {
     /// `base` is the collection that acts as the root, e.g.
-    /// `https://cloud.example.com/remote.php/dav/files/alice/ssh-client/`.
+    /// `https://cloud.example.com/remote.php/dav/files/alice/vaultport/`.
     pub fn new(base: &str, credentials: Option<WebDavCredentials>) -> Result<Self, SyncError> {
         let base = cloud_inventory::http::base_url(base)?;
         Ok(Self {

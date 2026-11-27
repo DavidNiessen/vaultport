@@ -434,7 +434,7 @@ pub fn connect_options(
         opts.post_quantum = plan.post_quantum;
         opts.compression = plan.compression;
         opts.agent_confirm = plan.agent_confirm;
-        opts.client_id = format!("SSH-2.0-ssh_client_{}", env!("CARGO_PKG_VERSION"));
+        opts.client_id = format!("SSH-2.0-vaultport_{}", env!("CARGO_PKG_VERSION"));
         Ok(opts)
     })
 }

@@ -3,10 +3,10 @@
 # Throw-away OpenSSH server used by the `integration` test suites of `ssh-engine` and
 # `sftp-engine`. NEVER expose it to a network you do not control: it has well-known passwords.
 #
-# Build:  docker build -t ssh-client-test-sshd:1 docker/test-servers/sshd
+# Build:  docker build -t vaultport-test-sshd:1 docker/test-servers/sshd
 # Behind a TLS-intercepting proxy, pass its CA as a build secret:
 #         docker build --secret id=ca,src=/path/to/ca.crt --network host \
-#           --build-arg https_proxy=$https_proxy -t ssh-client-test-sshd:1 docker/test-servers/sshd
+#           --build-arg https_proxy=$https_proxy -t vaultport-test-sshd:1 docker/test-servers/sshd
 ARG ALPINE_IMAGE=alpine:3.22
 FROM ${ALPINE_IMAGE}
 

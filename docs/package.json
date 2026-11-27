@@ -1,8 +1,8 @@
 {
-  "name": "@ssh-client/docs",
+  "name": "@vaultport/docs",
   "private": true,
   "version": "0.0.0",
-  "description": "Website and documentation for ssh-client",
+  "description": "Website and documentation for Vaultport",
   "license": "GPL-3.0-or-later",
   "type": "module",
   "scripts": {

@@ -417,7 +417,7 @@ function About() {
       <div className="flex items-center gap-4">
         <img src="/logo.svg" alt="" className="size-14" />
         <div>
-          <div className="text-[15px] font-semibold">ssh-client</div>
+          <div className="text-[15px] font-semibold">Vaultport</div>
           <div className="text-muted text-[13px]">
             {t('settings.version', { version: platform.version })} · {platform.kind} {platform.arch}
           </div>
@@ -450,13 +450,13 @@ function About() {
         ) : null}
         <Button
           variant="ghost"
-          onClick={() => void openUrl('https://github.com/davidniessen/ssh-client')}
+          onClick={() => void openUrl('https://github.com/DavidNiessen/vaultport')}
         >
           {t('settings.sourceCode')}
         </Button>
         <Button
           variant="ghost"
-          onClick={() => void openUrl('https://github.com/davidniessen/ssh-client/security/policy')}
+          onClick={() => void openUrl('https://github.com/DavidNiessen/vaultport/security/policy')}
         >
           {t('settings.securityPolicy')}
         </Button>

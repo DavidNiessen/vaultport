@@ -16,7 +16,7 @@
 //!
 //! ```text
 //! "SSHSEG01" || XChaCha20-Poly1305(segment key, aad, json(SegmentBody))
-//! aad = "ssh-client/segment/v1|<vault-id>|<device-hex>|<counter>|<delta|snapshot>"
+//! aad = "vaultport/segment/v1|<vault-id>|<device-hex>|<counter>|<delta|snapshot>"
 //! ```
 //!
 //! The segment key is an HKDF subkey of the vault key. The AAD is reconstructed from the
@@ -143,7 +143,7 @@ impl SegmentName {
 
     fn aad(&self, vault_id: Uuid) -> String {
         format!(
-            "ssh-client/segment/v1|{vault_id}|{}|{}|{}",
+            "vaultport/segment/v1|{vault_id}|{}|{}|{}",
             self.device,
             self.counter,
             self.kind.as_str()
