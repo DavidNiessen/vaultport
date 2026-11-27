@@ -34,7 +34,12 @@ import { AiSettingsCard } from '../ai/AiSettingsCard';
 import { SHORTCUTS } from '../palette/shortcuts';
 import { SyncSettings } from '../sync/SyncSettings';
 import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from '../terminal/settings';
-import { TERMINAL_FONTS, TERMINAL_THEMES, findTheme } from '../terminal/themes';
+import {
+  TERMINAL_FONTS,
+  TERMINAL_THEMES,
+  findTheme,
+  themePreviewBackground,
+} from '../terminal/themes';
 import { DEFAULT_LOGGING_SETTINGS, type LoggingSettings } from './logging';
 import { DEFAULT_SECURITY_SETTINGS, type SecuritySettings } from './security';
 
@@ -110,7 +115,7 @@ function ThemePreview({
     >
       <div
         className="flex h-14 flex-col justify-center gap-1 rounded-lg px-2.5"
-        style={{ background: c.background }}
+        style={{ background: themePreviewBackground(theme) }}
       >
         <div className="flex gap-1">
           <span className="h-1.5 w-6 rounded-full" style={{ background: c.green }} />

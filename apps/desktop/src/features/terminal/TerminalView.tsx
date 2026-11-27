@@ -32,7 +32,7 @@ import { attachAutocomplete, type Autocomplete, type PopupView } from './autocom
 import { AuthPromptDialog, HostKeyDialog, type PendingPrompt } from './Prompts';
 import { highlightKeywords } from './highlight';
 import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from './settings';
-import { themeColors } from './themes';
+import { minimumContrast, terminalBackdrop, themeColors } from './themes';
 import { terminalRegistry } from './registry';
 
 /** Where path suggestions can be listed for this tab. */
@@ -88,6 +88,9 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     if (!el) return;
     const term = new Terminal({
       allowProposedApi: true,
+      // The default Pulse theme has a transparent background.
+      allowTransparency: true,
+      minimumContrastRatio: minimumContrast(themeId, scheme),
       fontFamily: `'${settingsRef.current.fontFamily}', 'JetBrains Mono', monospace`,
       fontSize,
       lineHeight: 1.15,
@@ -263,6 +266,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     const term = termRef.current;
     if (!term) return;
     term.options.theme = themeColors(themeId, scheme, preset);
+    term.options.minimumContrastRatio = minimumContrast(themeId, scheme);
     term.options.fontSize = fontSize;
     term.options.fontFamily = `'${settings.fontFamily}', 'JetBrains Mono', monospace`;
     term.options.cursorBlink = settings.cursorBlink;
@@ -414,7 +418,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       .catch((e: unknown) => toast.error(errorMessage(e)));
   };
 
-  const background = themeColors(themeId, scheme, preset).background;
+  const background = terminalBackdrop(themeId, scheme, preset);
 
   return (
     <div ref={rootRef} className="relative flex h-full min-h-0 flex-col" style={{ background }}>

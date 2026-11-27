@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /**
- * Terminal color schemes. "Midnight", "Daylight", "Ember" and "Glacier" are originals of this
- * project; the others reproduce the published palettes of their (MIT-licensed) upstream themes.
+ * Terminal color schemes. "Pulse", "Midnight", "Daylight", "Ember" and "Glacier" are originals of
+ * this project; the others reproduce the published palettes of their (MIT-licensed) upstream
+ * themes. "Pulse" is the default: see themeColors.
  */
 import type { ITheme } from '@xterm/xterm';
 
@@ -54,7 +55,18 @@ function palette(
   };
 }
 
+/** The default theme: see-through and following the app's light/dark mode and colour preset. */
+export const PULSE_THEME = 'pulse';
+
 export const TERMINAL_THEMES: TerminalTheme[] = [
+  palette(
+    PULSE_THEME,
+    'Pulse',
+    true,
+    { background: '#00000000', foreground: '#e4e2ee', selection: '#ffffff30' },
+    ['#1d1b28', '#f2687a', '#5fd69b', '#f4c15c', '#7aa2ff', '#b9a3ff', '#5fd6e3', '#cbc8da'],
+    ['#55516c', '#ff8a98', '#84e6b4', '#ffd685', '#9dbaff', '#d0c2ff', '#8ae5f0', '#f6f5fb'],
+  ),
   palette(
     'midnight',
     'Midnight',
@@ -280,8 +292,10 @@ export const TERMINAL_FONTS = [
 ] as const;
 
 /**
- * The default themes follow the app: the dark one takes the window background, and both take
- * the colour preset for the cursor and selection. Other themes are used as they are.
+ * Colours for xterm. "Pulse" takes the light/dark mode and the colour preset from the app; in
+ * dark mode its background is transparent (the panel behind it is tinted, see terminalBackdrop). The old
+ * defaults "Midnight" and "Daylight" take the preset for the cursor and selection, and Midnight
+ * the window background. Other themes are used as they are.
  */
 export function themeColors(
   id: string | null | undefined,
@@ -289,8 +303,21 @@ export function themeColors(
   preset: PresetId,
 ): TerminalTheme['colors'] {
   const theme = findTheme(id, appScheme);
-  if (theme.id !== DEFAULT_DARK_THEME && theme.id !== DEFAULT_LIGHT_THEME) return theme.colors;
   const p = findPreset(preset);
+  if (theme.id === PULSE_THEME) {
+    const light = appScheme === 'light';
+    const base = light ? findTheme(DEFAULT_LIGHT_THEME, 'light').colors : theme.colors;
+    const accent = light ? p.light : p.swatch;
+    return {
+      ...base,
+      // Light mode stays solid so xterm can raise text contrast against it (see minimumContrast).
+      background: light ? '#f7f7fa' : '#00000000',
+      cursor: accent,
+      cursorAccent: light ? '#ffffff' : p.bg,
+      selectionBackground: `${accent}${light ? '30' : '45'}`,
+    };
+  }
+  if (theme.id !== DEFAULT_DARK_THEME && theme.id !== DEFAULT_LIGHT_THEME) return theme.colors;
   const accent = theme.dark ? p.swatch : p.light;
   return {
     ...theme.colors,
@@ -299,4 +326,39 @@ export function themeColors(
     cursorAccent: theme.dark ? p.bg : '#ffffff',
     selectionBackground: `${accent}${theme.dark ? '40' : '30'}`,
   };
+}
+
+/**
+ * What sits behind the terminal text. Pulse in dark mode is see-through: a darker tint over the
+ * app's living background glow. Everything else is opaque.
+ */
+export function terminalBackdrop(
+  id: string | null | undefined,
+  appScheme: 'dark' | 'light',
+  preset: PresetId,
+): string {
+  if (findTheme(id, appScheme).id === PULSE_THEME) {
+    return appScheme === 'light'
+      ? '#f7f7fa'
+      : 'color-mix(in oklab, color-mix(in oklab, var(--bg) 82%, black) 50%, transparent)';
+  }
+  return themeColors(id, appScheme, preset).background ?? 'var(--bg)';
+}
+
+/** Background for a theme's preview tile (Pulse shows the glow it sits on). */
+export function themePreviewBackground(theme: TerminalTheme): string {
+  if (theme.id !== PULSE_THEME) return theme.colors.background ?? '#000';
+  return 'radial-gradient(90% 120% at 10% 0%, rgb(var(--glow-1) / 0.45), transparent 70%), radial-gradient(80% 100% at 100% 100%, rgb(var(--glow-2) / 0.35), transparent 70%), #0d0c12';
+}
+
+/**
+ * Minimum contrast ratio xterm enforces for text against the background. Pulse asks for 4.5:1
+ * (WCAG AA): some ANSI colours, like bright yellow on a light background, are too pale otherwise.
+ * Other themes keep their colours exactly.
+ */
+export function minimumContrast(
+  id: string | null | undefined,
+  appScheme: 'dark' | 'light',
+): number {
+  return findTheme(id, appScheme).id === PULSE_THEME ? 4.5 : 1;
 }

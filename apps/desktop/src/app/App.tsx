@@ -75,6 +75,10 @@ function Root() {
   const current = status ?? initial.data ?? null;
   const unlocked = Boolean(current && !current.locked && current.active);
   useVaultEvents(unlocked);
+  const sessionActive = useApp((s) => {
+    const kind = s.tabs.find((t) => t.id === s.activeTab)?.kind;
+    return kind === 'terminal' || kind === 'workspace';
+  });
 
   const onStatus = useCallback(
     (s: VaultStatus) => {
@@ -122,7 +126,8 @@ function Root() {
 
   return (
     <>
-      <Ambient variant={unlocked ? 'top' : 'full'} />
+      {/* Terminals sit on the full glow: the default Pulse terminal theme is see-through. */}
+      <Ambient variant={unlocked && !sessionActive ? 'top' : 'full'} />
       <div className={hidden ? 'h-full blur-xl' : 'h-full'}>
         {!current ? (
           <div className="flex h-full items-center justify-center">
