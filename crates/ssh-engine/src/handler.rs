@@ -12,11 +12,12 @@ use core_model::{HostKeyPolicy, KnownHost};
 use russh::ChannelOpenFailure;
 use russh::client::{ChannelOpenHandle, DisconnectReason, Msg, Session};
 use russh::keys::PublicKeyOrCertificate;
+use std::collections::HashMap;
 use std::future::Future;
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
-use tokio::sync::watch;
+use tokio::sync::{mpsc, watch};
 
 /// First-writer-wins close reason shared by all hops of a connection.
 #[derive(Debug)]
@@ -100,9 +101,17 @@ impl Pauser {
     }
 }
 
+/// A channel opened by the server for a remote forward.
+pub(crate) struct ForwardedChannel {
+    pub channel: russh::Channel<Msg>,
+    pub originator: (String, u32),
+}
+
 /// State shared between a [`crate::Connection`] and the handler of its target hop.
 #[derive(Default)]
 pub(crate) struct Shared {
+    /// Remote forwards keyed by (bind address, bound port).
+    pub remote_forwards: Mutex<HashMap<(String, u32), mpsc::UnboundedSender<ForwardedChannel>>>,
     pub agent: Mutex<Option<Arc<ForwardAgent>>>,
     /// Set once a session channel requested agent forwarding.
     pub agent_requested: AtomicBool,
@@ -259,6 +268,43 @@ impl russh::client::Handler for ClientHandler {
         Ok(())
     }
 
+    async fn server_channel_open_forwarded_tcpip(
+        &mut self,
+        channel: russh::Channel<Msg>,
+        connected_address: &str,
+        connected_port: u32,
+        originator_address: &str,
+        originator_port: u32,
+        reply: ChannelOpenHandle,
+        _session: &mut Session,
+    ) -> Result<(), Self::Error> {
+        let tx = self.shared.remote_forwards.lock().ok().and_then(|map| {
+            map.get(&(connected_address.to_owned(), connected_port))
+                .or_else(|| {
+                    map.iter()
+                        .find(|((_, p), _)| *p == connected_port)
+                        .map(|(_, v)| v)
+                })
+                .cloned()
+        });
+        match tx {
+            Some(tx) if self.is_target => {
+                reply.accept().await;
+                let _ = tx.send(ForwardedChannel {
+                    channel,
+                    originator: (originator_address.to_owned(), originator_port),
+                });
+            }
+            _ => {
+                tracing::warn!(%connected_address, connected_port, "unexpected forwarded-tcpip channel");
+                reply
+                    .reject(ChannelOpenFailure::AdministrativelyProhibited)
+                    .await;
+            }
+        }
+        Ok(())
+    }
+
     async fn server_channel_open_agent_forward(
         &mut self,
         channel: russh::Channel<Msg>,
@@ -282,8 +328,7 @@ impl russh::client::Handler for ClientHandler {
         Ok(())
     }
 
-    // Everything else a server might try to open towards the client is refused
-    // (forwarded-tcpip is refused by the default implementation).
+    // Everything else a server might try to open towards the client is refused.
 
     async fn server_channel_open_session(
         &mut self,

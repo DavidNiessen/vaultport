@@ -45,8 +45,8 @@
 //!   `mlkem768x25519-sha256` is preferred when enabled.
 //! * A closed connection reports a [`CloseReason`] whose [`CloseCategory`] tells the app
 //!   whether reconnecting makes sense.
-//! * [`Connection`] offers shells, exec, SFTP and agent forwarding (an in-process,
-//!   read-only agent serving the target hop's keys).
+//! * [`Connection`] offers shells, exec, SFTP, local/remote/dynamic forwarding and agent
+//!   forwarding (an in-process, read-only agent serving the target hop's keys).
 //!
 //! # Secrets
 //!
@@ -61,6 +61,7 @@ mod auth;
 mod connection;
 mod error;
 pub mod fingerprint;
+pub mod forward;
 mod handler;
 mod interaction;
 pub mod keys;
@@ -73,6 +74,7 @@ mod signer;
 pub use algorithms::{AlgorithmOptions, NegotiatedAlgorithms};
 pub use connection::{Connection, HopInfo, connect};
 pub use error::{CloseCategory, CloseReason, HostKeyRejection, SshError};
+pub use forward::{ForwardHandle, ForwardKind, ForwardStatsSnapshot};
 pub use interaction::{AgentSignRequest, HostKeyDecision, Interaction, Prompt};
 pub use known_hosts::{
     HostCertificateInfo, HostKeyCheck, HostKeyStatus, KnownHosts, MemoryKnownHosts,
