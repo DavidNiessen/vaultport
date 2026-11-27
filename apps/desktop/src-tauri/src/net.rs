@@ -291,6 +291,7 @@ impl ExternalSigner for HwSigner {
 }
 
 /// PIN prompts for security keys go through the same UI prompt channel.
+#[cfg_attr(mobile, allow(dead_code))]
 struct UiPin {
     asker: Asker,
 }
@@ -496,6 +497,7 @@ impl ConnectionPool {
 }
 
 /// PIN / touch prompts for security keys.
+#[cfg_attr(mobile, allow(dead_code))]
 pub fn ui_pin(asker: Asker) -> Arc<dyn hw_keys::PinProvider> {
     Arc::new(UiPin { asker })
 }
