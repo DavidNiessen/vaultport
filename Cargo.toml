@@ -48,5 +48,6 @@ strip = "symbols"
 [profile.dev.package."*"]
 opt-level = 2
 
+
 [profile.dev.package.argon2]
 opt-level = 3
