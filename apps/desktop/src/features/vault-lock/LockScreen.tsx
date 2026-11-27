@@ -229,7 +229,7 @@ export function LockScreen({
   };
 
   return (
-    <div className="aura safe-top safe-bottom relative flex min-h-full items-center justify-center overflow-y-auto px-4 py-10">
+    <div className="safe-top safe-bottom relative flex min-h-full items-center justify-center overflow-y-auto px-4 py-10">
       <div className="relative grid w-full max-w-sm items-center gap-14 lg:max-w-[920px] lg:grid-cols-[1fr_400px]">
         <div>
           <Brand />

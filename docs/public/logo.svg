@@ -1,19 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
   <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#818CF8"/>
-      <stop offset="0.55" stop-color="#6366F1"/>
-      <stop offset="1" stop-color="#4338CA"/>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1C1930"/>
+      <stop offset="1" stop-color="#0D0C12"/>
     </linearGradient>
-    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.22"/>
-      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    <radialGradient id="glow-a" cx="0.3" cy="0.26" r="0.62">
+      <stop offset="0" stop-color="#8C78FF" stop-opacity="0.85"/>
+      <stop offset="0.55" stop-color="#6E5AF0" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#6E5AF0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glow-b" cx="0.82" cy="0.86" r="0.55">
+      <stop offset="0" stop-color="#5A8CE6" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#5A8CE6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C6BCFF"/>
+      <stop offset="1" stop-color="#9D8BFF"/>
     </linearGradient>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <clipPath id="clip"><rect x="64" y="64" width="896" height="896" rx="232"/></clipPath>
   </defs>
-  <rect x="64" y="64" width="896" height="896" rx="208" fill="url(#bg)"/>
-  <rect x="64" y="64" width="896" height="448" rx="208" fill="url(#shine)"/>
-  <path d="M292 380 L452 512 L292 644" fill="none" stroke="#FFFFFF" stroke-width="84" stroke-linecap="round" stroke-linejoin="round"/>
-  <rect x="516" y="604" width="236" height="80" rx="40" fill="#FFFFFF"/>
-  <circle cx="736" cy="340" r="44" fill="#A5F3FC"/>
+  <g clip-path="url(#clip)">
+    <rect x="64" y="64" width="896" height="896" fill="url(#tile)"/>
+    <rect x="64" y="64" width="896" height="896" fill="url(#glow-a)"/>
+    <rect x="64" y="64" width="896" height="896" fill="url(#glow-b)"/>
+    <rect x="530" y="606" width="236" height="112" rx="56" fill="#B3A6FF" opacity="0.55" filter="url(#soft)"/>
+  </g>
+  <rect x="66" y="66" width="892" height="892" rx="230" fill="none" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="4"/>
+  <path d="M286 352 L462 512 L286 672" fill="none" stroke="#FFFFFF" stroke-width="112" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="530" y="606" width="236" height="112" rx="56" fill="url(#pill)"/>
 </svg>

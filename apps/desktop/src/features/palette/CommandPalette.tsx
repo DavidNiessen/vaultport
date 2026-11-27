@@ -26,7 +26,7 @@ import { useSessions } from '../terminal/sessions';
 import { sendInput } from '../terminal/registry';
 
 const itemCls =
-  'flex h-10 cursor-default items-center gap-3 rounded-lg px-3 text-[13px] data-[selected=true]:bg-surface-3 [&>svg]:size-4 [&>svg]:text-muted';
+  'flex h-10 items-center gap-3 rounded-lg px-3 text-[13px] data-[selected=true]:bg-surface-3 [&>svg]:size-4 [&>svg]:text-muted';
 
 export function CommandPalette({ onLock, onImport }: { onLock: () => void; onImport: () => void }) {
   const { t } = useTranslation();

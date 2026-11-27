@@ -310,3 +310,102 @@ body {
 .vp-doc div[class*='language-'] {
   border-radius: 14px;
 }
+
+/* Living glow (components/LivingGlow.vue), the same motion as the app background. */
+.sc-glow {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.sc-glow-wander {
+  position: absolute;
+  animation: sc-glow-path-1 30s ease-in-out infinite;
+  will-change: transform;
+}
+.sc-glow-path-2 {
+  animation-name: sc-glow-path-2;
+}
+.sc-glow-path-3 {
+  animation-name: sc-glow-path-3;
+}
+.sc-glow-blob {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(ellipse closest-side, var(--blob-color), transparent);
+  animation: sc-glow-morph 24s linear infinite;
+  will-change: transform;
+}
+@keyframes sc-glow-path-1 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  20% {
+    transform: translate3d(9%, 8%, 0);
+  }
+  45% {
+    transform: translate3d(18%, -4%, 0);
+  }
+  70% {
+    transform: translate3d(6%, -10%, 0);
+  }
+  85% {
+    transform: translate3d(-5%, 3%, 0);
+  }
+}
+@keyframes sc-glow-path-2 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(-12%, 9%, 0);
+  }
+  50% {
+    transform: translate3d(-22%, -3%, 0);
+  }
+  75% {
+    transform: translate3d(-8%, -11%, 0);
+  }
+}
+@keyframes sc-glow-path-3 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  30% {
+    transform: translate3d(-11%, 12%, 0);
+  }
+  55% {
+    transform: translate3d(9%, 14%, 0);
+  }
+  80% {
+    transform: translate3d(13%, -6%, 0);
+  }
+}
+@keyframes sc-glow-morph {
+  0% {
+    transform: rotate(0deg) scale(1, 1);
+  }
+  25% {
+    transform: rotate(90deg) scale(1.22, 0.82);
+  }
+  50% {
+    transform: rotate(180deg) scale(0.88, 1.16);
+  }
+  75% {
+    transform: rotate(270deg) scale(1.12, 0.92);
+  }
+  100% {
+    transform: rotate(360deg) scale(1, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-glow-wander,
+  .sc-glow-blob {
+    animation: none;
+  }
+}

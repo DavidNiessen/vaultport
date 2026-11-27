@@ -72,6 +72,8 @@ export const SFTP_TAB = 'sftp';
 interface AppState {
   theme: ThemePref;
   preset: PresetId;
+  /** Slowly moving glow behind the UI (also off with prefers-reduced-motion). */
+  animatedBackground: boolean;
   section: VaultSection;
   selected: { kind: 'host' | 'group'; id: string } | null;
   currentGroup: string | null;
@@ -85,6 +87,7 @@ interface AppState {
 
   setTheme: (t: ThemePref) => void;
   setPreset: (p: PresetId) => void;
+  setAnimatedBackground: (on: boolean) => void;
   setSection: (s: VaultSection) => void;
   select: (s: AppState['selected']) => void;
   setCurrentGroup: (g: string | null) => void;
@@ -105,6 +108,7 @@ export const useApp = create<AppState>()(
     (set, get) => ({
       theme: 'system',
       preset: DEFAULT_PRESET,
+      animatedBackground: true,
       section: 'hosts',
       selected: null,
       currentGroup: null,
@@ -118,6 +122,7 @@ export const useApp = create<AppState>()(
 
       setTheme: (theme) => set({ theme }),
       setPreset: (preset) => set({ preset }),
+      setAnimatedBackground: (animatedBackground) => set({ animatedBackground }),
       setSection: (section) => set({ section, selected: null, activeTab: VAULT_TAB }),
       select: (selected) => set({ selected }),
       setCurrentGroup: (currentGroup) => set({ currentGroup, selected: null }),
@@ -177,6 +182,7 @@ export const useApp = create<AppState>()(
       partialize: (s) => ({
         theme: s.theme,
         preset: s.preset,
+        animatedBackground: s.animatedBackground,
         hostView: s.hostView,
         section: s.section,
       }),

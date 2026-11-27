@@ -457,7 +457,7 @@ function Pane({ side, other }: { side: 'left' | 'right'; other: PaneSource | nul
                 if (ev.key === 'Enter' && e.kind === 'dir') navigate(e.path);
               }}
               className={cn(
-                'grid cursor-default grid-cols-[1fr_110px_70px] items-center gap-2 rounded-lg px-2.5 py-1.5 sm:grid-cols-[1fr_150px_80px]',
+                'grid grid-cols-[1fr_110px_70px] items-center gap-2 rounded-lg px-2.5 py-1.5 sm:grid-cols-[1fr_150px_80px]',
                 selected.has(e.path) ? 'bg-accent-soft' : 'hover:bg-surface-2',
                 e.hidden && 'opacity-60',
               )}

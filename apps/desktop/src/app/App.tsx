@@ -3,6 +3,7 @@ import { QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-q
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Toaster } from 'sonner';
 
+import { Ambient } from '@/components/Ambient';
 import { TooltipProvider } from '@/components/ui/controls';
 import { Spinner } from '@/components/ui/controls';
 import { commands, onVaultLocked, type VaultStatus } from '@/lib/ipc';
@@ -18,14 +19,16 @@ import { Shell } from './Shell';
 function useDocumentTheme() {
   const theme = useApp((s) => s.theme);
   const preset = useApp((s) => s.preset);
+  const animated = useApp((s) => s.animatedBackground);
   const scheme = useColorScheme(theme);
   const platform = usePlatform();
   useEffect(() => {
     const root = document.documentElement;
     root.dataset.theme = scheme;
     root.dataset.preset = preset;
+    root.dataset.motion = animated ? 'on' : 'off';
     root.dataset.platform = platform.kind;
-  }, [scheme, preset, platform.kind]);
+  }, [scheme, preset, animated, platform.kind]);
   return scheme;
 }
 
@@ -119,6 +122,7 @@ function Root() {
 
   return (
     <>
+      <Ambient variant={unlocked ? 'top' : 'full'} />
       <div className={hidden ? 'h-full blur-xl' : 'h-full'}>
         {!current ? (
           <div className="flex h-full items-center justify-center">

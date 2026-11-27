@@ -2,12 +2,35 @@
 <script setup lang="ts">
 import { ArrowDown, BookOpen } from '@lucide/vue';
 import { withBase } from 'vitepress';
+
+import LivingGlow, { type GlowBlob } from './LivingGlow.vue';
+
+const glow: GlowBlob[] = [
+  {
+    box: { top: '-30%', left: '-10%', width: '60%', height: '120%' },
+    tone: 1,
+    strength: 1.6,
+    wander: 27,
+    morph: 21,
+    path: 1,
+    delay: -3,
+  },
+  {
+    box: { bottom: '-35%', right: '-12%', width: '60%', height: '120%' },
+    tone: 2,
+    strength: 1.35,
+    wander: 33,
+    morph: 25,
+    path: 2,
+    delay: -9,
+  },
+];
 </script>
 
 <template>
   <section v-reveal class="cta-wrap" aria-labelledby="cta-title">
     <div class="cta">
-      <div class="aura" aria-hidden="true" />
+      <LivingGlow :blobs="glow" />
       <h2 id="cta-title" class="h2 sc-display">Take back<br />your keys.</h2>
       <p class="sub">Free and open source, on every device you use.</p>
       <div class="actions">
@@ -38,24 +61,6 @@ import { withBase } from 'vitepress';
   background: var(--sc-surface);
   box-shadow: 0 0 0 1px var(--sc-border);
   text-align: center;
-}
-
-.aura {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(
-      45% 70% at 20% 25%,
-      rgb(var(--sc-glow-1) / calc(var(--sc-glow-strength) * 1.5)),
-      transparent 72%
-    ),
-    radial-gradient(
-      45% 70% at 82% 78%,
-      rgb(var(--sc-glow-2) / calc(var(--sc-glow-strength) * 1.3)),
-      transparent 72%
-    );
-  filter: blur(16px);
 }
 
 .h2 {

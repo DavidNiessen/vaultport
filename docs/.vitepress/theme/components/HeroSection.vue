@@ -7,6 +7,7 @@ import { computed } from 'vue';
 import { REPO_URL } from '../../site';
 import { OS_LABEL, usePlatform } from '../composables/platform';
 import AppWindow from './AppWindow.vue';
+import LivingGlow, { type GlowBlob } from './LivingGlow.vue';
 import GithubMark from './GithubMark.vue';
 
 const platform = usePlatform();
@@ -19,12 +20,43 @@ const download = computed(() => {
   };
 });
 
+// Lights behind the hero: two big ones in the brand colours and a smaller one between them.
+const glow: GlowBlob[] = [
+  {
+    box: { top: '-10%', left: '-12%', width: '62%', height: '80%' },
+    tone: 1,
+    strength: 1.5,
+    wander: 29,
+    morph: 22,
+    path: 1,
+    delay: -5,
+  },
+  {
+    box: { top: '0%', right: '-14%', width: '52%', height: '75%' },
+    tone: 2,
+    strength: 1.25,
+    wander: 35,
+    morph: 27,
+    path: 2,
+    delay: -12,
+  },
+  {
+    box: { top: '20%', left: '30%', width: '36%', height: '55%' },
+    tone: 1,
+    strength: 0.6,
+    wander: 41,
+    morph: 18,
+    path: 3,
+    delay: -20,
+  },
+];
+
 const platforms = ['Windows', 'macOS', 'Linux', 'Android', 'iOS & iPadOS'];
 </script>
 
 <template>
   <section class="hero" aria-labelledby="hero-title">
-    <div class="aura" aria-hidden="true" />
+    <LivingGlow class="aura" :blobs="glow" />
 
     <div class="inner">
       <a class="eyebrow" :href="withBase('/security/')">
@@ -74,23 +106,10 @@ const platforms = ['Windows', 'macOS', 'Linux', 'Android', 'iOS & iPadOS'];
 }
 
 /* A soft two-tone glow from the colour preset, no motion. */
+
 .aura {
-  position: absolute;
-  inset: -64px 0 35% 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(
-      40% 55% at 12% 15%,
-      rgb(var(--sc-glow-1) / calc(var(--sc-glow-strength) * 1.4)),
-      transparent 72%
-    ),
-    radial-gradient(
-      35% 50% at 88% 30%,
-      rgb(var(--sc-glow-2) / calc(var(--sc-glow-strength) * 1.2)),
-      transparent 72%
-    );
-  filter: blur(20px);
+  inset: -64px 0 25% 0;
+  mask-image: linear-gradient(#000 55%, transparent);
 }
 
 .inner {
