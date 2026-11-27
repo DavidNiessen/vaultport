@@ -430,7 +430,7 @@ function PhoneShell({ status, onStatus, onLock }: ShellProps) {
               }}
               className={cn(
                 'flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-medium [&>svg]:size-5',
-                phoneTab === id ? 'text-accent' : 'text-muted',
+                phoneTab === id ? 'text-accent-text' : 'text-muted',
               )}
             >
               {icon}

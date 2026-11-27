@@ -32,7 +32,7 @@ import { attachAutocomplete, type Autocomplete, type PopupView } from './autocom
 import { AuthPromptDialog, HostKeyDialog, type PendingPrompt } from './Prompts';
 import { highlightKeywords } from './highlight';
 import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from './settings';
-import { findTheme } from './themes';
+import { themeColors } from './themes';
 import { terminalRegistry } from './registry';
 
 /** Where path suggestions can be listed for this tab. */
@@ -77,6 +77,9 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   }, [settings]);
 
   const themeId = host?.config.terminal.theme ?? settings.theme;
+  const preset = useApp((s) => s.preset);
+  // Search matches use the preset colour for the current theme.
+  const match = themeColors(themeId, scheme, preset).cursor ?? '#888888';
   const fontSize = host?.config.terminal.fontSize ?? settings.fontSize;
 
   // Create the terminal once.
@@ -94,7 +97,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       drawBoldTextInBrightColors: settingsRef.current.brightBold,
       macOptionIsMeta: settingsRef.current.optionAsMeta,
       rightClickSelectsWord: false,
-      theme: findTheme(themeId, scheme).colors,
+      theme: themeColors(themeId, scheme, preset),
       linkHandler: {
         activate: (_e, uri) => {
           void confirmAndOpen(uri);
@@ -259,13 +262,13 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   useEffect(() => {
     const term = termRef.current;
     if (!term) return;
-    term.options.theme = findTheme(themeId, scheme).colors;
+    term.options.theme = themeColors(themeId, scheme, preset);
     term.options.fontSize = fontSize;
     term.options.fontFamily = `'${settings.fontFamily}', 'JetBrains Mono', monospace`;
     term.options.cursorBlink = settings.cursorBlink;
     term.options.cursorStyle = settings.cursorStyle;
     fitRef.current?.fit();
-  }, [themeId, scheme, fontSize, settings]);
+  }, [themeId, scheme, preset, fontSize, settings]);
 
   // Open (and re-open) the session.
   useEffect(() => {
@@ -386,15 +389,15 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         caseSensitive: false,
         decorations: {
           matchOverviewRuler: '#888',
-          activeMatchColorOverviewRuler: '#6366f1',
-          matchBackground: '#6366f155',
-          activeMatchBackground: '#6366f1',
+          activeMatchColorOverviewRuler: match,
+          matchBackground: `${match}55`,
+          activeMatchBackground: match,
         },
       };
       if (dir === 'next') s.findNext(searchTerm, opts);
       else s.findPrevious(searchTerm, opts);
     },
-    [searchTerm],
+    [searchTerm, match],
   );
 
   const respond = (accept: boolean, extra?: { remember?: boolean; answers?: string[] }) => {
@@ -411,7 +414,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       .catch((e: unknown) => toast.error(errorMessage(e)));
   };
 
-  const background = findTheme(themeId, scheme).colors.background;
+  const background = themeColors(themeId, scheme, preset).background;
 
   return (
     <div ref={rootRef} className="relative flex h-full min-h-0 flex-col" style={{ background }}>

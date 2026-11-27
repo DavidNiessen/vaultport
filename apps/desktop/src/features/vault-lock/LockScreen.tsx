@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /** First-run vault creation and unlock screen. */
-import { Fingerprint, KeyRound, Lock, ShieldCheck } from 'lucide-react';
+import { CloudOff, Fingerprint, KeyRound, Lock, RefreshCw, ShieldCheck } from 'lucide-react';
 import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Select, Switch } from '@/components/ui/controls';
 import { Field, Input, PasswordInput } from '@/components/ui/input';
@@ -25,13 +26,49 @@ export function passwordStrength(pw: string): number {
 function Brand() {
   const { t } = useTranslation();
   return (
-    <div className="mb-8 flex flex-col items-center text-center">
-      <img src="/logo.svg" alt="" className="mb-4 size-16" />
-      <h1 className="text-2xl font-semibold tracking-tight">vaultport</h1>
-      <p className="text-muted mt-1 text-[13px]">{t('lock.tagline')}</p>
+    <div className="mb-8 flex flex-col items-center text-center lg:items-start lg:text-left">
+      <Logo className="mb-6 size-14" />
+      <h1 className="font-display text-[44px] leading-none uppercase sm:text-[52px]">vaultport</h1>
+      <p className="text-muted mt-3 text-[15px] font-semibold">{t('lock.tagline')}</p>
     </div>
   );
 }
+
+/** Why the vault is safe, shown next to the unlock form on large screens. */
+function Promises() {
+  const { t } = useTranslation();
+  const items = [
+    {
+      icon: <ShieldCheck />,
+      title: t('lock.promiseEncryptedTitle'),
+      body: t('lock.promiseEncrypted'),
+    },
+    {
+      icon: <CloudOff />,
+      title: t('lock.promiseServerlessTitle'),
+      body: t('lock.promiseServerless'),
+    },
+    { icon: <RefreshCw />, title: t('lock.promiseSyncTitle'), body: t('lock.promiseSync') },
+  ];
+  return (
+    <ul className="hidden flex-col gap-5 lg:flex">
+      {items.map((i) => (
+        <li key={i.title} className="flex gap-3.5">
+          <span className="bg-text/[0.07] text-accent-text flex size-10 shrink-0 items-center justify-center rounded-full [&>svg]:size-[18px]">
+            {i.icon}
+          </span>
+          <span>
+            <span className="block text-[15px] font-extrabold">{i.title}</span>
+            <span className="text-muted mt-0.5 block text-[13px] leading-relaxed">{i.body}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+const panel =
+  'bg-surface-1/80 border-border-strong flex flex-col gap-4 rounded-[24px] border p-6 shadow-[var(--shadow)] backdrop-blur-xl sm:p-7';
 
 function RestoreOrPair({
   mode,
@@ -72,8 +109,8 @@ function RestoreOrPair({
     }
   };
   return (
-    <div className="bg-surface-1 flex flex-col gap-4 rounded-2xl p-6 shadow-[var(--shadow)]">
-      <h2 className="text-[15px] font-semibold">
+    <div className={panel}>
+      <h2 className="text-[18px] font-extrabold tracking-tight">
         {mode === 'restore' ? t('lock.restoreTitle') : t('lock.pairTitle')}
       </h2>
       <p className="text-muted text-[13px]">
@@ -119,7 +156,7 @@ function RestoreOrPair({
           {t('common.back')}
         </Button>
         <Button
-          variant="primary"
+          variant="accent"
           className="flex-1"
           loading={busy}
           disabled={!secret || !name || (mode === 'pair' && (!payload || !code))}
@@ -192,156 +229,170 @@ export function LockScreen({
   };
 
   return (
-    <div className="bg-bg safe-top safe-bottom flex min-h-full items-center justify-center overflow-y-auto px-4 py-10">
-      <div className="w-full max-w-sm">
-        <Brand />
-        {extra ? (
-          <RestoreOrPair mode={extra} onDone={onChange} onBack={() => setExtra(null)} />
-        ) : (
-          <form
-            onSubmit={(e) => void submit(e)}
-            className="bg-surface-1 flex flex-col gap-4 rounded-2xl p-6 shadow-[var(--shadow)]"
-          >
-            <div className="flex items-center gap-2">
-              {mode === 'create' ? (
-                <ShieldCheck className="text-accent size-5" />
-              ) : (
-                <Lock className="text-accent size-5" />
-              )}
-              <h2 className="text-[15px] font-semibold">
-                {mode === 'create' ? t('lock.createTitle') : t('lock.unlockTitle')}
-              </h2>
-            </div>
-            {mode === 'create' ? (
-              <p className="text-muted text-[13px]">{t('lock.createDescription')}</p>
-            ) : null}
-
-            {mode === 'unlock' && status.vaults.length > 1 ? (
-              <Field label={t('lock.vault')}>
-                {(id) => (
-                  <Select id={id} value={name} onChange={(e) => setName(e.target.value)}>
-                    {status.vaults.map((v) => (
-                      <option key={v} value={v}>
-                        {v}
-                      </option>
-                    ))}
-                  </Select>
-                )}
-              </Field>
-            ) : null}
-            {mode === 'create' ? (
-              <Field label={t('lock.vaultName')} hint={t('lock.vaultNameHint')}>
-                {(id) => <Input id={id} value={name} onChange={(e) => setName(e.target.value)} />}
-              </Field>
-            ) : null}
-
-            <Field
-              label={t('lock.masterPassword')}
-              error={error}
-              hint={mode === 'create' ? t('lock.passwordHint') : undefined}
-            >
-              {(id) => (
-                <PasswordInput
-                  id={id}
-                  autoFocus
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  aria-invalid={Boolean(error)}
-                />
-              )}
-            </Field>
-
-            {mode === 'create' && password.length > 0 ? (
-              <>
-                <div className="flex gap-1" aria-label={t('lock.strength', { score: strength })}>
-                  {[0, 1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className={`h-1 flex-1 rounded-full ${i < strength ? (strength < 2 ? 'bg-danger' : strength < 3 ? 'bg-warning' : 'bg-success') : 'bg-surface-4'}`}
-                    />
-                  ))}
+    <div className="aura safe-top safe-bottom relative flex min-h-full items-center justify-center overflow-y-auto px-4 py-10">
+      <div className="relative grid w-full max-w-sm items-center gap-14 lg:max-w-[920px] lg:grid-cols-[1fr_400px]">
+        <div>
+          <Brand />
+          <Promises />
+        </div>
+        <div>
+          {extra ? (
+            <RestoreOrPair mode={extra} onDone={onChange} onBack={() => setExtra(null)} />
+          ) : (
+            <form onSubmit={(e) => void submit(e)} className={panel}>
+              <div className="flex items-center gap-3">
+                <span className="bg-accent-soft text-accent-text flex size-10 items-center justify-center rounded-full">
+                  {mode === 'create' ? (
+                    <ShieldCheck className="size-[18px]" />
+                  ) : (
+                    <Lock className="size-[18px]" />
+                  )}
+                </span>
+                <div>
+                  <h2 className="text-[18px] leading-tight font-extrabold tracking-tight">
+                    {mode === 'create' ? t('lock.createTitle') : t('lock.unlockTitle')}
+                  </h2>
+                  {mode === 'unlock' ? (
+                    <p className="text-accent-text mt-0.5 font-mono text-[12px]">{name}</p>
+                  ) : null}
                 </div>
-                <Field
-                  label={t('lock.confirmPassword')}
-                  error={confirm && confirm !== password ? t('lock.mismatch') : undefined}
-                >
+              </div>
+              {mode === 'create' ? (
+                <p className="text-muted text-[13px]">{t('lock.createDescription')}</p>
+              ) : null}
+
+              {mode === 'unlock' && status.vaults.length > 1 ? (
+                <Field label={t('lock.vault')}>
                   {(id) => (
-                    <PasswordInput
-                      id={id}
-                      value={confirm}
-                      onChange={(e) => setConfirm(e.target.value)}
-                    />
+                    <Select id={id} value={name} onChange={(e) => setName(e.target.value)}>
+                      {status.vaults.map((v) => (
+                        <option key={v} value={v}>
+                          {v}
+                        </option>
+                      ))}
+                    </Select>
                   )}
                 </Field>
-              </>
-            ) : null}
+              ) : null}
+              {mode === 'create' ? (
+                <Field label={t('lock.vaultName')} hint={t('lock.vaultNameHint')}>
+                  {(id) => <Input id={id} value={name} onChange={(e) => setName(e.target.value)} />}
+                </Field>
+              ) : null}
 
-            {mode === 'create' ? (
-              <div className="flex items-start justify-between gap-3">
-                <span>
-                  <span className="block text-[13px]">{t('lock.rememberDevice')}</span>
-                  <span className="text-subtle block text-xs">
-                    {t('lock.rememberDeviceHint', { store: platformStore(platform.kind) })}
+              <Field
+                label={t('lock.masterPassword')}
+                error={error}
+                hint={mode === 'create' ? t('lock.passwordHint') : undefined}
+              >
+                {(id) => (
+                  <PasswordInput
+                    id={id}
+                    autoFocus
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    aria-invalid={Boolean(error)}
+                  />
+                )}
+              </Field>
+
+              {mode === 'create' && password.length > 0 ? (
+                <>
+                  <div className="flex gap-1" aria-label={t('lock.strength', { score: strength })}>
+                    {[0, 1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className={`h-1 flex-1 rounded-full ${i < strength ? (strength < 2 ? 'bg-danger' : strength < 3 ? 'bg-warning' : 'bg-success') : 'bg-surface-4'}`}
+                      />
+                    ))}
+                  </div>
+                  <Field
+                    label={t('lock.confirmPassword')}
+                    error={confirm && confirm !== password ? t('lock.mismatch') : undefined}
+                  >
+                    {(id) => (
+                      <PasswordInput
+                        id={id}
+                        value={confirm}
+                        onChange={(e) => setConfirm(e.target.value)}
+                      />
+                    )}
+                  </Field>
+                </>
+              ) : null}
+
+              {mode === 'create' ? (
+                <div className="flex items-start justify-between gap-3">
+                  <span>
+                    <span className="block text-[13px]">{t('lock.rememberDevice')}</span>
+                    <span className="text-subtle block text-xs">
+                      {t('lock.rememberDeviceHint', { store: platformStore(platform.kind) })}
+                    </span>
                   </span>
-                </span>
-                <Switch
-                  checked={remember}
-                  onCheckedChange={setRemember}
-                  label={t('lock.rememberDevice')}
-                />
-              </div>
-            ) : null}
+                  <Switch
+                    checked={remember}
+                    onCheckedChange={setRemember}
+                    label={t('lock.rememberDevice')}
+                  />
+                </div>
+              ) : null}
 
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              loading={busy}
-              disabled={mode === 'create' ? !canCreate : password.length === 0}
-            >
-              <KeyRound className="size-4" />
-              {mode === 'create' ? t('lock.create') : t('lock.unlock')}
-            </Button>
-
-            {mode === 'unlock' && status.hasDeviceKey ? (
-              <Button variant="ghost" onClick={() => void unlockWithDevice()} disabled={busy}>
-                <Fingerprint className="size-4" />
-                {t('lock.unlockWithDevice', { store: platformStore(platform.kind) })}
+              <Button
+                type="submit"
+                variant="accent"
+                size="lg"
+                loading={busy}
+                disabled={mode === 'create' ? !canCreate : password.length === 0}
+              >
+                <KeyRound className="size-4" />
+                {mode === 'create' ? t('lock.create') : t('lock.unlock')}
               </Button>
-            ) : null}
-          </form>
-        )}
-        <div className="mt-4 text-center">
-          <button
-            type="button"
-            className="text-muted hover:text-text text-[13px]"
-            onClick={() => {
-              setMode(mode === 'create' ? 'unlock' : 'create');
-              setError(null);
-              if (mode === 'unlock') setName('');
-            }}
-            hidden={creating}
-          >
-            {mode === 'create' ? t('lock.haveVault') : t('lock.newVault')}
-          </button>
-          <div className="mt-2 flex justify-center gap-4">
+
+              {mode === 'unlock' && status.hasDeviceKey ? (
+                <Button variant="ghost" onClick={() => void unlockWithDevice()} disabled={busy}>
+                  <Fingerprint className="size-4" />
+                  {t('lock.unlockWithDevice', { store: platformStore(platform.kind) })}
+                </Button>
+              ) : null}
+            </form>
+          )}
+          <div className="mt-5 text-center">
             <button
               type="button"
-              className="text-muted hover:text-text text-[13px]"
-              onClick={() => setExtra('restore')}
+              className="text-accent-text text-[13.5px] font-bold hover:underline"
+              onClick={() => {
+                setMode(mode === 'create' ? 'unlock' : 'create');
+                setError(null);
+                if (mode === 'unlock') setName('');
+              }}
+              hidden={creating}
             >
-              {t('lock.restore')}
+              {mode === 'create' ? t('lock.haveVault') : t('lock.newVault')}
             </button>
-            <button
-              type="button"
-              className="text-muted hover:text-text text-[13px]"
-              onClick={() => setExtra('pair')}
-            >
-              {t('lock.pairDevice')}
-            </button>
+            <div className="text-muted mt-3 flex items-center justify-center gap-3 text-[13px] font-semibold">
+              <button
+                type="button"
+                className="hover:text-text transition-colors"
+                onClick={() => setExtra('restore')}
+              >
+                {t('lock.restore')}
+              </button>
+              <span className="text-subtle" aria-hidden>
+                ·
+              </span>
+              <button
+                type="button"
+                className="hover:text-text transition-colors"
+                onClick={() => setExtra('pair')}
+              >
+                {t('lock.pairDevice')}
+              </button>
+            </div>
           </div>
+          <p className="text-subtle mt-6 text-center text-xs text-pretty lg:hidden">
+            {t('lock.serverless')}
+          </p>
         </div>
-        <p className="text-subtle mt-6 text-center text-xs">{t('lock.serverless')}</p>
       </div>
     </div>
   );

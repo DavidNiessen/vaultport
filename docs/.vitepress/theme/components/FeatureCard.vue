@@ -65,7 +65,7 @@ function track(event: PointerEvent) {
   border-radius: inherit;
   background: radial-gradient(
     420px circle at var(--mx, 50%) var(--my, 0%),
-    rgb(99 102 241 / 0.12),
+    rgb(var(--sc-accent-rgb) / 0.12),
     transparent 45%
   );
   opacity: 0;
@@ -81,7 +81,7 @@ function track(event: PointerEvent) {
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--vp-c-brand-3) 45%, var(--sc-border)),
     0 1px 0 0 rgb(255 255 255 / 0.05) inset,
-    0 24px 48px -24px rgb(99 102 241 / 0.35);
+    0 24px 48px -24px rgb(var(--sc-accent-rgb) / 0.35);
 }
 
 .visual {
@@ -100,8 +100,8 @@ function track(event: PointerEvent) {
   gap: 10px;
   margin: 0;
   color: var(--vp-c-text-1);
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 800;
   letter-spacing: -0.01em;
   line-height: 1.3;
 }
@@ -113,10 +113,10 @@ function track(event: PointerEvent) {
   flex-shrink: 0;
   width: 28px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: 999px;
   background: var(--vp-c-brand-soft);
-  box-shadow: inset 0 0 0 1px rgb(99 102 241 / 0.25);
-  color: var(--sc-accent);
+  box-shadow: inset 0 0 0 1px rgb(var(--sc-accent-rgb) / 0.25);
+  color: var(--sc-accent-text);
 }
 
 .text {

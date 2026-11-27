@@ -263,16 +263,19 @@ const published = computed(() => {
 .logo {
   display: block;
   margin: 0 auto 20px;
-  filter: drop-shadow(0 16px 32px rgb(99 102 241 / 0.45));
+  filter: drop-shadow(0 16px 32px rgb(var(--sc-accent-rgb) / 0.45));
 }
 
 .title {
   margin: 0;
   color: var(--vp-c-text-1);
   font-size: clamp(34px, 5vw, 52px);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   line-height: 1.1;
+  font-family: var(--sc-font-display);
+  font-stretch: 125%;
+  text-transform: uppercase;
 }
 
 .lead {
@@ -346,8 +349,9 @@ const published = computed(() => {
   padding: 24px 28px;
   border-radius: 20px;
   background:
-    radial-gradient(120% 140% at 0% 0%, rgb(99 102 241 / 0.18), transparent 60%), var(--sc-surface);
-  box-shadow: 0 0 0 1px rgb(99 102 241 / 0.4);
+    radial-gradient(120% 140% at 0% 0%, rgb(var(--sc-accent-rgb) / 0.18), transparent 60%),
+    var(--sc-surface);
+  box-shadow: 0 0 0 1px rgb(var(--sc-accent-rgb) / 0.4);
 }
 
 .rec-kicker {
@@ -371,20 +375,20 @@ const published = computed(() => {
   gap: 10px;
   height: 48px;
   padding: 0 22px;
-  border-radius: 12px;
+  border-radius: 999px;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 800;
   text-decoration: none;
 }
 
 .btn.primary {
-  background: #6366f1;
-  color: #fff;
-  box-shadow: 0 12px 32px -12px rgb(99 102 241 / 0.8);
+  background: var(--sc-accent);
+  color: var(--sc-accent-fg);
+  box-shadow: 0 12px 32px -12px rgb(var(--sc-accent-rgb) / 0.8);
 }
 
 .btn.primary:hover {
-  background: #5558ee;
+  background: color-mix(in srgb, var(--sc-accent) 88%, white);
 }
 
 .size {
@@ -402,7 +406,7 @@ const published = computed(() => {
   border-radius: 20px;
   background: var(--sc-surface);
   box-shadow: 0 0 0 1px var(--sc-border);
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
 }
 
 .soon > svg {
@@ -450,8 +454,8 @@ const published = computed(() => {
 .platform.current,
 .platform:target {
   box-shadow:
-    0 0 0 1px rgb(99 102 241 / 0.55),
-    0 24px 48px -28px rgb(99 102 241 / 0.6);
+    0 0 0 1px rgb(var(--sc-accent-rgb) / 0.55),
+    0 24px 48px -28px rgb(var(--sc-accent-rgb) / 0.6);
 }
 
 .p-head {
@@ -468,7 +472,7 @@ const published = computed(() => {
   height: 42px;
   border-radius: 12px;
   background: var(--vp-c-brand-soft);
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
 }
 
 .p-name {
@@ -523,7 +527,7 @@ const published = computed(() => {
 
 .a-icon {
   flex-shrink: 0;
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
 }
 
 .a-text {
@@ -606,7 +610,7 @@ const published = computed(() => {
   align-items: center;
   gap: 12px;
   margin-top: 24px;
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
   font-size: 14px;
 }
 

@@ -113,16 +113,23 @@ export function displayUser(h: Host): string | null {
   return null;
 }
 
+/** The protocol a host connects with by default. */
+export function hostProtocol(h: Host): 'ssh' | 'mosh' | 'telnet' {
+  if (h.config.mosh.enabled) return 'mosh';
+  if (h.config.telnet.enabled && h.config.ssh.enabled === false) return 'telnet';
+  return 'ssh';
+}
+
+/** `user@address[:port]`, the way the host would be typed on a command line. */
+export function hostTarget(h: Host): string {
+  const u = displayUser(h);
+  const port = h.config.ssh.port;
+  return `${u ? `${u}@` : ''}${h.address}${port && port !== 22 ? `:${String(port)}` : ''}`;
+}
+
 /** Second line of a host card: protocol, user and tags. */
 export function hostSubtitle(h: Host): string {
-  const parts: string[] = [];
-  parts.push(
-    h.config.mosh.enabled
-      ? 'mosh'
-      : h.config.telnet.enabled && h.config.ssh.enabled === false
-        ? 'telnet'
-        : 'ssh',
-  );
+  const parts: string[] = [hostProtocol(h)];
   const u = displayUser(h);
   if (u) parts.push(u);
   parts.push(...h.tags);

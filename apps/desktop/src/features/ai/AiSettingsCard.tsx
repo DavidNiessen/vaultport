@@ -55,7 +55,7 @@ export function AiSettingsCard() {
     <>
       <Card title={t('ai.title')}>
         <div className="flex gap-3">
-          <div className="bg-accent-soft text-accent flex size-10 shrink-0 items-center justify-center rounded-xl">
+          <div className="bg-accent-soft text-accent-text flex size-10 shrink-0 items-center justify-center rounded-xl">
             <Brain className="size-5" />
           </div>
           <p className="text-muted text-[13px]">{t('ai.description')}</p>

@@ -244,7 +244,11 @@
     "unfavorite": "Remove from favorites",
     "useIdentity": "Use an identity",
     "useMosh": "Use Mosh",
-    "username": "Username"
+    "username": "Username",
+    "summary": "{{hosts}} · {{groups}}",
+    "groupCount_one": "{{count}} group",
+    "groupCount_other": "{{count}} groups",
+    "layout": "Layout"
   },
   "import": {
     "addIntegration": "Add and sync",
@@ -297,6 +301,7 @@
     "imported": "Key imported",
     "install": "Install",
     "installOnHost": "Install on host…",
+    "intro": "SSH keys and identities, shared across your hosts and stored encrypted.",
     "keyCount_one": "{{count}} key",
     "keyCount_other": "{{count}} keys",
     "keyType": "Key type",
@@ -355,7 +360,13 @@
     "unlockWithDevice": "Unlock with {{store}}",
     "vault": "Vault",
     "vaultName": "Vault name",
-    "vaultNameHint": "Letters, digits, - and _"
+    "vaultNameHint": "Letters, digits, - and _",
+    "promiseEncryptedTitle": "Encrypted on your device",
+    "promiseEncrypted": "Hosts, keys and passwords are sealed with XChaCha20-Poly1305 under your master password.",
+    "promiseServerlessTitle": "No account, no servers",
+    "promiseServerless": "Nothing to sign up for and no telemetry. Vaultport never talks to a server of ours.",
+    "promiseSyncTitle": "Sync on your terms",
+    "promiseSync": "Keep devices in step through storage you already own, end-to-end encrypted."
   },
   "logs": {
     "bookmark": "Keep this log",
@@ -385,7 +396,9 @@
     "noConnections": "No open connections",
     "noConnectionsHint": "Tap a host in your vault to connect.",
     "settings": "Settings",
-    "snippets": "Snippets"
+    "snippets": "Snippets",
+    "unlocked": "Unlocked",
+    "vault": "Vault"
   },
   "palette": {
     "actions": "Actions",
@@ -397,7 +410,8 @@
     "placeholder": "Search hosts, tabs, snippets and actions…",
     "snippets": "Run snippet in current tab",
     "tabs": "Open tabs",
-    "title": "Command palette"
+    "title": "Command palette",
+    "short": "Search…"
   },
   "serial": {
     "baud": "Baud rate",
@@ -417,7 +431,6 @@
   "settings": {
     "about": "About",
     "aboutText": "A free, open-source and serverless SSH client. Your data is encrypted on your devices and only synced to storage you control.",
-    "accent": "Accent color",
     "ai": "Local AI",
     "allow": "Allow",
     "appTheme": "Theme",
@@ -446,6 +459,7 @@
     "highlightKeywords": "Highlight keywords (error, warning, IPs)",
     "importHistory": "Import remote shell history",
     "install": "Install",
+    "intro": "Preferences for this device. They are stored encrypted in your vault.",
     "language": "Language",
     "light": "Light",
     "lockOnBackground": "Lock when the app is in the background",
@@ -459,6 +473,16 @@
     "osc52": "Remote clipboard writes (OSC 52)",
     "osc52Hint": "Lets programs like tmux and vim copy to your clipboard",
     "passwordChanged": "Master password changed",
+    "preset": "Color preset",
+    "presetHint": "Sets the accent and the glow. Works with both light and dark themes.",
+    "presets": {
+      "ember": "Ember",
+      "glacier": "Glacier",
+      "iris": "Iris",
+      "mono": "Mono",
+      "moss": "Moss",
+      "rose": "Rose"
+    },
     "remoteTitles": "Let programs set the tab title",
     "removePassword": "Remove password",
     "rightClickPaste": "Right-click to paste",
@@ -560,6 +584,7 @@
     "edit": "Edit snippet",
     "empty": "No snippets",
     "emptyDescription": "Save commands you run often. Use {{example}} placeholders for variables.",
+    "intro": "Reusable commands with variables. Run them in one session or all at once.",
     "needsVariables": "This snippet has variables. Run it from the Snippets screen.",
     "new": "New snippet",
     "newPackage": "New package",

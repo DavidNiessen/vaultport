@@ -83,7 +83,7 @@ export function AgentApprovals() {
     >
       <div className="grid gap-3" data-testid="agent-approval">
         <div className="flex items-center gap-3">
-          <div className="bg-accent-soft text-accent flex size-9 shrink-0 items-center justify-center rounded-xl">
+          <div className="bg-accent-soft text-accent-text flex size-9 shrink-0 items-center justify-center rounded-xl">
             <Bot className="size-5" />
           </div>
           <div className="min-w-0">

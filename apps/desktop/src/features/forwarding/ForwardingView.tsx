@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge, Select, Switch } from '@/components/ui/controls';
 import { Field, Input } from '@/components/ui/input';
-import { EmptyState } from '@/components/ui/misc';
+import { EmptyState, PageHeader } from '@/components/ui/misc';
 import { ContextMenu, Dialog } from '@/components/ui/overlay';
 import { cn } from '@/lib/cn';
 import { EMPTY } from '@/lib/empty';
@@ -52,7 +52,7 @@ function KindCard({
         active && 'ring-accent',
       )}
     >
-      <span className="text-accent [&>svg]:size-5">{icon}</span>
+      <span className="text-accent-text [&>svg]:size-5">{icon}</span>
       <span className="text-[13px] font-medium">{title}</span>
       <span className="text-subtle text-xs">{description}</span>
     </button>
@@ -249,14 +249,18 @@ export function ForwardingView() {
   };
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-center px-4 pt-5 sm:px-6">
-        <p className="text-muted text-[13px]">{t('forwarding.description')}</p>
-        <Button variant="primary" size="sm" className="ml-auto" onClick={() => setEditing(blank())}>
-          <Plus className="size-4" />
-          <span className="font-semibold tracking-wide uppercase">{t('forwarding.new')}</span>
-        </Button>
-      </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+      <PageHeader
+        title={t('nav.forwarding')}
+        description={t('forwarding.description')}
+        className="px-4 pt-4 sm:px-8 sm:pt-7"
+        actions={
+          <Button variant="primary" onClick={() => setEditing(blank())}>
+            <Plus className="size-4" />
+            {t('forwarding.new')}
+          </Button>
+        }
+      />
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-8 sm:px-8">
         {rules.length === 0 ? (
           <EmptyState
             icon={<ArrowRightLeft />}

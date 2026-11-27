@@ -49,7 +49,7 @@ export function TerminalSidePanel({ tabId, hostId }: { tabId: string; hostId: st
             onClick={() => setPanel(x.id)}
             className={cn(
               'flex size-8 items-center justify-center rounded-lg [&>svg]:size-4',
-              panel === x.id ? 'bg-accent-soft text-accent' : 'text-muted hover:bg-surface-2',
+              panel === x.id ? 'bg-accent-soft text-accent-text' : 'text-muted hover:bg-surface-2',
             )}
           >
             {x.icon}
@@ -108,7 +108,7 @@ function SnippetList({ tabId }: { tabId: string }) {
             className="bg-surface-2 group rounded-xl p-2.5"
             onDoubleClick={() => run(s.script, true, false)}
           >
-            <div className="text-accent truncate text-[13px] font-medium">{s.label}</div>
+            <div className="text-accent-text truncate text-[13px] font-medium">{s.label}</div>
             <pre className="text-muted line-clamp-2 font-mono text-[11px] whitespace-pre-wrap">
               {s.script}
             </pre>

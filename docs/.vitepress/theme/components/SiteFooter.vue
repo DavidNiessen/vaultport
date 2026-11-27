@@ -89,8 +89,12 @@ const columns = [
   align-items: center;
   gap: 10px;
   color: var(--vp-c-text-1);
-  font-size: 17px;
-  font-weight: 700;
+  font-family: var(--sc-font-display);
+  font-size: 18px;
+  font-stretch: 125%;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   text-decoration: none;
 }
 

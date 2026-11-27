@@ -22,12 +22,12 @@ export const Switch = forwardRef<
       ref={ref}
       aria-label={label}
       className={cn(
-        'data-[state=checked]:bg-accent bg-surface-4 relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors disabled:opacity-50',
+        'data-[state=checked]:bg-accent bg-surface-4 border-border-strong relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border transition-colors duration-150 disabled:opacity-50 data-[state=checked]:border-transparent',
         className,
       )}
       {...props}
     >
-      <SwitchPrimitive.Thumb className="pointer-events-none block size-4 translate-x-0.5 rounded-full bg-white shadow transition-transform data-[state=checked]:translate-x-[18px]" />
+      <SwitchPrimitive.Thumb className="data-[state=checked]:bg-accent-fg pointer-events-none block size-[18px] translate-x-[2px] rounded-full bg-white shadow-[0_1px_3px_rgb(0_0_0/0.35)] transition-transform duration-150 data-[state=checked]:translate-x-[21px]" />
     </SwitchPrimitive.Root>
   );
 });
@@ -39,7 +39,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
         <select
           ref={ref}
           className={cn(
-            'bg-surface-3 text-text focus:border-accent h-9 w-full appearance-none rounded-[var(--radius-control)] border border-transparent pr-8 pl-3 text-sm focus:outline-none',
+            'bg-surface-3 text-text border-border-input hover:border-border-strong focus:border-accent focus:ring-accent-soft h-10 w-full cursor-pointer appearance-none rounded-[12px] border pr-9 pl-3.5 text-[13.5px] font-medium transition-[border-color,box-shadow] duration-150 focus:ring-3 focus:outline-none pointer-coarse:h-11',
             className,
           )}
           {...props}
@@ -71,7 +71,7 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={ariaLabel}
-      className={cn('bg-surface-3 inline-flex rounded-[var(--radius-control)] p-0.5', className)}
+      className={cn('bg-text/[0.07] inline-flex items-center rounded-full p-1', className)}
     >
       {options.map((o) => (
         <button
@@ -81,8 +81,8 @@ export function Segmented<T extends string>({
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            'flex h-8 items-center gap-1.5 rounded-[8px] px-3 text-[13px] font-medium transition-colors',
-            value === o.value ? 'bg-surface-1 text-text shadow-sm' : 'text-muted hover:text-text',
+            'flex h-7 items-center justify-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold transition-colors duration-150 pointer-coarse:h-10 [&>svg]:size-3.5',
+            value === o.value ? 'bg-accent text-accent-fg' : 'text-muted hover:text-text',
           )}
         >
           {o.icon}
@@ -99,20 +99,21 @@ export function Badge({
   className,
 }: {
   children: ReactNode;
-  tone?: 'neutral' | 'accent' | 'success' | 'warning' | 'danger';
+  tone?: 'neutral' | 'accent' | 'success' | 'warning' | 'danger' | 'info';
   className?: string;
 }) {
   const tones = {
-    neutral: 'bg-surface-3 text-muted',
-    accent: 'bg-accent-soft text-accent',
-    success: 'bg-success-soft text-success',
-    warning: 'bg-warning-soft text-warning',
-    danger: 'bg-danger-soft text-danger',
+    neutral: 'bg-text/[0.08] text-muted border-transparent',
+    accent: 'bg-accent-soft text-accent-text border-transparent',
+    success: 'bg-success-soft text-success border-transparent',
+    warning: 'bg-warning-soft text-warning border-transparent',
+    danger: 'bg-danger-soft text-danger border-transparent',
+    info: 'bg-info-soft text-info border-transparent',
   } as const;
   return (
     <span
       className={cn(
-        'inline-flex h-5 items-center rounded-full px-2 text-[11px] font-medium whitespace-nowrap',
+        'inline-flex h-5 items-center gap-1 rounded-[5px] border px-1.5 text-[10px] font-extrabold tracking-[0.04em] whitespace-nowrap uppercase',
         tones[tone],
         className,
       )}
@@ -124,7 +125,7 @@ export function Badge({
 
 export function Kbd({ children }: { children: ReactNode }) {
   return (
-    <kbd className="border-border-strong bg-surface-2 text-muted inline-flex h-5 min-w-5 items-center justify-center rounded-[5px] border px-1 font-sans text-[11px]">
+    <kbd className="border-border-strong bg-surface-2 text-muted inline-flex h-5 min-w-5 items-center justify-center rounded-[5px] border border-b-2 px-1 font-sans text-[11px] leading-none">
       {children}
     </kbd>
   );
@@ -146,7 +147,7 @@ export function Tooltip({
         <TooltipPrimitive.Content
           side={side}
           sideOffset={6}
-          className="bg-surface-4 text-text animate-fade-in z-50 rounded-md px-2 py-1 text-xs shadow-[var(--shadow)]"
+          className="bg-surface-4 text-text animate-fade-in z-50 rounded-lg px-2.5 py-1 text-xs font-bold shadow-[var(--shadow)]"
         >
           {content}
         </TooltipPrimitive.Content>
@@ -188,11 +189,11 @@ export function TagInput({
   };
   const listId = `tags-${ariaLabel.replace(/\s/g, '-')}`;
   return (
-    <div className="bg-surface-3 focus-within:border-accent flex min-h-9 flex-wrap items-center gap-1.5 rounded-[var(--radius-control)] border border-transparent px-2 py-1.5">
+    <div className="bg-surface-3 border-border-input focus-within:border-accent focus-within:ring-accent-soft flex min-h-10 flex-wrap items-center gap-1.5 rounded-[12px] border px-2 py-1.5 transition-[border-color,box-shadow] duration-150 focus-within:ring-3">
       {value.map((t) => (
         <span
           key={t}
-          className="bg-surface-1 text-text inline-flex h-6 items-center gap-1 rounded-full pr-1 pl-2.5 text-xs"
+          className="bg-text/[0.08] text-text inline-flex h-6 items-center gap-1 rounded-full pr-1 pl-2.5 text-xs font-bold"
         >
           {t}
           <button

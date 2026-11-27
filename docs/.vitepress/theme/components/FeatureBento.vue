@@ -65,7 +65,7 @@ const QR_MODULES = (() => {
   <section id="features" class="features" aria-labelledby="features-title">
     <header v-reveal class="head">
       <p class="kicker">Everything in one app</p>
-      <h2 id="features-title" class="h2">Built for real infrastructure work.</h2>
+      <h2 id="features-title" class="h2">Built for real infrastructure.</h2>
       <p class="sub">
         From a single Raspberry Pi to fleets behind bastions: the protocols, tunnels and tooling you
         reach for every day, with security defaults you don't have to think about.
@@ -409,34 +409,38 @@ const QR_MODULES = (() => {
 }
 
 .head {
-  max-width: 720px;
-  margin: 0 auto 48px;
-  text-align: center;
+  max-width: 820px;
+  margin: 0 0 56px;
 }
 
 .kicker {
   margin: 0;
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .h2 {
-  margin: 12px 0 0;
+  margin: 14px 0 0;
   color: var(--vp-c-text-1);
-  font-size: clamp(30px, 4.4vw, 48px);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-family: var(--sc-font-display);
+  font-size: clamp(34px, 5.4vw, 64px);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   text-wrap: balance;
 }
 
 .sub {
-  margin: 16px 0 0;
+  max-width: 640px;
+  margin: 20px 0 0;
   color: var(--vp-c-text-2);
-  font-size: 17px;
+  font-size: 18px;
+  font-weight: 500;
   line-height: 1.6;
   text-wrap: pretty;
 }
@@ -496,7 +500,7 @@ const QR_MODULES = (() => {
 
 .chip.cloud {
   background: var(--vp-c-brand-soft);
-  box-shadow: inset 0 0 0 1px rgb(99 102 241 / 0.3);
+  box-shadow: inset 0 0 0 1px rgb(var(--sc-accent-rgb) / 0.3);
   color: var(--vp-c-brand-1);
 }
 
@@ -566,7 +570,7 @@ const QR_MODULES = (() => {
   margin: 0;
   padding: 6px 16px;
   border-radius: 14px;
-  background: #0d1017;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
   font-family: var(--vp-font-family-mono);
   font-size: 12.5px;
@@ -590,7 +594,7 @@ const QR_MODULES = (() => {
 
 .spec dd {
   margin: 0;
-  color: #a5b4fc;
+  color: var(--sc-accent-text);
 }
 
 /* Jump hosts */
@@ -616,7 +620,7 @@ const QR_MODULES = (() => {
 }
 
 .hop.accent {
-  box-shadow: inset 0 0 0 1px rgb(99 102 241 / 0.5);
+  box-shadow: inset 0 0 0 1px rgb(var(--sc-accent-rgb) / 0.5);
   color: var(--vp-c-brand-1);
 }
 
@@ -728,7 +732,7 @@ const QR_MODULES = (() => {
   height: 64px;
   border-radius: 50%;
   background: var(--vp-c-brand-soft);
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
 }
 
 .ring::before,
@@ -736,7 +740,7 @@ const QR_MODULES = (() => {
   content: '';
   position: absolute;
   inset: -6px;
-  border: 1px solid rgb(99 102 241 / 0.5);
+  border: 1px solid rgb(var(--sc-accent-rgb) / 0.5);
   border-radius: 50%;
   animation: halo 2.6s var(--sc-ease) infinite;
 }
@@ -765,7 +769,7 @@ const QR_MODULES = (() => {
 .ws {
   overflow: hidden;
   border-radius: 14px;
-  background: #0d1017;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
 }
 
@@ -810,7 +814,7 @@ const QR_MODULES = (() => {
 .ws-term {
   overflow: hidden;
   padding: 14px 12px;
-  background: #0d1017;
+  background: #15141c;
   color: #d8dcea;
   font-size: 12px;
   white-space: nowrap;
@@ -832,7 +836,7 @@ const QR_MODULES = (() => {
 .ac-input {
   padding: 10px 12px;
   border-radius: 10px;
-  background: #0d1017;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
   color: #d8dcea;
   font-size: 13px;
@@ -958,7 +962,7 @@ const QR_MODULES = (() => {
 }
 
 .approve-title svg {
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
 }
 
 .approve-sub {
@@ -972,7 +976,7 @@ const QR_MODULES = (() => {
   padding: 9px 12px;
   overflow: hidden;
   border-radius: 9px;
-  background: #0d1017;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
   color: #7be2ee;
   font-size: 12.5px;
@@ -1002,8 +1006,8 @@ const QR_MODULES = (() => {
 }
 
 .btn-solid {
-  background: #6366f1;
-  color: #fff;
+  background: var(--sc-accent);
+  color: var(--sc-accent-fg);
 }
 
 /* AI */
@@ -1028,7 +1032,7 @@ const QR_MODULES = (() => {
   padding: 10px 12px;
   overflow: hidden;
   border-radius: 10px;
-  background: #0d1017;
+  background: #15141c;
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07);
   color: #7be2ee;
   font-size: 12px;
@@ -1127,7 +1131,7 @@ const QR_MODULES = (() => {
   width: 210px;
   padding: 10px;
   border-radius: 30px;
-  background: #0b0d14;
+  background: #0d0c12;
   box-shadow:
     0 0 0 1px rgb(255 255 255 / 0.12),
     0 0 0 6px #1a1e2b,
@@ -1139,7 +1143,7 @@ const QR_MODULES = (() => {
   padding: 16px 12px;
   overflow: hidden;
   border-radius: 20px 20px 6px 6px;
-  background: #0d1017;
+  background: #15141c;
   font-size: 10.5px;
   line-height: 1.75;
 }
@@ -1184,8 +1188,8 @@ const QR_MODULES = (() => {
 }
 
 .keys span.on {
-  background: #6366f1;
-  color: #fff;
+  background: var(--sc-accent);
+  color: var(--sc-accent-fg);
 }
 
 @media (max-width: 960px) {

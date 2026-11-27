@@ -254,7 +254,7 @@ export function ConfigEditor({
         )}
         <button
           type="button"
-          className="text-accent mt-4 text-[13px] font-medium"
+          className="text-accent-text mt-4 text-[13px] font-medium"
           onClick={() => setShowMore((v) => !v)}
         >
           {showMore ? t('hosts.showLess') : t('hosts.showMore')}

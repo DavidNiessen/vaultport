@@ -244,7 +244,11 @@
     "unfavorite": "Aus Favoriten entfernen",
     "useIdentity": "Identität verwenden",
     "useMosh": "Mosh verwenden",
-    "username": "Benutzername"
+    "username": "Benutzername",
+    "summary": "{{hosts}} · {{groups}}",
+    "groupCount_one": "{{count}} Gruppe",
+    "groupCount_other": "{{count}} Gruppen",
+    "layout": "Ansicht"
   },
   "import": {
     "addIntegration": "Hinzufügen und synchronisieren",
@@ -297,6 +301,7 @@
     "imported": "Schlüssel importiert",
     "install": "Installieren",
     "installOnHost": "Auf Host installieren …",
+    "intro": "SSH-Schlüssel und Identitäten, für alle Hosts nutzbar und verschlüsselt gespeichert.",
     "keyCount_one": "{{count}} Schlüssel",
     "keyCount_other": "{{count}} Schlüssel",
     "keyType": "Schlüsseltyp",
@@ -355,7 +360,13 @@
     "unlockWithDevice": "Mit {{store}} entsperren",
     "vault": "Tresor",
     "vaultName": "Name des Tresors",
-    "vaultNameHint": "Buchstaben, Ziffern, - und _"
+    "vaultNameHint": "Buchstaben, Ziffern, - und _",
+    "promiseEncryptedTitle": "Verschlüsselt auf deinem Gerät",
+    "promiseEncrypted": "Hosts, Schlüssel und Passwörter werden mit XChaCha20-Poly1305 unter deinem Master-Passwort versiegelt.",
+    "promiseServerlessTitle": "Kein Konto, keine Server",
+    "promiseServerless": "Keine Registrierung und keine Telemetrie. Vaultport spricht nie mit einem Server von uns.",
+    "promiseSyncTitle": "Synchronisation nach deinen Regeln",
+    "promiseSync": "Halte Geräte über Speicher, den du schon besitzt, auf dem gleichen Stand – Ende-zu-Ende-verschlüsselt."
   },
   "logs": {
     "bookmark": "Protokoll behalten",
@@ -385,7 +396,9 @@
     "noConnections": "Keine offenen Verbindungen",
     "noConnectionsHint": "Tippe auf einen Host in deinem Tresor, um dich zu verbinden.",
     "settings": "Einstellungen",
-    "snippets": "Snippets"
+    "snippets": "Snippets",
+    "unlocked": "Entsperrt",
+    "vault": "Tresor"
   },
   "palette": {
     "actions": "Aktionen",
@@ -397,7 +410,8 @@
     "placeholder": "Hosts, Tabs, Snippets und Aktionen suchen …",
     "snippets": "Snippet im aktuellen Tab ausführen",
     "tabs": "Offene Tabs",
-    "title": "Befehlspalette"
+    "title": "Befehlspalette",
+    "short": "Suchen …"
   },
   "serial": {
     "baud": "Baudrate",
@@ -417,7 +431,6 @@
   "settings": {
     "about": "Über",
     "aboutText": "Ein freier, quelloffener und serverloser SSH-Client. Deine Daten werden auf deinen Geräten verschlüsselt und nur mit Speicher synchronisiert, den du kontrollierst.",
-    "accent": "Akzentfarbe",
     "ai": "Lokale KI",
     "allow": "Erlauben",
     "appTheme": "Design",
@@ -446,6 +459,7 @@
     "highlightKeywords": "Schlüsselwörter hervorheben (Fehler, Warnungen, IPs)",
     "importHistory": "Shell-Verlauf des Servers importieren",
     "install": "Installieren",
+    "intro": "Einstellungen für dieses Gerät. Sie werden verschlüsselt in deinem Tresor gespeichert.",
     "language": "Sprache",
     "light": "Hell",
     "lockOnBackground": "Sperren, wenn die App im Hintergrund ist",
@@ -459,6 +473,16 @@
     "osc52": "Zwischenablage-Schreiben durch Server (OSC 52)",
     "osc52Hint": "Erlaubt Programmen wie tmux und vim, in deine Zwischenablage zu kopieren",
     "passwordChanged": "Master-Passwort geändert",
+    "preset": "Farbschema",
+    "presetHint": "Bestimmt Akzentfarbe und Leuchten. Funktioniert im hellen und dunklen Design.",
+    "presets": {
+      "ember": "Glut",
+      "glacier": "Gletscher",
+      "iris": "Iris",
+      "mono": "Mono",
+      "moss": "Moos",
+      "rose": "Rosé"
+    },
     "remoteTitles": "Programme dürfen den Tab-Titel setzen",
     "removePassword": "Passwort entfernen",
     "rightClickPaste": "Rechtsklick fügt ein",
@@ -560,6 +584,7 @@
     "edit": "Snippet bearbeiten",
     "empty": "Keine Snippets",
     "emptyDescription": "Speichere Befehle, die du oft ausführst. Nutze {{example}}-Platzhalter für Variablen.",
+    "intro": "Wiederverwendbare Befehle mit Variablen. In einer Sitzung oder in allen gleichzeitig ausführen.",
     "needsVariables": "Dieses Snippet hat Variablen. Führe es über die Snippet-Ansicht aus.",
     "new": "Neues Snippet",
     "newPackage": "Neues Paket",

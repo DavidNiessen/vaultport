@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import {
+  ArrowRight,
   ChevronDown,
   ChevronRight,
   Copy,
@@ -10,6 +11,7 @@ import {
   Pencil,
   Play,
   Plus,
+  Search,
   Server,
   SquareTerminal,
   Star,
@@ -24,8 +26,8 @@ import { useTranslation } from 'react-i18next';
 
 import { GroupIcon, OsIcon } from '@/components/OsIcon';
 import { Button } from '@/components/ui/button';
-import { Badge, Kbd } from '@/components/ui/controls';
-import { EmptyState, SectionHeader } from '@/components/ui/misc';
+import { Badge, Kbd, Segmented } from '@/components/ui/controls';
+import { EmptyState, PageHeader, SectionHeader } from '@/components/ui/misc';
 import { ContextMenu, DropdownMenu, type MenuItemDef } from '@/components/ui/overlay';
 import { cn } from '@/lib/cn';
 import { EMPTY } from '@/lib/empty';
@@ -48,7 +50,8 @@ import {
   childGroups,
   groupPath,
   hostCounts,
-  hostSubtitle,
+  hostProtocol,
+  hostTarget,
   hostsInView,
   newGroup,
   newHost,
@@ -198,177 +201,306 @@ export function HostsView({ onImport }: { onImport: () => void }) {
   };
 
   const phone = bp === 'phone';
+  const filtering = Boolean(query) || tagFilter.length > 0;
+  const quickTarget = quick
+    ? `${quick.username ? `${quick.username}@` : ''}${quick.host}${quick.port ? `:${String(quick.port)}` : ''}`
+    : '';
+
+  const toggleMulti = (id: string) =>
+    setMulti((m) => {
+      const n = new Set(m);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
+      return n;
+    });
+
+  // Tag filter and grid/list toggle: next to the search field, or below it on phones.
+  const viewControls = (
+    <div className="flex shrink-0 items-center gap-1.5">
+      <DropdownMenu
+        trigger={
+          <Button
+            size={tagFilter.length ? 'md' : 'icon'}
+            variant={tagFilter.length ? 'accent' : 'secondary'}
+            aria-label={t('hosts.filterTags')}
+            className="h-11 min-w-11"
+          >
+            <Tag className="size-4" />
+            {tagFilter.length ? tagFilter.length : null}
+          </Button>
+        }
+        items={
+          tags.length === 0
+            ? [{ label: t('hosts.noTags'), disabled: true }]
+            : [
+                ...tags.map((tag) => ({
+                  label: `${tagFilter.includes(tag) ? '✓ ' : ''}${tag}`,
+                  onSelect: () =>
+                    setTagFilter(
+                      tagFilter.includes(tag)
+                        ? tagFilter.filter((x) => x !== tag)
+                        : [...tagFilter, tag],
+                    ),
+                })),
+                { separator: true as const },
+                { label: t('hosts.clearTags'), onSelect: () => setTagFilter([]) },
+              ]
+        }
+      />
+      <Segmented
+        ariaLabel={t('hosts.layout')}
+        value={hostView}
+        onChange={setHostView}
+        options={[
+          {
+            value: 'grid',
+            label: <span className="sr-only">{t('hosts.gridView')}</span>,
+            icon: <LayoutGrid />,
+          },
+          {
+            value: 'list',
+            label: <span className="sr-only">{t('hosts.listView')}</span>,
+            icon: <List />,
+          },
+        ]}
+        className="h-11 [&_button]:h-9 [&_button]:px-3"
+      />
+    </div>
+  );
+
+  const hostCard = (h: Host) => {
+    const isSelected = selected?.id === h.id || multi.has(h.id);
+    const protocol = hostProtocol(h);
+    const grid = hostView === 'grid';
+    return (
+      <ContextMenu key={h.id} items={hostMenu(h)}>
+        <div className="group/card relative">
+          <button
+            type="button"
+            draggable
+            onDragStart={(e) => onHostDragStart(e, h)}
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey) {
+                toggleMulti(h.id);
+              } else if (phone) {
+                sessions.connectHost(h);
+              } else {
+                // Opening the inspector reflows the grid; wait until a double-click
+                // could no longer happen so the second click hits the same card.
+                if (clickTimer.current) clearTimeout(clickTimer.current);
+                clickTimer.current = setTimeout(() => {
+                  select({ kind: 'host', id: h.id });
+                }, 220);
+              }
+            }}
+            onDoubleClick={() => {
+              if (clickTimer.current) clearTimeout(clickTimer.current);
+              sessions.connectHost(h);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') sessions.connectHost(h);
+            }}
+            className={cn(
+              'bg-surface-2 border-border flex w-full items-center gap-3 border text-left transition-[background-color,border-color,box-shadow] duration-150',
+              // Hover: a soft wash of the preset colour with an accent edge.
+              'hover:border-border-strong hover:bg-[linear-gradient(90deg,var(--accent-soft),transparent_85%)] hover:shadow-[inset_3px_0_0_var(--accent)]',
+              grid
+                ? 'rounded-[var(--radius-card)] p-3.5 pr-12'
+                : 'h-14 rounded-[14px] px-3.5 pr-12',
+              isSelected && 'border-accent! ring-accent-soft ring-3',
+            )}
+          >
+            <OsIcon os={h.os} size={grid ? 'md' : 'sm'} />
+            <span className={cn('min-w-0 flex-1', !grid && 'flex items-center gap-4')}>
+              <span className={cn('flex items-center gap-1.5', !grid && 'w-56 shrink-0')}>
+                <span className="truncate text-[14px] font-extrabold">{h.label}</span>
+                {h.favorite ? (
+                  <Star
+                    className="text-warning size-3 shrink-0 fill-current"
+                    aria-label={t('hosts.favorite')}
+                  />
+                ) : null}
+              </span>
+              <span
+                className={cn(
+                  'text-muted block truncate font-mono text-[11.5px]',
+                  grid ? 'mt-0.5' : 'min-w-0 flex-1',
+                )}
+              >
+                {hostTarget(h)}
+              </span>
+              {grid ? (
+                <span className="mt-2 flex min-w-0 items-center gap-1 overflow-hidden">
+                  <ProtocolBadge protocol={protocol} />
+                  {h.tags.slice(0, 3).map((tag) => (
+                    <Badge key={tag}>{tag}</Badge>
+                  ))}
+                  {h.tags.length > 3 ? (
+                    <span className="text-subtle text-[11px]">+{h.tags.length - 3}</span>
+                  ) : null}
+                </span>
+              ) : (
+                <span className="hidden min-w-0 items-center gap-1 overflow-hidden lg:flex">
+                  {h.tags.slice(0, 3).map((tag) => (
+                    <Badge key={tag}>{tag}</Badge>
+                  ))}
+                </span>
+              )}
+            </span>
+            {!grid ? <ProtocolBadge protocol={protocol} /> : null}
+          </button>
+          {phone ? (
+            <button
+              type="button"
+              aria-label={t('common.edit')}
+              onClick={() => select({ kind: 'host', id: h.id })}
+              className="text-subtle hover:text-text absolute top-1/2 right-1 flex size-11 -translate-y-1/2 items-center justify-center"
+            >
+              <Pencil className="size-4" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              tabIndex={-1}
+              aria-label={`${t('hosts.connect')} ${h.label}`}
+              onClick={() => sessions.connectHost(h)}
+              className={cn(
+                'bg-accent text-accent-fg hover:bg-accent-hover absolute right-3.5 flex size-8 items-center justify-center rounded-full opacity-0 shadow-[0_4px_14px_-4px_var(--accent)] transition-[opacity,transform] duration-150 group-focus-within/card:opacity-100 group-hover/card:opacity-100',
+                grid ? 'top-3.5' : 'top-1/2 -translate-y-1/2',
+              )}
+            >
+              <Play className="size-3.5 fill-current" />
+            </button>
+          )}
+        </div>
+      </ContextMenu>
+    );
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="px-4 pt-4 sm:px-6 sm:pt-5">
-        <form onSubmit={onSubmit} className="relative">
-          <input
-            ref={inputRef}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('hosts.omnibox')}
-            aria-label={t('hosts.omnibox')}
-            className="bg-surface-2 text-text placeholder:text-subtle focus:border-accent h-11 w-full rounded-xl border border-transparent pr-28 pl-4 text-[14px] focus:outline-none"
-            autoCapitalize="off"
-            autoCorrect="off"
-            spellCheck={false}
+      <div className="px-4 pt-4 sm:px-8 sm:pt-7">
+        {!phone ? (
+          <PageHeader
+            title={t('hosts.hosts')}
+            description={t('hosts.summary', {
+              hosts: t('hosts.hostCount', { count: hosts.length }),
+              groups: t('hosts.groupCount', { count: groups.length }),
+            })}
+            actions={
+              <>
+                {platform.localTerminal ? (
+                  <Button
+                    variant="secondary"
+                    onClick={() => sessions.openLocal()}
+                    title={formatShortcut(platform, 'Mod+L')}
+                  >
+                    <SquareTerminal className="size-4" />
+                    {t('hosts.terminal')}
+                  </Button>
+                ) : null}
+                <Button variant="secondary" onClick={() => sessions.openSerialPicker()}>
+                  <Usb className="size-4" />
+                  {t('hosts.serial')}
+                </Button>
+                <CreateButton onHost={createHost} onGroup={createGroup} onImport={onImport} />
+              </>
+            }
           />
-          <Button
-            type="submit"
-            variant={quick ? 'primary' : 'ghost'}
-            size="sm"
-            disabled={!quick && visibleHosts.length === 0}
-            className="absolute top-1/2 right-1.5 -translate-y-1/2 font-semibold tracking-wide uppercase"
-          >
-            {t('hosts.connect')}
-          </Button>
-        </form>
+        ) : null}
+
+        <div className={cn('flex items-center gap-2', !phone && 'mt-6')}>
+          <form onSubmit={onSubmit} className="relative min-w-0 flex-1">
+            <Search className="text-subtle pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2" />
+            <input
+              ref={inputRef}
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={t('hosts.omnibox')}
+              aria-label={t('hosts.omnibox')}
+              className="bg-surface-3 border-border-input text-text placeholder:text-subtle hover:border-border-strong focus:border-accent focus:ring-accent-soft h-11 w-full rounded-full border pr-32 pl-11 text-[14px] font-semibold transition-[border-color,box-shadow] duration-150 focus:ring-3 focus:outline-none"
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+            />
+            <Button
+              type="submit"
+              variant={quick ? 'accent' : 'ghost'}
+              size="sm"
+              disabled={!quick && visibleHosts.length === 0}
+              className="absolute top-1/2 right-1.5 h-9 -translate-y-1/2"
+            >
+              {t('hosts.connect')}
+              <ArrowRight className="size-3.5" />
+            </Button>
+          </form>
+          {phone ? null : viewControls}
+        </div>
         {quick ? (
-          <p className="text-muted mt-2 text-xs">
-            {t('hosts.quickConnectHint', {
-              target: `${quick.username ? `${quick.username}@` : ''}${quick.host}${quick.port ? `:${String(quick.port)}` : ''}`,
-            })}{' '}
-            <Kbd>↵</Kbd>
+          <p className="text-muted mt-2 flex items-center gap-1.5 text-xs">
+            {t('hosts.quickConnectHint', { target: quickTarget })} <Kbd>↵</Kbd>
           </p>
         ) : null}
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <div className="flex">
-            <Button variant="primary" size="sm" onClick={createHost} className="rounded-r-none">
-              <Plus className="size-4" />
-              <span className="font-semibold tracking-wide uppercase">{t('hosts.newHost')}</span>
-            </Button>
-            <DropdownMenu
-              align="start"
-              trigger={
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="border-accent-fg/20 rounded-l-none border-l px-2"
-                  aria-label={t('hosts.moreCreate')}
-                >
-                  <ChevronDown className="size-4" />
-                </Button>
-              }
-              items={[
-                { label: t('hosts.newGroup'), icon: <FolderPlus />, onSelect: createGroup },
-                { label: t('hosts.import'), icon: <Upload />, onSelect: onImport },
-              ]}
-            />
-          </div>
-          {platform.localTerminal ? (
-            <Button
-              size="sm"
-              onClick={() => sessions.openLocal()}
-              title={formatShortcut(platform, 'Mod+L')}
-            >
-              <SquareTerminal className="size-4" />
-              <span className="font-semibold tracking-wide uppercase">{t('hosts.terminal')}</span>
-            </Button>
-          ) : null}
-          {!phone ? (
-            <Button size="sm" onClick={() => sessions.openSerialPicker()}>
-              <Usb className="size-4" />
-              <span className="font-semibold tracking-wide uppercase">{t('hosts.serial')}</span>
-            </Button>
-          ) : null}
-          <div className="ml-auto flex items-center gap-1">
-            <DropdownMenu
-              trigger={
-                <Button
-                  size="sm"
-                  variant={tagFilter.length ? 'primary' : 'ghost'}
-                  aria-label={t('hosts.filterTags')}
-                >
-                  <Tag className="size-4" />
-                  {tagFilter.length ? tagFilter.length : null}
-                </Button>
-              }
-              items={
-                tags.length === 0
-                  ? [{ label: t('hosts.noTags'), disabled: true }]
-                  : [
-                      ...tags.map((tag) => ({
-                        label: `${tagFilter.includes(tag) ? '✓ ' : ''}${tag}`,
-                        onSelect: () =>
-                          setTagFilter(
-                            tagFilter.includes(tag)
-                              ? tagFilter.filter((x) => x !== tag)
-                              : [...tagFilter, tag],
-                          ),
-                      })),
-                      { separator: true as const },
-                      { label: t('hosts.clearTags'), onSelect: () => setTagFilter([]) },
-                    ]
-              }
-            />
-            <Button
-              size="icon-sm"
-              variant="ghost"
-              aria-label={hostView === 'grid' ? t('hosts.listView') : t('hosts.gridView')}
-              onClick={() => setHostView(hostView === 'grid' ? 'list' : 'grid')}
-            >
-              {hostView === 'grid' ? (
-                <List className="size-4" />
-              ) : (
-                <LayoutGrid className="size-4" />
-              )}
-            </Button>
-          </div>
-        </div>
-
-        {path.length > 0 ? (
-          <nav
-            aria-label={t('hosts.breadcrumb')}
-            className="text-muted mt-4 flex flex-wrap items-center gap-1 text-[13px]"
-          >
-            <button
-              type="button"
-              className="hover:text-text"
-              onClick={() => setCurrentGroup(null)}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => dropOnGroup(e, null)}
-            >
-              {t('hosts.allHosts')}
-            </button>
-            {path.map((g) => (
-              <span key={g.id} className="flex items-center gap-1">
-                <ChevronRight className="size-3.5" />
+        {phone || path.length > 0 || tagFilter.length > 0 ? (
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            {phone ? (
+              <CreateButton onHost={createHost} onGroup={createGroup} onImport={onImport} />
+            ) : null}
+            {phone ? <div className="ml-auto">{viewControls}</div> : null}
+            {path.length > 0 ? (
+              <nav
+                aria-label={t('hosts.breadcrumb')}
+                className="text-muted flex min-w-0 flex-wrap items-center gap-1 text-[13px]"
+              >
                 <button
                   type="button"
-                  className={cn(
-                    'hover:text-text',
-                    g.id === currentGroup && 'text-text font-medium',
-                  )}
-                  onClick={() => setCurrentGroup(g.id)}
+                  className="hover:text-text hover:bg-text/[0.07] rounded-full px-2 py-0.5 font-semibold transition-colors"
+                  onClick={() => setCurrentGroup(null)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={(e) => dropOnGroup(e, null)}
                 >
-                  {g.label}
+                  {t('hosts.allHosts')}
                 </button>
-              </span>
-            ))}
-          </nav>
-        ) : null}
-        {tagFilter.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
+                {path.map((g) => (
+                  <span key={g.id} className="flex items-center gap-1">
+                    <ChevronRight className="text-subtle size-3.5" />
+                    <button
+                      type="button"
+                      className={cn(
+                        'hover:text-text hover:bg-surface-3 rounded-md px-1.5 py-0.5 transition-colors',
+                        g.id === currentGroup && 'text-text font-semibold',
+                      )}
+                      onClick={() => setCurrentGroup(g.id)}
+                    >
+                      {g.label}
+                    </button>
+                  </span>
+                ))}
+              </nav>
+            ) : null}
             {tagFilter.map((tag) => (
               <button
                 key={tag}
                 type="button"
+                aria-label={`${t('hosts.clearTags')}: ${tag}`}
                 onClick={() => setTagFilter(tagFilter.filter((x) => x !== tag))}
               >
-                <Badge tone="accent">{tag} ×</Badge>
+                <Badge tone="accent">
+                  <Tag className="size-3" />
+                  {tag} ×
+                </Badge>
               </button>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-2 pb-6 sm:px-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-8 sm:px-8">
         {subgroups.length > 0 && (
           <>
             <SectionHeader>{t('hosts.groups')}</SectionHeader>
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
               {subgroups.map((g) => (
                 <ContextMenu key={g.id} items={groupMenu(g)}>
                   <button
@@ -378,26 +510,25 @@ export function HostsView({ onImport }: { onImport: () => void }) {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => dropOnGroup(e, g.id)}
                     className={cn(
-                      'bg-surface-2 hover:bg-surface-3 flex h-16 items-center gap-3 rounded-[var(--radius-card)] px-3.5 text-left ring-2 ring-transparent transition',
-                      selected?.id === g.id && 'ring-accent',
+                      'bg-surface-2 border-border hover:border-border-strong hover:bg-text/[0.04] group flex h-16 items-center gap-3 rounded-[var(--radius-card)] border px-3.5 text-left transition-[background-color,border-color,box-shadow] duration-150',
+                      selected?.id === g.id && 'border-accent! ring-accent-soft ring-3',
                     )}
                   >
                     <GroupIcon />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-medium">{g.label}</span>
-                      <span className="text-subtle block text-xs">
+                      <span className="block truncate text-[14px] font-extrabold">{g.label}</span>
+                      <span className="text-muted block text-xs">
                         {t('hosts.hostCount', { count: counts.get(g.id) ?? 0 })}
                       </span>
                     </span>
-                    {phone ? (
-                      <ChevronRight
-                        className="text-subtle size-4"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentGroup(g.id);
-                        }}
-                      />
-                    ) : null}
+                    <ChevronRight
+                      className="text-subtle size-4 transition-transform duration-150 group-hover:translate-x-0.5"
+                      aria-label={phone ? t('hosts.openGroup') : undefined}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCurrentGroup(g.id);
+                      }}
+                    />
                   </button>
                 </ContextMenu>
               ))}
@@ -412,26 +543,28 @@ export function HostsView({ onImport }: { onImport: () => void }) {
                 {t('hosts.selected', { count: multi.size })}{' '}
                 <button
                   type="button"
-                  className="text-accent ml-2"
+                  className="text-accent-text ml-2 font-medium"
                   onClick={() => setMulti(new Set())}
                 >
                   {t('common.clear')}
                 </button>
               </span>
-            ) : null
+            ) : (
+              <span className="text-subtle font-mono text-[11px]">{visibleHosts.length}</span>
+            )
           }
         >
           {t('hosts.hosts')}
         </SectionHeader>
         {visibleHosts.length === 0 ? (
           <EmptyState
-            icon={<Server />}
-            title={query || tagFilter.length ? t('hosts.noMatches') : t('hosts.emptyTitle')}
-            description={query || tagFilter.length ? undefined : t('hosts.emptyDescription')}
+            icon={filtering ? <Search /> : <Server />}
+            title={filtering ? t('hosts.noMatches') : t('hosts.emptyTitle')}
+            description={filtering ? undefined : t('hosts.emptyDescription')}
             action={
-              query || tagFilter.length ? undefined : (
+              filtering ? undefined : (
                 <div className="flex gap-2">
-                  <Button variant="primary" onClick={createHost}>
+                  <Button variant="accent" onClick={createHost}>
                     <Plus className="size-4" />
                     {t('hosts.newHost')}
                   </Button>
@@ -447,81 +580,59 @@ export function HostsView({ onImport }: { onImport: () => void }) {
           <div
             className={cn(
               hostView === 'grid'
-                ? 'grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
-                : 'flex flex-col gap-1',
+                ? 'grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4'
+                : 'flex flex-col gap-1.5',
             )}
           >
-            {visibleHosts.map((h) => (
-              <ContextMenu key={h.id} items={hostMenu(h)}>
-                <div className="relative">
-                  <button
-                    type="button"
-                    draggable
-                    onDragStart={(e) => onHostDragStart(e, h)}
-                    onClick={(e) => {
-                      if (e.metaKey || e.ctrlKey || e.shiftKey) {
-                        setMulti((m) => {
-                          const n = new Set(m);
-                          if (n.has(h.id)) n.delete(h.id);
-                          else n.add(h.id);
-                          return n;
-                        });
-                      } else if (phone) {
-                        sessions.connectHost(h);
-                      } else {
-                        // Opening the inspector reflows the grid; wait until a double-click
-                        // could no longer happen so the second click hits the same card.
-                        if (clickTimer.current) clearTimeout(clickTimer.current);
-                        clickTimer.current = setTimeout(() => {
-                          select({ kind: 'host', id: h.id });
-                        }, 220);
-                      }
-                    }}
-                    onDoubleClick={() => {
-                      if (clickTimer.current) clearTimeout(clickTimer.current);
-                      sessions.connectHost(h);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') sessions.connectHost(h);
-                    }}
-                    className={cn(
-                      'bg-surface-2 hover:bg-surface-3 group flex w-full items-center gap-3 text-left ring-2 ring-transparent transition',
-                      hostView === 'grid'
-                        ? 'h-16 rounded-[var(--radius-card)] px-3.5'
-                        : 'h-12 rounded-xl px-3',
-                      (selected?.id === h.id || multi.has(h.id)) && 'ring-accent',
-                    )}
-                  >
-                    <OsIcon os={h.os} size={hostView === 'grid' ? 'md' : 'sm'} />
-                    <span className="min-w-0 flex-1">
-                      <span className="flex items-center gap-1.5">
-                        <span className="truncate font-medium">{h.label}</span>
-                        {h.favorite ? (
-                          <Star className="text-warning size-3 shrink-0 fill-current" />
-                        ) : null}
-                      </span>
-                      <span className="text-subtle block truncate text-xs">{hostSubtitle(h)}</span>
-                    </span>
-                    {phone ? null : (
-                      <Play className="text-subtle size-4 opacity-0 transition group-hover:opacity-100" />
-                    )}
-                  </button>
-                  {phone ? (
-                    <button
-                      type="button"
-                      aria-label={t('common.edit')}
-                      onClick={() => select({ kind: 'host', id: h.id })}
-                      className="text-subtle hover:text-text absolute top-1/2 right-2 -translate-y-1/2 p-2"
-                    >
-                      <Pencil className="size-4" />
-                    </button>
-                  ) : null}
-                </div>
-              </ContextMenu>
-            ))}
+            {visibleHosts.map(hostCard)}
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function ProtocolBadge({ protocol }: { protocol: 'ssh' | 'mosh' | 'telnet' }) {
+  return (
+    <Badge tone={protocol === 'ssh' ? 'accent' : protocol === 'mosh' ? 'info' : 'warning'}>
+      {protocol}
+    </Badge>
+  );
+}
+
+/** "New host" with a menu for the other things that can be created. */
+function CreateButton({
+  onHost,
+  onGroup,
+  onImport,
+}: {
+  onHost: () => void;
+  onGroup: () => void;
+  onImport: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex">
+      <Button variant="primary" onClick={onHost} className="rounded-r-none pr-3.5">
+        <Plus className="size-4" />
+        {t('hosts.newHost')}
+      </Button>
+      <DropdownMenu
+        align="end"
+        trigger={
+          <Button
+            variant="primary"
+            className="border-primary-fg/15 rounded-l-none border-l pr-3 pl-2.5"
+            aria-label={t('hosts.moreCreate')}
+          >
+            <ChevronDown className="size-4" />
+          </Button>
+        }
+        items={[
+          { label: t('hosts.newGroup'), icon: <FolderPlus />, onSelect: onGroup },
+          { label: t('hosts.import'), icon: <Upload />, onSelect: onImport },
+        ]}
+      />
     </div>
   );
 }

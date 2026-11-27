@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-3.0-or-later */
 @import 'tailwindcss';
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/manrope';
+@import '@fontsource-variable/archivo/wdth.css';
 @import '@fontsource/jetbrains-mono/400.css';
 @import '@fontsource/jetbrains-mono/700.css';
 @import '@xterm/xterm/css/xterm.css';
@@ -8,80 +9,246 @@
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 /*
- * Design tokens. Every color in the UI comes from these variables so light/dark themes and
- * the accent color can change at runtime.
+ * Design tokens ("Pulse"), in three layers:
+ *   1. Theme values: neutrals and text per light/dark theme, then a colour preset
+ *      (data-preset on <html>) that sets the accent, the ambient glow and, in dark mode, a tint
+ *      of the neutrals. Iris is the default preset.
+ *   2. Semantic Tailwind colors (@theme inline): bg, surface-*, text, muted, accent, primary…
+ *      Components only ever use these names, never raw hex values.
+ *   3. Component tokens: radii, fonts, elevation and motion.
+ * Text colors are chosen for at least 4.5:1 contrast on every surface they are used on, and
+ * the light variant of each accent keeps white text on it readable.
  */
 :root,
 [data-theme='dark'] {
   color-scheme: dark;
-  --bg: #0b0d14;
-  --surface-1: #10131c;
-  --surface-2: #161a25;
-  --surface-3: #1e2331;
-  --surface-4: #272d3e;
-  --border: rgb(255 255 255 / 0.07);
-  --border-strong: rgb(255 255 255 / 0.12);
-  --text: #e8eaf2;
-  --text-muted: #9ba2b6;
-  --text-subtle: #6b7288;
-  --accent: #6366f1;
-  --accent-hover: #7477f5;
-  --accent-soft: rgb(99 102 241 / 0.16);
-  --accent-fg: #ffffff;
-  --success: #22c55e;
-  --success-soft: rgb(34 197 94 / 0.15);
-  --warning: #f59e0b;
-  --warning-soft: rgb(245 158 11 / 0.15);
-  --danger: #ef4444;
-  --danger-soft: rgb(239 68 68 / 0.15);
-  --info: #38bdf8;
-  --overlay: rgb(3 5 10 / 0.6);
-  --shadow: 0 12px 32px -8px rgb(0 0 0 / 0.55), 0 0 0 1px var(--border);
-  --titlebar-bg: rgb(11 13 20 / 0.82);
+  --bg: #0b0f12;
+  --sidebar: #0d1216;
+  --surface-1: #12181d;
+  --surface-2: #141a1f;
+  --surface-3: #1b2228;
+  --surface-4: #252e35;
+  --border: rgb(255 255 255 / 0.06);
+  --border-strong: rgb(255 255 255 / 0.11);
+  --border-input: rgb(255 255 255 / 0.14);
+  --text: #f5f7fa;
+  --text-muted: #aeb5bf;
+  --text-subtle: #8a929d;
+  --primary: #ffffff;
+  --primary-hover: #e9edf1;
+  --primary-fg: #0b0f12;
+  --success: #4ade80;
+  --success-soft: rgb(74 222 128 / 0.14);
+  --warning: #fbbf24;
+  --warning-soft: rgb(251 191 36 / 0.14);
+  --danger: #f87171;
+  --danger-soft: rgb(248 113 113 / 0.14);
+  --info: #8ec5ff;
+  --info-soft: rgb(142 197 255 / 0.14);
+  --overlay: rgb(3 5 8 / 0.7);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow: 0 24px 60px -16px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(255 255 255 / 0.08);
+  --titlebar-bg: transparent;
+  --glow-strength: 0.24;
 }
 
 [data-theme='light'] {
   color-scheme: light;
-  --bg: #f4f5f9;
+  --bg: #f5f6f8;
+  --sidebar: #eef0f3;
   --surface-1: #ffffff;
   --surface-2: #ffffff;
-  --surface-3: #eef0f6;
-  --surface-4: #e3e6ef;
-  --border: rgb(15 23 42 / 0.08);
-  --border-strong: rgb(15 23 42 / 0.14);
-  --text: #111827;
-  --text-muted: #4b5469;
-  --text-subtle: #7b8399;
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --accent-soft: rgb(79 70 229 / 0.1);
-  --accent-fg: #ffffff;
-  --success: #16a34a;
+  --surface-3: #eef0f3;
+  --surface-4: #e2e5ea;
+  --border: rgb(11 15 18 / 0.08);
+  --border-strong: rgb(11 15 18 / 0.13);
+  --border-input: rgb(11 15 18 / 0.18);
+  --text: #0b0f12;
+  --text-muted: #4a5260;
+  --text-subtle: #5f6774;
+  --primary: #0b0f12;
+  --primary-hover: #262c33;
+  --primary-fg: #ffffff;
+  --success: #15803d;
   --success-soft: rgb(22 163 74 / 0.12);
-  --warning: #d97706;
+  --warning: #b45309;
   --warning-soft: rgb(217 119 6 / 0.12);
   --danger: #dc2626;
   --danger-soft: rgb(220 38 38 / 0.1);
-  --info: #0284c7;
-  --overlay: rgb(15 23 42 / 0.35);
-  --shadow: 0 12px 32px -12px rgb(15 23 42 / 0.25), 0 0 0 1px var(--border);
-  --titlebar-bg: rgb(244 245 249 / 0.85);
+  --info: #1d4ed8;
+  --info-soft: rgb(29 78 216 / 0.1);
+  --overlay: rgb(11 15 18 / 0.4);
+  --shadow-sm: 0 1px 2px rgb(11 15 18 / 0.06);
+  --shadow: 0 20px 50px -20px rgb(11 15 18 / 0.3), 0 0 0 1px var(--border-strong);
+  --titlebar-bg: transparent;
+  --glow-strength: 0.12;
+}
+
+/*
+ * Colour presets. Each sets the accent for both themes (the light one is darker so white text
+ * on it stays readable), two glow colours (as RGB triplets) and, in dark mode, tinted neutrals.
+ * Keep in sync with PRESETS in src/lib/presets.ts.
+ */
+[data-preset='glacier'] {
+  --accent: #6fe3d9;
+  --accent-hover: #93ece4;
+  --accent-fg: #041312;
+  --accent-text: #6fe3d9;
+  --glow-1: 70 190 200;
+  --glow-2: 80 120 220;
+}
+[data-theme='light'][data-preset='glacier'] {
+  --accent: #0b7d74;
+  --accent-hover: #096a62;
+  --accent-fg: #ffffff;
+  --accent-text: #0b6b63;
+}
+
+:root,
+[data-preset='iris'] {
+  --accent: #b3a6ff;
+  --accent-hover: #c6bcff;
+  --accent-fg: #0f0b1f;
+  --accent-text: #b3a6ff;
+  --glow-1: 130 110 255;
+  --glow-2: 90 140 230;
+}
+[data-theme='dark'][data-preset='iris'],
+:root:not([data-preset]):not([data-theme='light']) {
+  --bg: #0d0c12;
+  --sidebar: #100f16;
+  --surface-1: #15141c;
+  --surface-2: #17161f;
+  --surface-3: #1f1e29;
+  --surface-4: #2a2836;
+}
+[data-theme='light'][data-preset='iris'],
+[data-theme='light']:not([data-preset]) {
+  --accent: #5b47e0;
+  --accent-hover: #4b37cf;
+  --accent-fg: #ffffff;
+  --accent-text: #4a37c9;
+}
+
+[data-preset='ember'] {
+  --accent: #ff8a4c;
+  --accent-hover: #ffa06c;
+  --accent-fg: #140b06;
+  --accent-text: #ff9a63;
+  --glow-1: 255 120 60;
+  --glow-2: 190 70 90;
+}
+[data-theme='dark'][data-preset='ember'] {
+  --bg: #100d0c;
+  --sidebar: #13100f;
+  --surface-1: #181413;
+  --surface-2: #1a1614;
+  --surface-3: #231e1c;
+  --surface-4: #2e2826;
+}
+[data-theme='light'][data-preset='ember'] {
+  --accent: #c2410c;
+  --accent-hover: #a8380a;
+  --accent-fg: #ffffff;
+  --accent-text: #9a3412;
+}
+
+[data-preset='rose'] {
+  --accent: #ff8fbd;
+  --accent-hover: #ffa8cc;
+  --accent-fg: #1f0812;
+  --accent-text: #ff9ac4;
+  --glow-1: 255 100 160;
+  --glow-2: 150 80 200;
+}
+[data-theme='dark'][data-preset='rose'] {
+  --bg: #110c0f;
+  --sidebar: #140f12;
+  --surface-1: #1a1418;
+  --surface-2: #1c161a;
+  --surface-3: #261e23;
+  --surface-4: #32282e;
+}
+[data-theme='light'][data-preset='rose'] {
+  --accent: #be185d;
+  --accent-hover: #a3144f;
+  --accent-fg: #ffffff;
+  --accent-text: #9d174d;
+}
+
+[data-preset='moss'] {
+  --accent: #93d99a;
+  --accent-hover: #ade3b2;
+  --accent-fg: #07160a;
+  --accent-text: #9ddfa3;
+  --glow-1: 110 200 120;
+  --glow-2: 60 150 140;
+}
+[data-theme='dark'][data-preset='moss'] {
+  --bg: #0c100d;
+  --sidebar: #0e1310;
+  --surface-1: #131915;
+  --surface-2: #151b17;
+  --surface-3: #1c241e;
+  --surface-4: #263028;
+}
+[data-theme='light'][data-preset='moss'] {
+  --accent: #2f7d3a;
+  --accent-hover: #276a31;
+  --accent-fg: #ffffff;
+  --accent-text: #276a31;
+}
+
+[data-preset='mono'] {
+  --accent: #e8e8ec;
+  --accent-hover: #ffffff;
+  --accent-fg: #0e0e10;
+  --accent-text: #e8e8ec;
+  --glow-1: 160 160 175;
+  --glow-2: 110 110 130;
+}
+[data-theme='dark'][data-preset='mono'] {
+  --bg: #0e0e10;
+  --sidebar: #111113;
+  --surface-1: #161618;
+  --surface-2: #18181b;
+  --surface-3: #212124;
+  --surface-4: #2c2c30;
+}
+[data-theme='light'][data-preset='mono'] {
+  --accent: #18181b;
+  --accent-hover: #2c2c30;
+  --accent-fg: #ffffff;
+  --accent-text: #18181b;
+}
+
+/* Derived from the preset in every theme. */
+:root {
+  --accent-soft: color-mix(in oklab, var(--accent) 14%, transparent);
+  --glow-a: rgb(var(--glow-1) / var(--glow-strength));
+  --glow-b: rgb(var(--glow-2) / calc(var(--glow-strength) * 0.6));
 }
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-sidebar: var(--sidebar);
   --color-surface-1: var(--surface-1);
   --color-surface-2: var(--surface-2);
   --color-surface-3: var(--surface-3);
   --color-surface-4: var(--surface-4);
   --color-border: var(--border);
   --color-border-strong: var(--border-strong);
+  --color-border-input: var(--border-input);
   --color-text: var(--text);
   --color-muted: var(--text-muted);
   --color-subtle: var(--text-subtle);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-text: var(--accent-text);
   --color-accent-fg: var(--accent-fg);
   --color-success: var(--success);
   --color-success-soft: var(--success-soft);
@@ -90,20 +257,47 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
   --color-overlay: var(--overlay);
   --shadow-pop: var(--shadow);
-  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --shadow-xs: var(--shadow-sm);
+  --font-sans: 'Manrope Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono:
     'JetBrains Mono', ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
-  --radius-card: 14px;
+  --radius-card: 16px;
   --radius-control: 10px;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* Wide display face for page titles and the wordmark. */
+@utility font-display {
+  font-family: 'Archivo Variable', var(--font-sans);
+  font-stretch: 125%;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+/* Soft two-tone glow from the active preset, used behind the lock screen. */
+@utility aura {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(
+      45% 45% at 15% 18%,
+      rgb(var(--glow-1) / calc(var(--glow-strength) * 1.6)),
+      transparent 72%
+    ),
+    radial-gradient(
+      40% 40% at 88% 88%,
+      rgb(var(--glow-2) / calc(var(--glow-strength) * 1.4)),
+      transparent 72%
+    );
 }
 
 @theme {
-  --animate-fade-in: fade-in 140ms ease-out;
-  --animate-slide-in-right: slide-in-right 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  --animate-slide-up: slide-up 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  --animate-pop: pop 140ms ease-out;
+  --animate-fade-in: fade-in 150ms ease-out;
+  --animate-slide-in-right: slide-in-right 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-slide-up: slide-up 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-pop: pop 150ms cubic-bezier(0.2, 0.8, 0.2, 1);
 
   @keyframes fade-in {
     from {
@@ -154,6 +348,12 @@
 
   body {
     @apply bg-bg text-text font-sans antialiased;
+    font-weight: 500;
+    /* Ambient glow along the top of the window, tinted by the colour preset. */
+    background-image:
+      radial-gradient(60% 300px at 28% -120px, var(--glow-a), transparent 70%),
+      radial-gradient(40% 240px at 92% -100px, var(--glow-b), transparent 70%);
+    background-repeat: no-repeat;
     font-feature-settings: 'cv11', 'ss01';
     overscroll-behavior: none;
     -webkit-tap-highlight-color: transparent;
@@ -161,7 +361,29 @@
     user-select: none;
     margin: 0;
     font-size: 14px;
-    line-height: 1.45;
+    line-height: 1.5;
+  }
+
+  /* Touch screens: slightly larger body text (controls grow to 44px in their components). */
+  @media (pointer: coarse) {
+    body {
+      font-size: 15px;
+    }
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+    letter-spacing: -0.01em;
+  }
+
+  button:not(:disabled),
+  [role='button']:not([aria-disabled='true']),
+  [role='tab'],
+  summary,
+  label[for] {
+    cursor: pointer;
   }
 
   input,
@@ -211,6 +433,7 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+  /* Subtle dotted grid used behind the lock screen and empty states. */
   .safe-x {
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
