@@ -37,3 +37,14 @@ jobs:
       tag: ${{ needs.release-please.outputs.tag_name }}
       version: ${{ needs.release-please.outputs.version }}
     secrets: inherit
+
+  # Releases created with GITHUB_TOKEN do not trigger other workflows, so redeploy the docs
+  # (download page, llms.txt) explicitly.
+  docs:
+    needs: [release-please, release]
+    if: needs.release-please.outputs.release_created == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/docs.yml
