@@ -22,14 +22,14 @@
 //!   chain is prepended, mirroring how OpenSSH connects to it.
 //! * `ProxyCommand` is not supported (warning).
 
-use crate::bundle::{ImportBundle, KeyFileFormat, WarningKind};
+use crate::bundle::{ImportBundle, KeyCache, KeyFileFormat, WarningKind};
 use crate::common::{parse_port, split_host_port};
 use crate::error::ImportError;
 use crate::finalize::finalize;
 use crate::text::{MAX_INPUT_BYTES, check_size};
 use core_model::{
     Credential, EnvVar, ForwardKind, Group, GroupId, Host, HostConfig, HostId, HostKeyPolicy,
-    KeyId, PortForwardRule, RuleId, glob_match,
+    KeyId, PortForwardRule, RuleId,
 };
 use std::collections::{HashMap, HashSet};
 
@@ -43,7 +43,11 @@ const MAX_WILDCARD_BLOCKS: usize = 1_000;
 const MAX_HOSTS: usize = 10_000;
 const MAX_INCLUDES: usize = 1_000;
 const MAX_JUMP_DEPTH: usize = 16;
-const MAX_PATTERN_LEN: usize = 1_024;
+const MAX_PATTERN_LEN: usize = 255;
+const MAX_PATTERNS_PER_LINE: usize = 256;
+/// Upper bound on pattern-matching work (pattern bytes x name bytes) for one import, so
+/// adversarial wildcard combinations cannot stall the importer.
+const MATCH_BUDGET: u64 = 200_000_000;
 
 /// Parses an `ssh_config` file. `Include` directives are not followed (each one produces a
 /// warning); use [`parse_with_includes`] to resolve them.
@@ -192,6 +196,16 @@ struct Block {
 }
 
 impl Block {
+    /// Upper bound of the work [`Block::applies_to`] does for a name of length `len`.
+    fn match_cost(&self, len: usize) -> u64 {
+        let own = match &self.kind {
+            BlockKind::Host(p) => p.iter().map(String::len).sum(),
+            _ => 0,
+        };
+        let guards: usize = self.guards.iter().flatten().map(String::len).sum();
+        ((own + guards + 1) as u64).saturating_mul((len + 1) as u64)
+    }
+
     fn is_star(&self) -> bool {
         let own = match &self.kind {
             BlockKind::Global | BlockKind::MatchAll => true,
@@ -231,14 +245,43 @@ fn patterns_match(patterns: &[String], alias: &str) -> bool {
     let mut matched = false;
     for p in patterns {
         if let Some(neg) = p.strip_prefix('!') {
-            if glob_match(neg, alias) {
+            if glob(neg.as_bytes(), alias.as_bytes()) {
                 return false;
             }
-        } else if !matched && glob_match(p, alias) {
+        } else if !matched && glob(p.as_bytes(), alias.as_bytes()) {
             matched = true;
         }
     }
     matched
+}
+
+/// Allocation-free `*` / `?` glob matching over bytes (patterns and names are lowercase).
+/// Linear backtracking on the last `*` keeps it O(len(pattern) * len(text)).
+fn glob(p: &[u8], t: &[u8]) -> bool {
+    let (mut pi, mut ti) = (0usize, 0usize);
+    let mut star: Option<(usize, usize)> = None;
+    while ti < t.len() {
+        match (p.get(pi), t.get(ti)) {
+            (Some(b'*'), _) => {
+                star = Some((pi, ti));
+                pi += 1;
+            }
+            (Some(pc), Some(tc)) if *pc == b'?' || pc == tc => {
+                pi += 1;
+                ti += 1;
+            }
+            _ => match star {
+                Some((sp, st)) => {
+                    pi = sp + 1;
+                    ti = st + 1;
+                    star = Some((sp, st + 1));
+                }
+                None => return false,
+            },
+        }
+    }
+    p.get(pi..)
+        .is_some_and(|rest| rest.iter().all(|c| *c == b'*'))
 }
 
 #[derive(Debug, Clone)]
@@ -627,6 +670,14 @@ fn host_block_kind(b: &mut ImportBundle, loc: Loc<'_>, args: &[String]) -> Block
         );
         return BlockKind::Ignored;
     }
+    if patterns.len() > MAX_PATTERNS_PER_LINE {
+        loc.warn(
+            b,
+            WarningKind::Limit,
+            format!("more than {MAX_PATTERNS_PER_LINE} patterns on one Host line; block ignored"),
+        );
+        return BlockKind::Ignored;
+    }
     if patterns.iter().any(|p| p.len() > MAX_PATTERN_LEN) {
         loc.warn(
             b,
@@ -776,7 +827,7 @@ impl Effective {
     /// Builds the sparse configuration. For hosts (`group == false`), values that come from
     /// match-everything blocks are left unset because the host inherits them from the
     /// defaults group.
-    fn to_config(&self, b: &mut ImportBundle, group: bool) -> HostConfig {
+    fn to_config(&self, b: &mut ImportBundle, keys: &mut KeyCache, group: bool) -> HostConfig {
         fn take<T: Clone>(slot: Option<&(T, bool)>, group: bool) -> Option<T> {
             slot.filter(|(_, star)| group || !star)
                 .map(|(v, _)| v.clone())
@@ -803,7 +854,7 @@ impl Effective {
             let keys: Vec<KeyId> = self
                 .identity_files
                 .iter()
-                .map(|(p, _)| b.key_for_path(p, KeyFileFormat::OpenSsh))
+                .map(|(p, _)| keys.key(b, p, KeyFileFormat::OpenSsh))
                 .collect();
             let username = self.user.as_ref().map(|(u, _)| u.clone());
             if username.is_some() || !keys.is_empty() {
@@ -870,6 +921,11 @@ struct Builder<'a> {
     /// The (lowercase) alias each host in `hosts` was built for.
     aliases: Vec<String>,
     chains: Vec<ChainState>,
+    /// Which blocks applied to at least one host.
+    used: Vec<bool>,
+    keys: KeyCache,
+    budget: u64,
+    budget_warned: bool,
     limit_warned: bool,
 }
 
@@ -909,23 +965,46 @@ impl<'a> Builder<'a> {
             hosts: Vec::new(),
             aliases: Vec::new(),
             chains: Vec::new(),
+            used: vec![false; blocks.len()],
+            keys: KeyCache::default(),
+            budget: MATCH_BUDGET,
+            budget_warned: false,
             limit_warned: false,
         }
     }
 
-    fn effective(&self, alias: &str) -> Effective {
-        let mut idx: Vec<usize> = self
-            .wildcard
-            .iter()
-            .copied()
-            .filter(|i| self.blocks.get(*i).is_some_and(|blk| blk.applies_to(alias)))
-            .collect();
+    /// Whether block `i` applies to `alias`, charged against the matching budget.
+    fn applies(&mut self, b: &mut ImportBundle, i: usize, alias: &str) -> bool {
+        let Some(blk) = self.blocks.get(i) else {
+            return false;
+        };
+        let cost = blk.match_cost(alias.len());
+        if self.budget < cost {
+            if !self.budget_warned {
+                self.budget_warned = true;
+                b.warn(
+                    WarningKind::Limit,
+                    Some(blk.line),
+                    None,
+                    "pattern matching limit reached; remaining Host patterns were not applied",
+                );
+            }
+            return false;
+        }
+        self.budget -= cost;
+        blk.applies_to(alias)
+    }
+
+    fn effective(&mut self, b: &mut ImportBundle, alias: &str) -> Effective {
+        let mut candidates = self.wildcard.clone();
         if let Some(list) = self.by_alias.get(alias) {
-            idx.extend(
-                list.iter()
-                    .copied()
-                    .filter(|i| self.blocks.get(*i).is_some_and(|blk| blk.applies_to(alias))),
-            );
+            candidates.extend(list.iter().copied());
+        }
+        let mut idx: Vec<usize> = Vec::with_capacity(candidates.len());
+        for i in candidates {
+            if self.applies(b, i, alias) {
+                idx.push(i);
+            }
         }
         idx.sort_unstable();
         idx.dedup();
@@ -933,6 +1012,9 @@ impl<'a> Builder<'a> {
         for i in idx {
             if let Some(blk) = self.blocks.get(i) {
                 eff.apply(blk);
+            }
+            if let Some(u) = self.used.get_mut(i) {
+                *u = true;
             }
         }
         eff
@@ -966,8 +1048,8 @@ impl<'a> Builder<'a> {
             }
             return None;
         }
-        let eff = self.effective(&alias);
-        let mut config = eff.to_config(b, false);
+        let eff = self.effective(b, &alias);
+        let mut config = eff.to_config(b, &mut self.keys, false);
         if let Some(p) = port {
             config.ssh.port = Some(p);
         }
@@ -977,7 +1059,7 @@ impl<'a> Builder<'a> {
                 _ => eff
                     .identity_files
                     .iter()
-                    .map(|(p, _)| b.key_for_path(p, KeyFileFormat::OpenSsh))
+                    .map(|(p, _)| self.keys.key(b, p, KeyFileFormat::OpenSsh))
                     .collect(),
             };
             config.ssh.credential = Some(Credential::Inline {
@@ -1098,10 +1180,14 @@ fn build(b: &mut ImportBundle, blocks: &[Block]) {
     // Concrete aliases in order of first appearance.
     let mut seen = HashSet::new();
     let mut aliases: Vec<&str> = Vec::new();
-    for blk in blocks {
+    'blocks: for (i, blk) in blocks.iter().enumerate() {
         if let BlockKind::Host(patterns) = &blk.kind {
             for p in patterns {
-                if is_concrete(p) && blk.applies_to(p) && seen.insert(p.as_str()) {
+                if aliases.len() >= MAX_HOSTS {
+                    break 'blocks;
+                }
+                if is_concrete(p) && !seen.contains(p.as_str()) && builder.applies(b, i, p) {
+                    seen.insert(p.as_str());
                     aliases.push(p);
                 }
             }
@@ -1112,12 +1198,12 @@ fn build(b: &mut ImportBundle, blocks: &[Block]) {
     }
 
     // Wildcard blocks that matched nothing were not imported.
-    for blk in blocks {
+    for (blk, used) in blocks.iter().zip(&builder.used) {
         if let BlockKind::Host(p) = &blk.kind
+            && !used
             && blk.has_wildcards()
             && !blk.is_star()
             && !blk.settings.is_empty()
-            && !builder.aliases.iter().any(|a| blk.applies_to(a))
         {
             b.warn(
                 WarningKind::Unsupported,
@@ -1136,7 +1222,7 @@ fn build(b: &mut ImportBundle, blocks: &[Block]) {
     for blk in blocks.iter().filter(|blk| blk.is_star()) {
         defaults.apply(blk);
     }
-    let config = defaults.to_config(b, true);
+    let config = defaults.to_config(b, &mut builder.keys, true);
     let mut hosts = builder.hosts;
     if !config.is_empty_config() {
         let mut g = Group::new(DEFAULTS_GROUP_LABEL);
@@ -1509,6 +1595,39 @@ Host *
         );
         assert_eq!(parse_hop("@h"), None);
         assert_eq!(parse_hop("h:0"), None);
+    }
+
+    #[test]
+    fn glob_matching() {
+        assert!(glob(b"*.example.com", b"web.example.com"));
+        assert!(glob(b"web?", b"web1"));
+        assert!(!glob(b"web?", b"web"));
+        assert!(glob(b"*", b""));
+        assert!(glob(b"a*b*c", b"axxbyyc"));
+        assert!(!glob(b"a*b*c", b"axxbyy"));
+        assert!(glob(b"**", b"x"));
+        assert!(!glob(b"", b"x"));
+    }
+
+    #[test]
+    fn host_line_limits() {
+        let many: Vec<String> = (0..300).map(|i| format!("h{i}")).collect();
+        let b = parse(&format!(
+            "Host {}
+",
+            many.join(" ")
+        ))
+        .unwrap();
+        assert!(b.hosts.is_empty());
+        assert_eq!(b.warnings[0].kind, WarningKind::Limit);
+        let b = parse(&format!(
+            "Host {}
+",
+            "x".repeat(300)
+        ))
+        .unwrap();
+        assert!(b.hosts.is_empty());
+        assert_eq!(b.warnings[0].kind, WarningKind::Limit);
     }
 
     #[test]

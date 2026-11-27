@@ -15,7 +15,7 @@
 //! * `SshHostKeys` entries (`rsa2@22:host`, `ssh-ed25519@22:host`, `ecdsa-sha2-nistp256@...`,
 //!   `dss@...`) are converted from PuTTY's numeric format to known hosts.
 
-use crate::bundle::{ImportBundle, KeyFileFormat, SecretKind, WarningKind};
+use crate::bundle::{ImportBundle, KeyCache, KeyFileFormat, SecretKind, WarningKind};
 use crate::common::{HostDraft, Protocol, split_host_port};
 use crate::error::ImportError;
 use crate::finalize::finalize;
@@ -89,6 +89,7 @@ pub fn parse(input: &str) -> Result<ImportBundle, ImportError> {
 
     let mut b = ImportBundle::default();
     let mut names: Vec<String> = Vec::new();
+    let mut index: HashMap<String, usize> = HashMap::new();
     let mut sessions: Vec<Session> = Vec::new();
     let mut host_keys: Vec<(usize, String, String)> = Vec::new();
     let mut section = Section::None;
@@ -99,7 +100,7 @@ pub fn parse(input: &str) -> Result<ImportBundle, ImportError> {
         }
         if let Some(path) = line.strip_prefix('[') {
             let path = path.strip_suffix(']').unwrap_or(path);
-            section = classify(path, &mut names, &mut sessions, line_no);
+            section = classify(path, &mut names, &mut index, &mut sessions, line_no);
             continue;
         }
         let Some((name, value)) = parse_value_line(line) else {
@@ -163,6 +164,7 @@ fn logical_lines(input: &str) -> impl Iterator<Item = (usize, String)> + '_ {
 fn classify(
     path: &str,
     names: &mut Vec<String>,
+    index: &mut HashMap<String, usize>,
     sessions: &mut Vec<Session>,
     line: usize,
 ) -> Section {
@@ -183,9 +185,10 @@ fn classify(
     if raw_name.is_empty() || raw_name.contains('\\') {
         return Section::None;
     }
-    if let Some(i) = names.iter().position(|n| n == raw_name) {
-        return Section::Session(i);
+    if let Some(i) = index.get(raw_name) {
+        return Section::Session(*i);
     }
+    index.insert(raw_name.to_owned(), names.len());
     names.push(raw_name.to_owned());
     sessions.push(Session {
         line,
@@ -258,6 +261,7 @@ struct PendingJump {
 fn build_sessions(b: &mut ImportBundle, names: &[String], sessions: &[Session]) {
     let mut by_name: HashMap<String, HostId> = HashMap::new();
     let mut pending: Vec<PendingJump> = Vec::new();
+    let mut keys = KeyCache::default();
     for (raw, s) in names.iter().zip(sessions) {
         let name = url_decode(raw);
         if name == "Default Settings" {
@@ -299,7 +303,7 @@ fn build_sessions(b: &mut ImportBundle, names: &[String], sessions: &[Session]) 
         d.username(s.string("UserName").or(user_in_host).unwrap_or_default());
         if protocol == Protocol::Ssh {
             if let Some(path) = s.string("PublicKeyFile") {
-                d.keys.push(b.key_for_path(path, KeyFileFormat::Ppk));
+                d.keys.push(keys.key(b, path, KeyFileFormat::Ppk));
             }
             proxy(b, s, &mut d, &name, &mut pending);
         }

@@ -11,7 +11,7 @@
 //! Stored passwords are encrypted with the MobaXterm master password and cannot be imported
 //! (a warning reports how many were found).
 
-use crate::bundle::{ImportBundle, KeyFileFormat, WarningKind};
+use crate::bundle::{ImportBundle, KeyCache, KeyFileFormat, WarningKind};
 use crate::common::{GroupTree, HostDraft, Protocol, parse_port};
 use crate::error::ImportError;
 use crate::finalize::finalize;
@@ -36,6 +36,7 @@ pub fn parse(input: &str) -> Result<ImportBundle, ImportError> {
     check_size(input.len())?;
     let mut b = ImportBundle::default();
     let mut groups = GroupTree::default();
+    let mut keys = KeyCache::default();
     let mut section = Section::Other;
     let mut folder: Option<core_model::GroupId> = None;
     let mut secrets = 0usize;
@@ -71,7 +72,7 @@ pub fn parse(input: &str) -> Result<ImportBundle, ImportError> {
                     folder = groups.ensure(&mut b, value.split('\\'), Some(line_no));
                 } else if key.eq_ignore_ascii_case("ImgNum") {
                 } else if value.starts_with('#') {
-                    session(&mut b, key, value, folder, line_no);
+                    session(&mut b, &mut keys, key, value, folder, line_no);
                 }
             }
         }
@@ -98,6 +99,7 @@ pub fn parse(input: &str) -> Result<ImportBundle, ImportError> {
 
 fn session(
     b: &mut ImportBundle,
+    keys: &mut KeyCache,
     name: &str,
     value: &str,
     group: Option<core_model::GroupId>,
@@ -165,7 +167,7 @@ fn session(
             } else {
                 KeyFileFormat::Unknown
             };
-            d.keys.push(b.key_for_path(key, format));
+            d.keys.push(keys.key(b, key, format));
         }
     }
     let host = d.build(b);

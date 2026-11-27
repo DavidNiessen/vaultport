@@ -3,6 +3,7 @@
 
 use core_model::{Group, Host, Identity, KeyId, KnownHost, PortForwardRule, SecretRef};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::fmt;
 use zeroize::Zeroizing;
 
@@ -63,15 +64,8 @@ impl ImportBundle {
         });
     }
 
-    /// Returns the key placeholder for `path`, creating it on first use.
-    pub(crate) fn key_for_path(&mut self, path: &str, format: KeyFileFormat) -> KeyId {
-        if let Some(k) = self
-            .keys
-            .iter()
-            .find(|k| k.source_path.as_deref() == Some(path))
-        {
-            return k.id;
-        }
+    /// Adds a key placeholder for the file at `path`. Use [`KeyCache`] to deduplicate.
+    pub(crate) fn new_key(&mut self, path: &str, format: KeyFileFormat) -> KeyId {
         let label = path
             .rsplit(['/', '\\'])
             .find(|s| !s.is_empty())
@@ -104,6 +98,24 @@ impl ImportBundle {
             value,
         });
         slot
+    }
+}
+
+/// Deduplicates key placeholders by path during one import.
+#[derive(Debug, Default)]
+pub(crate) struct KeyCache {
+    by_path: HashMap<String, KeyId>,
+}
+
+impl KeyCache {
+    /// Returns the key placeholder for `path`, creating it on first use.
+    pub(crate) fn key(&mut self, b: &mut ImportBundle, path: &str, format: KeyFileFormat) -> KeyId {
+        if let Some(id) = self.by_path.get(path) {
+            return *id;
+        }
+        let id = b.new_key(path, format);
+        self.by_path.insert(path.to_owned(), id);
+        id
     }
 }
 
@@ -283,9 +295,10 @@ mod tests {
     #[test]
     fn key_placeholders_are_deduplicated_by_path() {
         let mut b = ImportBundle::default();
-        let a = b.key_for_path("~/.ssh/id_ed25519", KeyFileFormat::OpenSsh);
-        let c = b.key_for_path("~/.ssh/id_ed25519", KeyFileFormat::OpenSsh);
-        let d = b.key_for_path(r"C:\keys\work.ppk", KeyFileFormat::Ppk);
+        let mut cache = KeyCache::default();
+        let a = cache.key(&mut b, "~/.ssh/id_ed25519", KeyFileFormat::OpenSsh);
+        let c = cache.key(&mut b, "~/.ssh/id_ed25519", KeyFileFormat::OpenSsh);
+        let d = cache.key(&mut b, r"C:\keys\work.ppk", KeyFileFormat::Ppk);
         assert_eq!(a, c);
         assert_ne!(a, d);
         assert_eq!(b.keys.len(), 2);

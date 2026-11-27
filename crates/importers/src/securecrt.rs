@@ -12,7 +12,7 @@
 //!
 //! The XML is parsed without DTD or external entity processing, with bounded nesting.
 
-use crate::bundle::{ImportBundle, KeyFileFormat, WarningKind};
+use crate::bundle::{ImportBundle, KeyCache, KeyFileFormat, WarningKind};
 use crate::common::{GroupTree, HostDraft, Protocol};
 use crate::error::ImportError;
 use crate::finalize::finalize;
@@ -73,8 +73,9 @@ pub fn parse(input: &str) -> Result<ImportBundle, ImportError> {
     let mut b = ImportBundle::default();
     let sessions = find_sessions(&root, 0).unwrap_or(&root);
     let mut groups = GroupTree::default();
+    let mut keys = KeyCache::default();
     let mut path = Vec::new();
-    walk(&mut b, &mut groups, sessions, &mut path, 0);
+    walk(&mut b, &mut groups, &mut keys, sessions, &mut path, 0);
     Ok(finalize(b))
 }
 
@@ -221,6 +222,7 @@ fn find_sessions(k: &XKey, depth: usize) -> Option<&XKey> {
 fn walk<'a>(
     b: &mut ImportBundle,
     groups: &mut GroupTree,
+    keys: &mut KeyCache,
     folder: &'a XKey,
     path: &mut Vec<&'a str>,
     depth: usize,
@@ -234,16 +236,16 @@ fn walk<'a>(
                 continue;
             }
             let group = groups.ensure(b, path.iter().copied(), None);
-            session(b, child, group);
+            session(b, keys, child, group);
         } else if !child.children.is_empty() {
             path.push(&child.name);
-            walk(b, groups, child, path, depth + 1);
+            walk(b, groups, keys, child, path, depth + 1);
             path.pop();
         }
     }
 }
 
-fn session(b: &mut ImportBundle, k: &XKey, group: Option<GroupId>) {
+fn session(b: &mut ImportBundle, keys: &mut KeyCache, k: &XKey, group: Option<GroupId>) {
     let name = k.name.as_str();
     let protocol_name = k.string("Protocol Name").unwrap_or("SSH2");
     let protocol = match protocol_name.to_ascii_lowercase().as_str() {
@@ -293,7 +295,7 @@ fn session(b: &mut ImportBundle, k: &XKey, group: Option<GroupId>) {
             } else {
                 KeyFileFormat::Unknown
             };
-            d.keys.push(b.key_for_path(path, format));
+            d.keys.push(keys.key(b, path, format));
         }
     }
     if k.string("Password V2").is_some() || k.string("Password").is_some() {

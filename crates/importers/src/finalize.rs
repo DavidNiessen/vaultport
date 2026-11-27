@@ -277,7 +277,7 @@ mod tests {
         let a = Host::new("a", "Example.com");
         let mut dup = Host::new("a-dup", "example.com");
         let pw = b.add_secret(SecretKind::Password, "x", Zeroizing::new(b"pw".to_vec()));
-        let key = b.key_for_path("/k", KeyFileFormat::OpenSsh);
+        let key = b.new_key("/k", KeyFileFormat::OpenSsh);
         dup.config.ssh.credential = None;
         let mut c = Host::new("c", "c.example");
         c.config.ssh.jump_chain = Some(vec![dup.id]);
