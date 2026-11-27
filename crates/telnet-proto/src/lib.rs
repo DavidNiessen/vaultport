@@ -18,13 +18,19 @@
 //! TERMINAL-TYPE (1091, default `xterm-256color`), NAWS (1073, sent on every resize) and
 //! NEW-ENVIRON (1572, `USER` only). Everything else is refused.
 //!
-//! The protocol is implemented as a sans-IO [`Codec`].
+//! The protocol is implemented as a sans-IO [`Codec`]; [`Session`] is a thin tokio driver
+//! over TCP or any other `AsyncRead + AsyncWrite` stream, shaped like an SSH shell channel
+//! (`write`, `resize`, `close` plus an event channel).
 
 #![forbid(unsafe_code)]
 
 pub mod codec;
 pub mod consts;
+mod error;
 pub mod qmethod;
+mod session;
 
 pub use codec::{Codec, CodecEvent, Config, Newline, Side, escape_iac};
 pub use consts::TelnetOption;
+pub use error::{Error, Result};
+pub use session::{CloseReason, Event, Session, SessionConfig, SessionEvents, Status};
