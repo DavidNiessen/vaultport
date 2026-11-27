@@ -18,12 +18,14 @@ use zeroize::Zeroizing;
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum Purpose {
     Segment,
+    Export,
 }
 
 impl Purpose {
     fn info(self) -> &'static [u8] {
         match self {
             Self::Segment => b"ssh-client/sync/segment/v1",
+            Self::Export => b"ssh-client/sync/export/v1",
         }
     }
 }

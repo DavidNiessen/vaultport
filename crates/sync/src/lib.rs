@@ -11,6 +11,9 @@
 //!   silently drop data without being detected ([`engine`]);
 //! * the vault is a CRDT, so concurrent edits on several devices merge without conflicts.
 //!
+//! Also provided: an encrypted single-file export/import ([`export`]) and device pairing via
+//! QR code + short code ([`pairing`]).
+//!
 //! # What the app provides
 //!
 //! * Persistence of [`SyncState`] (one per backend; [`SyncState::load`]/[`SyncState::save`]
@@ -24,7 +27,9 @@ mod backend;
 pub mod backends;
 pub mod engine;
 mod error;
+pub mod export;
 mod keys;
+pub mod pairing;
 pub mod segment;
 mod state;
 
@@ -35,4 +40,5 @@ pub use engine::{
     CompactOptions, CompactReport, Issue, SyncEngine, SyncOptions, SyncReport, Uploaded,
 };
 pub use error::SyncError;
+pub use export::{ExportInfo, export_file, export_file_with, import_file, inspect_file};
 pub use state::{Head, STATE_SETTINGS_PREFIX, SyncState};
