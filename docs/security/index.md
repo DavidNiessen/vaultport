@@ -32,8 +32,18 @@ ssh-client handles private keys, passwords and access to production infrastructu
 | A malicious or compromised SSH server                  | Read-only in-process agent, validated SFTP file names, no symlink following on delete, OSC 52 clipboard writes need consent                                     |
 | A compromised dependency in the web UI                 | Secrets never reach the UI; Tauri isolation pattern, strict CSP, frozen prototypes, least-privilege capabilities — see [App isolation](/security/app-isolation) |
 | Malicious import files                                 | Size limits, bounded nesting, panic-free parsers, validation of every entity                                                                                    |
+| Prompt injection into an AI agent via server output    | Agents never see secrets; every change needs approval in the app, read-only mode and host scope, audit log — see [below](#ai-agents-over-mcp)                   |
 | Prompt injection into the local AI                     | Remote text framed as data, grammar-constrained output, validation, never auto-executed                                                                         |
 | A tampered download                                    | SHA-256 checksums, Sigstore signatures, build-provenance attestations, SBOM — see [Supply chain](/security/supply-chain)                                        |
+
+## AI agents over MCP
+
+[Agent access](/guide/ai-agents) lets local AI tools call ssh-client over the Model Context Protocol. It is off by default and desktop-only.
+
+- **Reachability:** a `0600` Unix socket or a local-only, per-user named pipe; no network listener. Connections must present a 256-bit token from a `0600` file, and on macOS and Linux the peer's user id must match.
+- **Secrets:** tools never return passwords, keys or vault data. ssh-client opens connections itself, with full host-key verification.
+- **Authority:** the agent can only use the tools you allow (read-only mode), on the hosts you allow (host scope). Every call that changes something needs your approval in the app, with the exact command, path or content shown; approvals time out (denied) after 5 minutes; session grants end when the agent disconnects or the vault locks. A locked vault refuses all calls.
+- **Residual risk — prompt injection:** output from your servers (logs, files, command output) flows into the agent's context and may contain instructions aimed at the model. ssh-client cannot detect this. **Approvals are the control**: review each action, prefer _Allow once_ for anything destructive, and use read-only mode or a host allow-list when exploring. Also remember that what the agent reads is sent to wherever the AI tool runs its model.
 
 ## Out of scope
 
@@ -54,5 +64,6 @@ ssh-client handles private keys, passwords and access to production infrastructu
 - [Sync protocol](/security/sync)
 - [Host-key policy](/security/host-keys)
 - [App isolation](/security/app-isolation)
+- [AI agents (MCP)](/guide/ai-agents#security-model)
 - [Supply chain](/security/supply-chain)
 - [Reporting a vulnerability](/security/disclosure)

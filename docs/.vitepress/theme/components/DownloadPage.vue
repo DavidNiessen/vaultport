@@ -63,7 +63,7 @@ const PLATFORMS: PlatformInfo[] = [
     icon: Tablet,
     requirement: 'iOS & iPadOS 16 or later',
     formats: ['.ipa'],
-    note: 'ssh-client is not in the App Store. Install the IPA by sideloading (for example with AltStore or Sideloadly), or through TestFlight when a beta is offered.',
+    note: 'ssh-client is not in the App Store. When a release is signed, the IPA reaches devices through TestFlight (when a beta is offered) or by re-signing it with a sideloading tool such as AltStore or Sideloadly.',
   },
   {
     id: 'android',
@@ -223,8 +223,9 @@ const published = computed(() => {
         }}</a>
         <template v-if="ready.checksums && ready.sbom"> · </template>
         <a v-if="ready.sbom" :href="ready.sbom.browser_download_url">{{ ready.sbom.name }}</a>
-        <template v-if="ready.signatures.length">
-          · {{ ready.signatures.length }} signature files
+        <template v-if="ready.checksumsBundle">
+          ·
+          <a :href="ready.checksumsBundle.browser_download_url">{{ ready.checksumsBundle.name }}</a>
         </template>
         · <a :href="ready.url" target="_blank" rel="noopener">all {{ ready.assetCount }} files</a>
       </p>

@@ -17,6 +17,9 @@ on:
   release:
     # Rebuild when a release is published so the download page and llms.txt stay current.
     types: [published]
+  # Releases created with the default GITHUB_TOKEN (release-please) do not emit `release`
+  # events to other workflows; the release workflow can call this one instead.
+  workflow_call:
   workflow_dispatch:
 
 permissions:

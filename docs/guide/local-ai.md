@@ -19,6 +19,10 @@ ssh-client can turn a plain-language request such as _"find the 10 largest files
 
 **Remove model** deletes every file the feature created.
 
+::: info Android
+Android release builds are currently compiled without the on-device inference engine, so Local AI reports itself as unavailable there. iOS and iPadOS builds include it.
+:::
+
 ## Using it
 
 Open the terminal side panel (<kbd>Mod</kbd>+<kbd>.</kbd>) and choose **AI**:

@@ -43,6 +43,7 @@ export const sections: DocSection[] = [
       { text: 'Sync, backup & pairing', link: '/guide/sync' },
       { text: 'Session logs', link: '/guide/session-logs' },
       { text: 'Local AI', link: '/guide/local-ai' },
+      { text: 'AI agents (MCP)', link: '/guide/ai-agents' },
       { text: 'Keyboard shortcuts', link: '/guide/keyboard-shortcuts' },
       { text: 'Phones & tablets', link: '/guide/mobile' },
     ],

@@ -26,14 +26,14 @@ The only file ssh-client downloads on its own initiative is the [local AI model]
 
 ## Releases
 
-Every release is built by GitHub Actions from a tagged commit. Each artifact ships with:
+Every release is built by GitHub Actions from a tagged commit (`.github/workflows/release.yml`). Each release ships with:
 
-| What                        | How to check it                                                               |
-| --------------------------- | ----------------------------------------------------------------------------- |
-| SHA-256 checksum            | `sha256sum -c SHA256SUMS.txt --ignore-missing`                                |
-| GitHub build provenance     | `gh attestation verify <file> --repo davidniessen/ssh-client`                 |
-| Sigstore (cosign) signature | `cosign verify-blob <file> --signature <file>.sig --certificate <file>.pem …` |
-| SBOM                        | `sbom.spdx.json` (SPDX) attached to the release                               |
+| What                                   | How to check it                                                             |
+| -------------------------------------- | --------------------------------------------------------------------------- |
+| `SHA256SUMS.txt` covering every file   | `sha256sum -c SHA256SUMS.txt --ignore-missing`                              |
+| Keyless Sigstore signature of the sums | `cosign verify-blob SHA256SUMS.txt --bundle SHA256SUMS.txt.sigstore.json …` |
+| GitHub build provenance for every file | `gh attestation verify <file> --repo davidniessen/ssh-client`               |
+| SBOM                                   | `sbom.spdx.json` (SPDX, generated with Syft) attached to the release        |
 
 The full commands are on the [download page](/download#verify-your-download). The desktop self-updater additionally verifies each update's signature against the project's public key before installing it.
 

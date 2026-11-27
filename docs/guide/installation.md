@@ -11,19 +11,20 @@ Grab the file for your platform from the [download page](/download), which picks
 
 **Requirements:** Windows 10 or 11, x64 or ARM64.
 
-| File                                 | Use it for                                                         |
-| ------------------------------------ | ------------------------------------------------------------------ |
-| `ssh-client_<version>_x64-setup.exe` | Recommended. Installs for the current user, no admin rights needed |
-| `ssh-client_<version>_x64_en-US.msi` | Managed or scripted deployments (Intune, Group Policy, `msiexec`)  |
-| `…_arm64-setup.exe`                  | Windows on ARM devices                                             |
+| File                                     | Use it for                                                         |
+| ---------------------------------------- | ------------------------------------------------------------------ |
+| `ssh-client_<version>_x64-setup.exe`     | Recommended. Installs for the current user, no admin rights needed |
+| `ssh-client_<version>_x64_en-US.msi`     | Managed or scripted deployments (Intune, Group Policy, `msiexec`)  |
+| `ssh-client_<version>_x64_de-DE.msi`     | The same, German user interface for the installer                  |
+| `…_arm64-setup.exe`, `…_arm64_en-US.msi` | Windows on ARM devices                                             |
 
-The installers are available in English and German. ssh-client uses the Microsoft Edge WebView2 runtime; if it is missing, the installer downloads it silently.
+The `.exe` installer speaks English and German. Builds are Authenticode-signed when the project's code-signing certificate is configured for the release; otherwise Windows SmartScreen may warn about an unknown publisher. ssh-client uses the Microsoft Edge WebView2 runtime; if it is missing, the installer downloads it silently.
 
 ## macOS
 
 **Requirements:** macOS 13 Ventura or later.
 
-Download `ssh-client_<version>_universal.dmg` (one build for Apple silicon and Intel), open it and drag **ssh-client** into **Applications**. The app uses the hardened runtime.
+Download `ssh-client_<version>_universal.dmg` (one build for Apple silicon and Intel), open it and drag **ssh-client** into **Applications**. The app uses the hardened runtime, and release builds are signed and notarized when the project's Apple credentials are configured for the release; if a build is not notarized, macOS asks you to confirm opening it in **System Settings → Privacy & Security**.
 
 ## Linux
 
@@ -68,13 +69,13 @@ The vault's "unlock with this device" option stores its key through the Secret S
 
 **Requirements:** iOS or iPadOS 16 or later.
 
-ssh-client is not distributed through the App Store. Install `ssh-client_<version>_ios.ipa` by sideloading it (for example with AltStore or Sideloadly), or through TestFlight when a beta is offered.
+ssh-client is not distributed through the App Store. The release workflow only publishes `ssh-client_<version>_ios.ipa` when the project's Apple signing credentials are configured; the IPA is exported for App Store Connect, so it reaches devices through TestFlight when a beta is offered, or by re-signing it with a sideloading tool such as AltStore or Sideloadly. You can always [build it yourself](/development/building) with your own Apple developer account.
 
 ## Android
 
 **Requirements:** Android 8.0 (API level 26) or later.
 
-Download `ssh-client_<version>_android-universal.apk` on the device, allow **Install unknown apps** for your browser or file manager when asked, and open the file. The universal APK contains native code for all common CPU architectures.
+Download `ssh-client_<version>_android-universal.apk` on the device, allow **Install unknown apps** for your browser or file manager when asked, and open the file. The universal APK contains native code for all common CPU architectures. The release also contains an Android App Bundle (`.aab`) for app stores; it cannot be installed directly.
 
 ## Updating
 

@@ -32,7 +32,7 @@ device key (OS key store) ──────────┘                 │
 - The **vault key** (VK) is generated randomly when the vault is created and never stored in the clear.
 - It is stored **wrapped** (encrypted) by one or both of:
   - a key-encryption key derived from the **master password** with Argon2id;
-  - a random 256-bit **device key** kept in the OS key store — macOS/iOS Keychain, Windows Credential Manager (DPAPI), or the Secret Service on Linux.
+  - a random 256-bit **device key** kept in the OS key store — macOS/iOS Keychain (this-device-only on iOS), Windows Credential Manager (DPAPI), the Secret Service on Linux, or on Android wrapped by an AES-256-GCM key that lives in the Android Keystore (StrongBox when available).
 - At least one wrap always exists. Changing the master password re-wraps the VK; it does not re-encrypt the data.
 - Each wrap is authenticated with associated data `ssh-client/vk-wrap/v1|<method>|<vault id>`.
 
