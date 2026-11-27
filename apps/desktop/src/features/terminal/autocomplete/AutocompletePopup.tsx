@@ -45,7 +45,7 @@ export function AutocompletePopup({
           aria-selected={i === view.selected}
           tabIndex={-1}
           className={cn(
-            'flex h-[30px] cursor-default items-center gap-2 px-2.5 text-[13px]',
+            'flex h-[30px] items-center gap-2 px-2.5 text-[13px]',
             i === view.selected ? 'bg-accent-soft text-text' : 'text-muted',
           )}
           onMouseMove={() => onHover(i)}

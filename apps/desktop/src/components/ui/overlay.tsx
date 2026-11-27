@@ -78,7 +78,7 @@ export function Dialog({
 const menuContent =
   'bg-surface-3 animate-pop z-50 min-w-52 overflow-hidden rounded-[14px] p-1.5 shadow-[var(--shadow)]';
 const menuItem =
-  'text-text data-[highlighted]:bg-text/[0.08] flex h-9 cursor-pointer items-center gap-2.5 rounded-[9px] px-2.5 text-[13.5px] font-bold outline-none select-none data-[disabled]:cursor-default data-[disabled]:opacity-40 pointer-coarse:h-11 [&>svg]:size-4 [&>svg]:text-muted';
+  'text-text data-[highlighted]:bg-text/[0.08] flex h-9 cursor-pointer items-center gap-2.5 rounded-[9px] px-2.5 text-[13.5px] font-bold outline-none select-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-40 pointer-coarse:h-11 [&>svg]:size-4 [&>svg]:text-muted';
 
 export interface MenuEntry {
   label: ReactNode;
