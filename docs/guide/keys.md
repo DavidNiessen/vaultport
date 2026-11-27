@@ -48,12 +48,17 @@ If no security key is found, make sure your user can access the device's `hidraw
 
 A **biometric device key** is created inside your device's secure hardware and can never be exported or copied — not even into the vault:
 
-| Platform   | Backend        | Key type                            |
-| ---------- | -------------- | ----------------------------------- |
-| macOS, iOS | Secure Enclave | ECDSA P-256 (`ecdsa-sha2-nistp256`) |
-| Windows    | Windows Hello  | RSA-2048 (`rsa-sha2-256`)           |
+| Platform   | Backend                                     | Key type                            |
+| ---------- | ------------------------------------------- | ----------------------------------- |
+| macOS, iOS | Secure Enclave                              | ECDSA P-256 (`ecdsa-sha2-nistp256`) |
+| Windows    | Windows Hello                               | RSA-2048 (`rsa-sha2-256`)           |
+| Android    | Android Keystore (StrongBox when available) | ECDSA P-256 (`ecdsa-sha2-nistp256`) |
 
-Every signature asks for Touch ID, Face ID or Windows Hello (or the device passcode). Because such a key is bound to one device, register a separate device key per computer or phone, or combine it with another key on your servers. Linux has no supported backend (TPM 2.0 is not implemented); Android Keystore support exists in the core but is not wired into the app yet.
+Every signature asks for Touch ID, Face ID, Windows Hello or, on Android, the system biometric prompt (strong biometrics only). Because such a key is bound to one device, register a separate device key per computer or phone, or combine it with another key on your servers. On Android the key is invalidated when you enroll a new fingerprint or face, so you would then need to create and install a new one. Linux has no supported backend (TPM 2.0 is not implemented).
+
+::: info Android support is new
+Android Keystore keys have not yet been verified on many devices. Keep a second way to log in to your servers until you have confirmed the key works on your phone.
+:::
 
 ## How hardware signatures are checked
 

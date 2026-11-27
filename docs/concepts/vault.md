@@ -12,7 +12,7 @@ Everything you configure in ssh-client — hosts, groups, identities, keys, pass
 - A random 256-bit **vault key** encrypts every record with **XChaCha20-Poly1305**. The vault id and the record id are bound into each ciphertext, so records cannot be swapped between entries or vaults.
 - The vault key itself is only ever stored **wrapped**:
   - by a key derived from your **master password** with **Argon2id** (256 MiB of memory and 3 passes on desktop, 64 MiB on phones and tablets), and/or
-  - by a random **device key** kept in the operating system's key store (macOS/iOS Keychain, Windows Credential Manager/DPAPI, Linux Secret Service).
+  - by a random **device key** kept in the operating system's key store (macOS Keychain, iOS Keychain with "this device only" access, Windows Credential Manager/DPAPI, Linux Secret Service, or on Android encrypted with an AES-256-GCM key held in the Android Keystore).
 - **Secrets** (passwords, private keys, API tokens) are separate records that are only decrypted when the Rust core needs them, held in memory that is wiped after use, and never sent to the UI.
 
 The details are in [Vault cryptography](/security/vault-crypto).
@@ -27,7 +27,7 @@ The details are in [Vault cryptography](/security/vault-crypto).
 You can enable both, or either one alone, and change this later in **Settings → Security**: set or change the master password, remove it (only while device unlock is on), or turn device unlock on and off.
 
 ::: info Android
-On Android, device unlock needs a key-store bridge that is not wired up in the current build, so Android vaults use a master password.
+On Android, the device key is encrypted with an AES-256-GCM key that is generated inside the Android Keystore (StrongBox-backed when the phone has a StrongBox chip) and never leaves it; only the ciphertext is kept in the app's private storage. This support is new and has not yet been verified on a wide range of devices — keep a master password or another unlock method as a fallback.
 :::
 
 ## Locking

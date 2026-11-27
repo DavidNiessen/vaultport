@@ -13,7 +13,7 @@ On first launch ssh-client asks you to **Create your vault**. The vault is the e
 
 1. Pick a **vault name** (letters, digits, `-` and `_`).
 2. Choose a **master password** of at least 8 characters. A long passphrase is best; the strength meter helps.
-3. Optionally enable **Unlock with this device**. This stores a random unlock key in the system key store (Keychain, Windows Credential Manager, Secret Service), so you can unlock without typing the password.
+3. Optionally enable **Unlock with this device**. This stores a random unlock key in the system key store (Keychain, Windows Credential Manager, Secret Service, Android Keystore), so you can unlock without typing the password.
 
 You need at least one of the two: a master password, or device unlock.
 
