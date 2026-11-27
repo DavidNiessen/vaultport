@@ -6,6 +6,7 @@
 
 pub mod algorithms;
 pub mod fingerprint;
+pub mod keys;
 pub mod known_hosts;
 pub mod proxy;
 
