@@ -113,6 +113,19 @@ jobs:
             echo "::notice::Updater signing key not configured; building without updater artifacts."
             echo "json=false" >> "$GITHUB_OUTPUT"
           fi
+      # tauri-action rewrites the body of an existing release with `releaseBody`, which would clear
+      # the notes release-please wrote. Pass it the same changelog section instead.
+      - name: Read the release notes
+        id: notes
+        shell: bash
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          notes=$(awk -v v="$VERSION" '
+            /^## / { if (found) exit; if (index($0, "[" v "]") || index($0, "## " v " ") == 1) { found = 1; next } }
+            found' CHANGELOG.md)
+          eof="EOF_NOTES_${RANDOM}${RANDOM}${RANDOM}"
+          printf 'body<<%s\n%s\n%s\n' "$eof" "$notes" "$eof" >> "$GITHUB_OUTPUT"
       # llama.cpp builds portably for Windows on ARM only with clang: MSVC needs GGML_NATIVE=ON,
       # which would tie the binary to the runner's CPU. Build it with clang-cl and Ninja in the
       # native ARM64 developer environment. llama-cpp-sys-2 forwards the CMAKE_* variables, and
@@ -201,6 +214,7 @@ jobs:
           tauriScript: pnpm tauri
           tagName: ${{ inputs.tag }}
           releaseName: Vaultport ${{ inputs.version }}
+          releaseBody: ${{ steps.notes.outputs.body }}
           releaseDraft: false
           uploadUpdaterJson: ${{ steps.updater.outputs.json == 'true' }}
           updaterJsonPreferNsis: true
