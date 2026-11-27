@@ -370,7 +370,7 @@
           "id": "status",
           "type": "markdown",
           "options": {
-            "text": "## Project status\n\nVaultport is pre-1.0. These parts are not finished yet:\n\n- **Git sync:** the engine supports it, but the app does not offer it yet.\n- **Autocomplete:** the deterministic autocomplete engine is not yet connected to the terminal.\n- **Azure import:** needs a subscription field in the dialog.\n- **Not yet tested on real hardware:**\n  - FIDO2 keys, Secure Enclave, Windows Hello, Android Keystore and serial devices;\n  - Mosh against a real `mosh-server`;\n  - the mobile builds.\n\nIssues and pull requests are welcome."
+            "text": "## Project status\n\nVaultport is pre-1.0. These parts are not finished yet:\n\n- **Git sync:** the engine supports it, but the app does not offer it yet.\n- **Autocomplete:** the deterministic autocomplete engine is not yet connected to the terminal.\n- **Not yet tested on real hardware:**\n  - FIDO2 keys, Secure Enclave, Windows Hello, Android Keystore and serial devices;\n  - Mosh against a real `mosh-server`;\n  - the mobile builds.\n\nIssues and pull requests are welcome."
           }
         }
       ]
