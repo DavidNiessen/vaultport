@@ -628,9 +628,12 @@ dependencies = [
  "aes",
  "base64",
  "flate2",
+ "getrandom 0.3.4",
  "ocb3",
+ "proptest",
  "prost",
  "thiserror",
+ "tracing",
  "zeroize",
 ]
 

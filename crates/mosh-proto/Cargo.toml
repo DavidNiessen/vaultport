@@ -13,10 +13,15 @@ publish.workspace = true
 aes = { version = "0.9", features = ["zeroize"] }
 base64 = "0.22"
 flate2 = "1"
+getrandom = "0.3"
 ocb3 = { version = "0.2", default-features = false }
 prost = { version = "0.14", default-features = false, features = ["derive", "std"] }
 thiserror = "2"
+tracing = "0.1"
 zeroize = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+proptest = "1"
 
 [lints]
 workspace = true
