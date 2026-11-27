@@ -12,13 +12,15 @@ import { Input, Textarea } from '@/components/ui/input';
 import { cn } from '@/lib/cn';
 import { EMPTY } from '@/lib/empty';
 import { commands, errorMessage } from '@/lib/ipc';
+import { useColorScheme } from '@/lib/platform';
 import { useHosts, useSaveHost, useSettings, useSnippets } from '@/lib/queries';
 import { useApp } from '@/stores/app';
 
 import { DEFAULT_AI_SETTINGS, type AiSettings } from '../ai/settings';
 import { renderSnippet, snippetVariables } from '../snippets/SnippetsView';
 import { sendInput, terminalRegistry } from './registry';
-import { TERMINAL_THEMES, findTheme, themePreviewBackground } from './themes';
+import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from './settings';
+import { TERMINAL_THEMES, findTheme, sidePanelBackdrop, themePreviewBackground } from './themes';
 
 type Panel = 'snippets' | 'history' | 'themes' | 'ai';
 
@@ -27,6 +29,15 @@ export function TerminalSidePanel({ tabId, hostId }: { tabId: string; hostId: st
   const [panel, setPanel] = useState<Panel>('snippets');
   const setSidePanelOpen = useApp((s) => s.setSidePanelOpen);
   const { settings: ai } = useSettings<AiSettings>('ai', DEFAULT_AI_SETTINGS);
+  // The panel shares the terminal's see-through background when it uses the Pulse theme.
+  const { settings: terminal } = useSettings<TerminalSettings>(
+    'terminal',
+    DEFAULT_TERMINAL_SETTINGS,
+  );
+  const hosts = useHosts().data ?? EMPTY;
+  const scheme = useColorScheme(useApp((s) => s.theme));
+  const themeId = hosts.find((h) => h.id === hostId)?.config.terminal.theme ?? terminal.theme;
+  const backdrop = sidePanelBackdrop(themeId, scheme);
   const tabs: { id: Panel; icon: ReactNode; label: string }[] = [
     { id: 'snippets', icon: <Code2 />, label: t('nav.snippets') },
     { id: 'history', icon: <History />, label: t('terminal.history') },
@@ -36,7 +47,11 @@ export function TerminalSidePanel({ tabId, hostId }: { tabId: string; hostId: st
   return (
     <aside
       aria-label={t('terminal.sidePanel')}
-      className="border-border bg-surface-1 flex w-80 shrink-0 flex-col border-l"
+      className={cn(
+        'border-border flex w-80 shrink-0 flex-col border-l',
+        !backdrop && 'bg-surface-1',
+      )}
+      style={backdrop ? { background: backdrop } : undefined}
     >
       <div className="flex items-center gap-1 p-2">
         {tabs.map((x) => (
