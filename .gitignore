@@ -1,0 +1,52 @@
+# Rust
+/target/
+**/target/
+*.profraw
+
+# Node
+node_modules/
+.pnpm-store/
+dist/
+dist-ssr/
+coverage/
+*.tsbuildinfo
+.vite/
+playwright-report/
+test-results/
+blob-report/
+
+# Tauri generated
+apps/desktop/src-tauri/gen/schemas/
+apps/desktop/src-tauri/gen/android/app/build/
+apps/desktop/src-tauri/gen/android/.gradle/
+apps/desktop/src-tauri/gen/android/build/
+apps/desktop/src-tauri/gen/android/local.properties
+apps/desktop/src-tauri/gen/apple/build/
+apps/desktop/src-tauri/gen/apple/DerivedData/
+
+# Docs
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+
+# Fuzz
+fuzz/artifacts/
+fuzz/corpus/
+fuzz/coverage/
+
+# Editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Secrets
+*.pem
+*.p12
+*.keystore
+*.jks
+.env
+.env.*
+!.env.example

@@ -1,0 +1,13 @@
+target/
+node_modules/
+dist/
+coverage/
+pnpm-lock.yaml
+Cargo.lock
+LICENSE
+CHANGELOG.md
+apps/desktop/src-tauri/gen/
+apps/desktop/src/lib/ipc/bindings.ts
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+*.rs

@@ -1,0 +1,16 @@
+version = 1
+SPDX-PackageName = "ssh-client"
+SPDX-PackageSupplier = "David Niessen"
+SPDX-PackageDownloadLocation = "https://github.com/davidniessen/ssh-client"
+
+[[annotations]]
+path = ["**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 David Niessen and ssh-client contributors"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+[[annotations]]
+path = ["apps/desktop/public/fonts/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "The respective font authors"
+SPDX-License-Identifier = "OFL-1.1"
