@@ -205,15 +205,37 @@ mod tests {
             .1
     }
 
+    /// Whether `bin` is a shell that actually runs here. A launcher alone is not enough: on
+    /// Windows `bash` may be the WSL stub, which starts but fails without a distribution.
+    fn usable(bin: &str) -> bool {
+        use std::process::{Command, Stdio};
+        Command::new(bin)
+            .args(["-c", "exit 0"])
+            .stdin(Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .is_ok_and(|s| s.success())
+    }
+
+    /// `dir/name` the way [`local_launch`] spells it on this platform.
+    fn joined(dir: &str, name: &str) -> String {
+        Path::new(dir).join(name).to_string_lossy().into_owned()
+    }
+
     #[test]
     fn local_launch_bash() {
         let l = local_launch(Shell::Bash, Path::new("/data/it's"), None);
-        assert_eq!(l.args, ["--rcfile", "/data/it's/bashrc", "-i"]);
+        let rcfile = joined("/data/it's", "bashrc");
+        assert_eq!(l.args, ["--rcfile", rcfile.as_str(), "-i"]);
         assert_eq!(l.env, [(ENABLE_VAR.to_owned(), "1".to_owned())]);
         assert_eq!(files(&l), ["bash.sh", "bashrc"]);
         let rc = file(&l, "bashrc");
         assert!(rc.contains("~/.bash_profile ~/.bash_login ~/.profile"));
-        assert!(rc.ends_with(". '/data/it'\\''s/bash.sh'\n"));
+        assert!(rc.ends_with(&format!(
+            ". {}\n",
+            sh_quote(&joined("/data/it's", "bash.sh"))
+        )));
         assert_eq!(file(&l, "bash.sh"), BASH);
     }
 
@@ -239,7 +261,11 @@ mod tests {
         let rc = file(&l, ".zshrc");
         assert!(rc.contains("\"$ZDOTDIR/.zshrc\""));
         assert!(rc.contains("ZDOTDIR=$SSHC_USER_ZDOTDIR"));
-        assert!(rc.ends_with("builtin source '/data/si/zsh.zsh'\n"));
+        let source = format!(
+            "builtin source {}\n",
+            sh_quote(&joined("/data/si", "zsh.zsh"))
+        );
+        assert!(rc.ends_with(&source));
         let l = local_launch(Shell::Zsh, Path::new("/data/si"), None);
         assert!(l.env.iter().all(|(k, _)| k != "SSHC_USER_ZDOTDIR"));
     }
@@ -247,10 +273,8 @@ mod tests {
     #[test]
     fn local_launch_fish() {
         let l = local_launch(Shell::Fish, Path::new("/data/a\\b"), None);
-        assert_eq!(
-            l.args,
-            ["-l", "--init-command", r"source '/data/a\\b/fish.fish'"]
-        );
+        let init = format!("source {}", fish_quote(&joined("/data/a\\b", "fish.fish")));
+        assert_eq!(l.args, ["-l", "--init-command", init.as_str()]);
         assert_eq!(files(&l), ["fish.fish"]);
     }
 
@@ -259,6 +283,9 @@ mod tests {
     fn local_launch_files_parse() {
         use std::process::{Command, Stdio};
         for (bin, sh) in [("bash", Shell::Bash), ("zsh", Shell::Zsh)] {
+            if !usable(bin) {
+                continue;
+            }
             let l = local_launch(sh, Path::new("/tmp/sshc"), None);
             for (path, body) in &l.files {
                 let Ok(out) = Command::new(bin)
@@ -296,6 +323,9 @@ mod tests {
         ];
         for (sh, rc, body, mark) in cases {
             let bin = format!("{sh:?}").to_lowercase();
+            if !usable(&bin) {
+                continue;
+            }
             let tmp = std::env::temp_dir().join(format!("sshc-si-{}-{bin}", std::process::id()));
             let (home, dir) = (tmp.join("home"), tmp.join("si"));
             std::fs::create_dir_all(home.join(rc).parent().unwrap()).unwrap();
@@ -349,6 +379,9 @@ mod tests {
         use std::io::Write;
         use std::process::{Command, Stdio};
         for (bin, script) in [("bash", BASH), ("zsh", ZSH), ("fish", FISH)] {
+            if !usable(bin) {
+                continue;
+            }
             let Ok(mut child) = Command::new(bin)
                 .arg("-n")
                 .stdin(Stdio::piped())
