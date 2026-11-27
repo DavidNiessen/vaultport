@@ -20,14 +20,10 @@ A **cloud integration** keeps a group of hosts in line with the machines in a cl
 ## Adding an integration
 
 1. **Hosts → Import → Cloud**.
-2. Choose the provider, give the integration a label, and enter the credentials (and, for AWS, regions such as `us-east-1,eu-central-1`).
+2. Choose the provider, give the integration a label, and enter the credentials (and, for AWS, regions such as `us-east-1,eu-central-1`; for Azure, a comma-separated list of the subscription IDs to list VMs from).
 3. **Add and sync.** ssh-client creates a group named after the integration and fills it with one host per instance.
 
 In the current build the sync runs when you add the integration; the core can re-sync an existing integration, but there is no button for it in the UI yet. Cloud credentials are stored as vault secrets that **stay on this device**: they are not synced to your other devices.
-
-::: info Azure subscriptions
-The Azure client lists VMs per subscription. If a sync reports that no Azure subscription is configured, your build's import dialog does not yet ask for subscription IDs; this is a known gap in the current UI.
-:::
 
 ## What a sync changes
 
