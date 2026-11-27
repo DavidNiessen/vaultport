@@ -430,8 +430,6 @@
     "brightBold": "Bright colors for bold text",
     "changePassword": "Change master password",
     "checkUpdates": "Check for updates",
-    "clearClipboard": "Clear copied secrets",
-    "clearClipboardHint": "Clears the clipboard 30 seconds after copying a password",
     "copyOnSelect": "Copy on select",
     "cursor": "Cursor style",
     "cursorBlink": "Blinking cursor",

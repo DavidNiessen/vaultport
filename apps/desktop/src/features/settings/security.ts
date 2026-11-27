@@ -4,12 +4,10 @@ export interface SecuritySettings {
   autoLockMinutes: number;
   lockOnSleep: boolean;
   lockOnBackground: boolean;
-  clearClipboard: boolean;
 }
 
 export const DEFAULT_SECURITY_SETTINGS: SecuritySettings = {
   autoLockMinutes: 15,
   lockOnSleep: true,
   lockOnBackground: true,
-  clearClipboard: true,
 };

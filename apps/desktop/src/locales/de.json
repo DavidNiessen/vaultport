@@ -430,8 +430,6 @@
     "brightBold": "Helle Farben für fetten Text",
     "changePassword": "Master-Passwort ändern",
     "checkUpdates": "Nach Updates suchen",
-    "clearClipboard": "Kopierte Geheimnisse löschen",
-    "clearClipboardHint": "Leert die Zwischenablage 30 Sekunden nach dem Kopieren eines Passworts",
     "copyOnSelect": "Beim Markieren kopieren",
     "cursor": "Cursor-Stil",
     "cursorBlink": "Blinkender Cursor",

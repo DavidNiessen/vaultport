@@ -335,13 +335,6 @@ function Security({
             }
           />
         </Row>
-        <Row label={t('settings.clearClipboard')} description={t('settings.clearClipboardHint')}>
-          <Switch
-            label={t('settings.clearClipboard')}
-            checked={settings.clearClipboard}
-            onCheckedChange={(v) => update({ clearClipboard: v })}
-          />
-        </Row>
       </Card>
       <Card title={status.hasPassword ? t('settings.changePassword') : t('settings.setPassword')}>
         <div className="grid gap-3 sm:grid-cols-2">
