@@ -270,8 +270,14 @@ mod tests {
 
     #[test]
     fn configs_quote_paths() {
-        let c = client_configs("/Applications/ssh client.app/Contents/MacOS/vaultport");
-        assert!(c[0].text.contains("-- '/Applications/ssh client.app"));
+        let c = client_configs("/Applications/Vaultport Beta.app/Contents/MacOS/vaultport");
+        // cmd and PowerShell don't treat single quotes as quoting, so Windows uses double quotes.
+        let expected = if cfg!(windows) {
+            "-- \"/Applications/Vaultport Beta.app/Contents/MacOS/vaultport\" mcp"
+        } else {
+            "-- '/Applications/Vaultport Beta.app/Contents/MacOS/vaultport' mcp"
+        };
+        assert!(c[0].text.ends_with(expected), "{}", c[0].text);
         let json: serde_json::Value = serde_json::from_str(&c[1].text).unwrap_or_default();
         assert_eq!(json["mcpServers"]["vaultport"]["args"][0], "mcp");
         assert_eq!(
