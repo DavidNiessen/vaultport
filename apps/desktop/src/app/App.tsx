@@ -3,6 +3,7 @@ import { QueryClientProvider, useQuery, useQueryClient } from '@tanstack/react-q
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Toaster } from 'sonner';
 
+import { Ambient } from '@/components/Ambient';
 import { TooltipProvider } from '@/components/ui/controls';
 import { Spinner } from '@/components/ui/controls';
 import { commands, onVaultLocked, type VaultStatus } from '@/lib/ipc';
@@ -121,6 +122,7 @@ function Root() {
 
   return (
     <>
+      <Ambient variant={unlocked ? 'top' : 'full'} />
       <div className={hidden ? 'h-full blur-xl' : 'h-full'}>
         {!current ? (
           <div className="flex h-full items-center justify-center">
