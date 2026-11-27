@@ -244,7 +244,11 @@
     "unfavorite": "Remove from favorites",
     "useIdentity": "Use an identity",
     "useMosh": "Use Mosh",
-    "username": "Username"
+    "username": "Username",
+    "summary": "{{hosts}} · {{groups}}",
+    "groupCount_one": "{{count}} group",
+    "groupCount_other": "{{count}} groups",
+    "layout": "Layout"
   },
   "import": {
     "addIntegration": "Add and sync",
@@ -355,7 +359,13 @@
     "unlockWithDevice": "Unlock with {{store}}",
     "vault": "Vault",
     "vaultName": "Vault name",
-    "vaultNameHint": "Letters, digits, - and _"
+    "vaultNameHint": "Letters, digits, - and _",
+    "promiseEncryptedTitle": "Encrypted on your device",
+    "promiseEncrypted": "Hosts, keys and passwords are sealed with XChaCha20-Poly1305 under your master password.",
+    "promiseServerlessTitle": "No account, no servers",
+    "promiseServerless": "Nothing to sign up for and no telemetry. Vaultport never talks to a server of ours.",
+    "promiseSyncTitle": "Sync on your terms",
+    "promiseSync": "Keep devices in step through storage you already own, end-to-end encrypted."
   },
   "logs": {
     "bookmark": "Keep this log",
@@ -385,7 +395,9 @@
     "noConnections": "No open connections",
     "noConnectionsHint": "Tap a host in your vault to connect.",
     "settings": "Settings",
-    "snippets": "Snippets"
+    "snippets": "Snippets",
+    "unlocked": "Unlocked",
+    "vault": "Vault"
   },
   "palette": {
     "actions": "Actions",
@@ -397,7 +409,8 @@
     "placeholder": "Search hosts, tabs, snippets and actions…",
     "snippets": "Run snippet in current tab",
     "tabs": "Open tabs",
-    "title": "Command palette"
+    "title": "Command palette",
+    "short": "Search…"
   },
   "serial": {
     "baud": "Baud rate",
