@@ -7,6 +7,7 @@
 //! * [`inspect_private_key`] / [`decode_private_key`] understand OpenSSH, PKCS#8 (plain and
 //!   encrypted), PKCS#1 RSA and PuTTY PPK v2/v3 keys.
 //! * [`parse_certificate`] summarizes an OpenSSH certificate for display.
+//! * [`export_to_host`] appends a public key to a remote `authorized_keys` idempotently.
 
 use crate::fingerprint::{key_type_and_bits, randomart, sha256_fingerprint};
 use core_model::KeyAlgorithm;
@@ -567,6 +568,28 @@ pub fn authorized_keys_command(public_line: &str, path: Option<&str>) -> Result<
         line = shell_quote(&line),
     );
     Ok(format!("sh -c {}", shell_quote(&script)))
+}
+
+/// Appends `public_line` to the remote `authorized_keys` (see [`authorized_keys_command`]).
+pub async fn export_to_host(
+    conn: &crate::Connection,
+    public_line: &str,
+    path: Option<&str>,
+) -> Result<ExportOutcome, crate::SshError> {
+    let cmd = authorized_keys_command(public_line, path)?;
+    let out = conn.exec(&cmd).await?;
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    if stdout.contains(MARK_ADDED) {
+        Ok(ExportOutcome::Added)
+    } else if stdout.contains(MARK_PRESENT) {
+        Ok(ExportOutcome::AlreadyPresent)
+    } else {
+        Err(crate::SshError::UnexpectedResponse(format!(
+            "authorized_keys update failed (exit {:?}): {}",
+            out.exit_status,
+            String::from_utf8_lossy(&out.stderr).trim()
+        )))
+    }
 }
 
 #[cfg(test)]
