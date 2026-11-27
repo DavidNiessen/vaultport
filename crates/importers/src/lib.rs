@@ -38,6 +38,7 @@ mod finalize;
 pub mod known_hosts;
 pub mod mobaxterm;
 pub mod putty;
+pub mod securecrt;
 pub mod ssh_config;
 mod text;
 mod wire;
