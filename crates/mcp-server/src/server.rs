@@ -117,7 +117,10 @@ where
         }
         if buf.len() > MAX_MESSAGE {
             let _ = out_tx.send(error(&Value::Null, INVALID_REQUEST, "message too large"));
-            break Ok(());
+            break Err(std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                "message too large",
+            ));
         }
         let line = buf.trim_ascii();
         if line.is_empty() {
@@ -232,7 +235,12 @@ where
         while tasks.try_join_next().is_some() {}
     };
 
-    tasks.abort_all();
+    if result.is_ok() {
+        // The client closed its input: finish the calls in flight (it waits for us to exit).
+        while tasks.join_next().await.is_some() {}
+    } else {
+        tasks.abort_all();
+    }
     handler.disconnected(connection_id);
     drop(out_tx);
     let _ = writer_task.await;
@@ -276,6 +284,9 @@ mod tests {
         async fn call(&self, ctx: CallContext, name: String, arguments: Value) -> ToolResult {
             if name == "sleep" {
                 std::future::pending::<()>().await;
+            }
+            if arguments.get("slow").is_some() {
+                tokio::time::sleep(std::time::Duration::from_millis(200)).await;
             }
             ToolResult::json(json!({"client": ctx.client.name, "args": arguments}))
         }
@@ -347,6 +358,16 @@ mod tests {
         assert_eq!(by_id(5)["error"]["code"], INVALID_PARAMS);
         assert_eq!(by_id(6)["result"], json!({}));
         assert!(out.iter().any(|m| m["error"]["code"] == PARSE_ERROR));
+    }
+
+    #[tokio::test]
+    async fn calls_in_flight_finish_after_the_client_closes_its_input() {
+        let out = run(concat!(
+            r#"{"jsonrpc":"2.0","id":7,"method":"tools/call","params":{"name":"echo","arguments":{"slow":true}}}"#,
+            "\n",
+        ))
+        .await;
+        assert!(out.iter().any(|m| m["id"] == json!(7)));
     }
 
     #[tokio::test]
