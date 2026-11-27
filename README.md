@@ -126,7 +126,6 @@ Vaultport is pre-1.0. These parts are not finished yet:
 
 - **Git sync:** the engine supports it, but the app does not offer it yet.
 - **Autocomplete:** the deterministic autocomplete engine is not yet connected to the terminal.
-- **Azure import:** needs a subscription field in the dialog.
 - **Not yet tested on real hardware:**
   - FIDO2 keys, Secure Enclave, Windows Hello, Android Keystore and serial devices;
   - Mosh against a real `mosh-server`;

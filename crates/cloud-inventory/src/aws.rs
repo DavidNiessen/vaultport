@@ -25,6 +25,7 @@ pub enum AwsService {
 #[serde(rename_all = "camelCase")]
 pub struct AwsSettings {
     /// Regions to query, e.g. `["eu-central-1", "us-east-1"]`.
+    #[serde(deserialize_with = "crate::model::string_list")]
     pub regions: Vec<String>,
     /// Services to query (default: EC2 only).
     #[serde(default = "default_services")]
@@ -529,5 +530,20 @@ mod lightsail {
         pub key: String,
         #[serde(default)]
         pub value: Option<String>,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used)]
+    use super::*;
+
+    #[test]
+    fn settings_accept_comma_separated_regions() {
+        // The desktop app stores every settings value as a JSON string.
+        let map = serde_json::json!({ "regions": "us-east-1, eu-central-1" });
+        let s = AwsSettings::from_map(map.as_object().unwrap()).unwrap();
+        assert_eq!(s.regions, ["us-east-1", "eu-central-1"]);
+        assert_eq!(s.services, [AwsService::Ec2]);
     }
 }

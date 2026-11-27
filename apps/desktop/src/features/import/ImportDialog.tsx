@@ -41,6 +41,7 @@ export function ImportDialog({
   const [b, setB] = useState('');
   const [c, setC] = useState('');
   const [region, setRegion] = useState('us-east-1');
+  const [subscriptions, setSubscriptions] = useState('');
 
   const refresh = async () => {
     for (const k of ['hosts', 'groups', 'keys', 'knownHosts', 'forwards', 'identities'])
@@ -74,7 +75,8 @@ export function ImportDialog({
           : provider === 'digitalocean'
             ? { token: a }
             : { tenantId: a, clientId: b, clientSecret: c };
-      const settings: Record<string, string> = provider === 'aws' ? { regions: region } : {};
+      const settings: Record<string, string> =
+        provider === 'aws' ? { regions: region } : provider === 'azure' ? { subscriptions } : {};
       const n = await commands.cloudAddIntegration(
         provider,
         label || provider,
@@ -202,6 +204,15 @@ export function ImportDialog({
               </Field>
               <Field label="Client secret">
                 {(id) => <PasswordInput id={id} value={c} onChange={(e) => setC(e.target.value)} />}
+              </Field>
+              <Field label={t('import.subscriptions')} hint={t('import.subscriptionsHint')}>
+                {(id) => (
+                  <Input
+                    id={id}
+                    value={subscriptions}
+                    onChange={(e) => setSubscriptions(e.target.value)}
+                  />
+                )}
               </Field>
             </>
           )}
