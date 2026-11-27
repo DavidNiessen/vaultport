@@ -166,9 +166,57 @@ pub fn os_hint(text: &str) -> OsKind {
         .map_or(OsKind::Unknown, |(_, os)| *os)
 }
 
+/// Deserializes a list of strings from a JSON array or a comma-separated string.
+///
+/// Integration settings coming from the desktop UI are stored as JSON strings, so a list
+/// such as AWS regions or Azure subscription IDs arrives as `"a, b"`. Items are trimmed and
+/// empty items are dropped.
+pub(crate) fn string_list<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum Raw {
+        List(Vec<String>),
+        Csv(String),
+    }
+    let items = match Raw::deserialize(deserializer)? {
+        Raw::List(v) => v,
+        Raw::Csv(s) => s.split(',').map(str::to_owned).collect(),
+    };
+    Ok(items
+        .into_iter()
+        .map(|s| s.trim().to_owned())
+        .filter(|s| !s.is_empty())
+        .collect())
+}
+
 #[cfg(test)]
 mod tests {
+    #![allow(clippy::unwrap_used)]
     use super::*;
+
+    #[derive(Debug, Deserialize)]
+    struct Lists {
+        #[serde(deserialize_with = "string_list")]
+        items: Vec<String>,
+    }
+
+    fn list(v: &serde_json::Value) -> Result<Vec<String>, serde_json::Error> {
+        serde_json::from_value::<Lists>(serde_json::json!({ "items": v })).map(|l| l.items)
+    }
+
+    #[test]
+    fn string_lists() {
+        assert_eq!(list(&"a, b ,,c ".into()).unwrap(), ["a", "b", "c"]);
+        assert_eq!(
+            list(&serde_json::json!([" a", "", "b"])).unwrap(),
+            ["a", "b"]
+        );
+        assert!(list(&" , ".into()).unwrap().is_empty());
+        assert!(list(&serde_json::json!(42)).is_err());
+    }
 
     #[test]
     fn os_hints() {

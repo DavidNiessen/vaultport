@@ -50,6 +50,7 @@ impl fmt::Debug for AzureCredentials {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AzureSettings {
+    #[serde(deserialize_with = "crate::model::string_list")]
     pub subscriptions: Vec<String>,
     #[serde(default = "default_address")]
     pub address: AddressPreference,
@@ -498,5 +499,57 @@ mod api {
     pub struct DnsSettings {
         #[serde(default)]
         pub fqdn: Option<String>,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::unwrap_used)]
+    use super::*;
+
+    fn map(v: &serde_json::Value) -> serde_json::Map<String, serde_json::Value> {
+        v.as_object().cloned().unwrap()
+    }
+
+    fn credentials() -> AzureCredentials {
+        AzureCredentials {
+            tenant_id: "tenant".into(),
+            client_id: "client".into(),
+            client_secret: "secret".into(),
+        }
+    }
+
+    #[test]
+    fn settings_accept_comma_separated_subscriptions() {
+        // The desktop app stores every settings value as a JSON string.
+        let s = AzureSettings::from_map(&map(&serde_json::json!({
+            "subscriptions": " 11111111-aaaa , 22222222-bbbb,",
+        })))
+        .unwrap();
+        assert_eq!(s.subscriptions, ["11111111-aaaa", "22222222-bbbb"]);
+        assert_eq!(s.address, AddressPreference::Public);
+        assert!(AzureInventory::new(credentials(), s).is_ok());
+    }
+
+    #[test]
+    fn settings_accept_subscription_arrays() {
+        let s = AzureSettings::from_map(&map(&serde_json::json!({
+            "subscriptions": ["sub-a", "sub-b"],
+            "address": "private",
+        })))
+        .unwrap();
+        assert_eq!(s.subscriptions, ["sub-a", "sub-b"]);
+        assert_eq!(s.address, AddressPreference::Private);
+    }
+
+    #[test]
+    fn empty_subscriptions_are_rejected() {
+        let s =
+            AzureSettings::from_map(&map(&serde_json::json!({ "subscriptions": " , " }))).unwrap();
+        assert_eq!(
+            AzureInventory::new(credentials(), s).unwrap_err(),
+            InventoryError::Config("no Azure subscription configured".into())
+        );
+        assert!(AzureSettings::from_map(&serde_json::Map::new()).is_err());
     }
 }
