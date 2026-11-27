@@ -188,9 +188,137 @@ export const commands = {
 	fsUploadEdit: (editId: string, force: boolean, options?: InvokeOptions) => __TAURI_INVOKE<null>("fs_upload_edit", { editId, force }, options),
 	/**  Serial ports available on this device. */
 	serialListPorts: (options?: InvokeOptions) => __TAURI_INVOKE<SerialPort_Serialize[]>("serial_list_ports", undefined, options),
+	/**  Agent settings, connected clients and setup snippets. */
+	agentStatus: (options?: InvokeOptions) => __TAURI_INVOKE<AgentStatus_Serialize>("agent_status", undefined, options),
+	/**  Saves agent settings and starts or stops the local endpoint. */
+	agentSaveSettings: (settings: AgentSettings_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<AgentStatus_Serialize>("agent_save_settings", { settings }, options),
+	/**  Answers an approval request. */
+	agentRespond: (id: string, decision: AgentDecision, options?: InvokeOptions) => __TAURI_INVOKE<null>("agent_respond", { id, decision }, options),
+	/**  Recent agent actions, newest first. */
+	agentAuditLog: (options?: InvokeOptions) => __TAURI_INVOKE<AuditEntry_Serialize[]>("agent_audit_log", undefined, options),
+	/**  Replaces the access token and disconnects every agent. */
+	agentRotateToken: (options?: InvokeOptions) => __TAURI_INVOKE<AgentStatus_Serialize>("agent_rotate_token", undefined, options),
+	/**  Disconnects every agent without changing settings. */
+	agentDisconnectAll: (options?: InvokeOptions) => __TAURI_INVOKE<void>("agent_disconnect_all", undefined, options),
 };
 
 /* Types */
+/**  An action waiting for the user's decision. */
+export type AgentApprovalRequest = AgentApprovalRequest_Serialize | AgentApprovalRequest_Deserialize;
+
+/**  An action waiting for the user's decision. */
+export type AgentApprovalRequest_Deserialize = {
+	id: string,
+	client: string,
+	tool: string,
+	title: string,
+	host?: string | null,
+	/**  What exactly will happen (command, path, content preview). */
+	details: string,
+	destructive: boolean,
+};
+
+/**  An action waiting for the user's decision. */
+export type AgentApprovalRequest_Serialize = {
+	id: string,
+	client: string,
+	tool: string,
+	title: string,
+	host: string | null,
+	/**  What exactly will happen (command, path, content preview). */
+	details: string,
+	destructive: boolean,
+};
+
+/**  An agent connected right now. */
+export type AgentClient = {
+	id: string,
+	name: string,
+	connectedAt: number | null,
+};
+
+/**  What a client needs to be configured. */
+export type AgentClientConfig = AgentClientConfig_Serialize | AgentClientConfig_Deserialize;
+
+/**  What a client needs to be configured. */
+export type AgentClientConfig_Deserialize = {
+	/**  "claude-code", "claude-desktop", "cursor", "vscode", "generic". */
+	client: string,
+	/**  "shell" (a command to run) or "json" (a config file snippet). */
+	kind: string,
+	/**  Where the snippet goes, if it is a file. */
+	location?: string | null,
+	text: string,
+};
+
+/**  What a client needs to be configured. */
+export type AgentClientConfig_Serialize = {
+	/**  "claude-code", "claude-desktop", "cursor", "vscode", "generic". */
+	client: string,
+	/**  "shell" (a command to run) or "json" (a config file snippet). */
+	kind: string,
+	/**  Where the snippet goes, if it is a file. */
+	location: string | null,
+	text: string,
+};
+
+/**  The user's answer. */
+export type AgentDecision = "deny" | "allowOnce" | 
+/**  Allow this tool on this host until the agent disconnects. */
+"allowSession";
+
+/**  Device-local agent settings (never synced: granting an agent access is a per-device choice). */
+export type AgentSettings = AgentSettings_Serialize | AgentSettings_Deserialize;
+
+/**  Device-local agent settings (never synced: granting an agent access is a per-device choice). */
+export type AgentSettings_Deserialize = {
+	enabled?: boolean,
+	approval?: ApprovalPolicy,
+	/**  Only offer tools that do not change anything. */
+	readOnly?: boolean,
+	/**  `true`: every saved SSH host; `false`: only [`AgentSettings::hosts`]. */
+	allHosts?: boolean,
+	hosts?: string[],
+};
+
+/**  Device-local agent settings (never synced: granting an agent access is a per-device choice). */
+export type AgentSettings_Serialize = {
+	enabled: boolean,
+	approval: ApprovalPolicy,
+	/**  Only offer tools that do not change anything. */
+	readOnly: boolean,
+	/**  `true`: every saved SSH host; `false`: only [`AgentSettings::hosts`]. */
+	allHosts: boolean,
+	hosts: string[],
+};
+
+/**  Agent settings and live state for the UI. */
+export type AgentStatus = AgentStatus_Serialize | AgentStatus_Deserialize;
+
+/**  Agent settings and live state for the UI. */
+export type AgentStatus_Deserialize = {
+	supported: boolean,
+	settings: AgentSettings_Deserialize,
+	listening: boolean,
+	error?: string | null,
+	clients: AgentClient[],
+	/**  Command that starts the MCP server (`<exe> mcp`). */
+	command: string,
+	configs: AgentClientConfig_Deserialize[],
+};
+
+/**  Agent settings and live state for the UI. */
+export type AgentStatus_Serialize = {
+	supported: boolean,
+	settings: AgentSettings_Serialize,
+	listening: boolean,
+	error: string | null,
+	clients: AgentClient[],
+	/**  Command that starts the MCP server (`<exe> mcp`). */
+	command: string,
+	configs: AgentClientConfig_Serialize[],
+};
+
 export type AiState = "notInstalled" | "downloading" | "installed" | "loading" | "ready" | "error";
 
 export type AiStatus = AiStatus_Serialize | AiStatus_Deserialize;
@@ -218,6 +346,43 @@ export type AiSuggestion = {
 	explanation: string,
 	risk: string,
 };
+
+/**  When the user is asked before an agent acts. */
+export type ApprovalPolicy = 
+/**  Ask before every tool call, including reads. */
+"always" | 
+/**  Reads (listing hosts, directories, reading files) run without asking. */
+"changesOnly";
+
+/**  One recorded agent action. */
+export type AuditEntry = AuditEntry_Serialize | AuditEntry_Deserialize;
+
+/**  One recorded agent action. */
+export type AuditEntry_Deserialize = {
+	id: string,
+	at: number | null,
+	client: string,
+	tool: string,
+	host?: string | null,
+	summary: string,
+	outcome: AuditOutcome,
+	message?: string | null,
+};
+
+/**  One recorded agent action. */
+export type AuditEntry_Serialize = {
+	id: string,
+	at: number | null,
+	client: string,
+	tool: string,
+	host: string | null,
+	summary: string,
+	outcome: AuditOutcome,
+	message: string | null,
+};
+
+/**  How a call ended. */
+export type AuditOutcome = "ok" | "error" | "denied";
 
 /**  Terminal backspace behaviour. */
 export type Backspace = 

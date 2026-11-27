@@ -163,7 +163,7 @@ impl FilesState {
         }
     }
 
-    async fn fs(&self, app: &AppHandle, source: &FsSource) -> CmdResult<Arc<dyn FileSystem>> {
+    pub async fn fs(&self, app: &AppHandle, source: &FsSource) -> CmdResult<Arc<dyn FileSystem>> {
         match source {
             FsSource::Local => Ok(Arc::new(Local)),
             FsSource::Remote { host_id } => {

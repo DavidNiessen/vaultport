@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+pub mod agent;
 pub mod ai;
 pub mod data;
 pub mod entities;

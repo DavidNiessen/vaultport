@@ -193,6 +193,8 @@ pub async fn vault_lock(
         .stop_all()
         .await;
     app.state::<crate::net::ConnectionPool>().close_all().await;
+    app.state::<std::sync::Arc<crate::agent::AgentState>>()
+        .clear_grants();
     app.state::<crate::commands::files::FilesState>()
         .reset()
         .await;
