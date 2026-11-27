@@ -468,7 +468,7 @@
     "securityPolicy": "Sicherheitsrichtlinie",
     "setPassword": "Master-Passwort festlegen",
     "shellIntegration": "Shell-Integration",
-    "shellIntegrationHint": "Lädt das Integrationsskript in lokale bash-, zsh- und fish-Shells und setzt SSH_CLIENT_SHELL_INTEGRATION für SSH-Sitzungen (OSC 7 / 133)",
+    "shellIntegrationHint": "Lädt das Integrationsskript in lokale bash-, zsh- und fish-Shells und setzt VAULTPORT_SHELL_INTEGRATION für SSH-Sitzungen (OSC 7 / 133)",
     "shortcuts": "Tastenkürzel",
     "sourceCode": "Quellcode",
     "storedEncrypted": "Einstellungen werden verschlüsselt in deinem Tresor gespeichert.",
