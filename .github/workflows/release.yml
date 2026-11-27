@@ -153,6 +153,27 @@ jobs:
             'CMAKE_CXX_COMPILER_TARGET=aarch64-pc-windows-msvc',
             'CMAKE_ASM_COMPILER_TARGET=aarch64-pc-windows-msvc'
           ) | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      # Tauri signs and notarizes whenever APPLE_CERTIFICATE is set, even to an empty string, and
+      # an unset secret expands to one. Export only the Apple secrets that are configured.
+      - name: Export Apple signing secrets
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          eof="EOF_$(openssl rand -hex 16)"
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY \
+            APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            if [ -n "${!name}" ]; then
+              printf '%s<<%s\n%s\n%s\n' "$name" "$eof" "${!name}" "$eof" >> "$GITHUB_ENV"
+            fi
+          done
+          [ -n "$APPLE_CERTIFICATE" ] || echo "::notice::Apple signing not configured; building an unsigned macOS app."
       - name: Import Windows code-signing certificate
         if: runner.os == 'Windows' && env.HAS_WINDOWS_CERT == 'true'
         shell: pwsh
@@ -172,12 +193,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           projectPath: apps/desktop
           tauriScript: pnpm tauri
