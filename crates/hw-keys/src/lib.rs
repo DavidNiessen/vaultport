@@ -28,10 +28,25 @@
 
 pub mod ecdsa;
 mod error;
+#[cfg(all(
+    feature = "fido2-hid",
+    not(any(target_os = "android", target_os = "ios"))
+))]
+pub mod fido2;
 mod pin;
 pub mod pubkey;
 mod signer;
 pub mod sk;
+#[cfg(any(
+    all(
+        feature = "fido2-hid",
+        not(any(target_os = "android", target_os = "ios"))
+    ),
+    target_os = "macos",
+    target_os = "ios",
+    windows
+))]
+mod task;
 mod wire;
 
 pub use error::{Error, Result};
