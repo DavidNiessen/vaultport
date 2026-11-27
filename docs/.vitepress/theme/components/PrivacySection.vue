@@ -52,9 +52,10 @@ const claims = [
       <div class="aura" aria-hidden="true" />
       <header v-reveal class="head">
         <p class="kicker">Serverless &amp; private by design</p>
-        <h2 id="privacy-title" class="h2">
+        <h2 id="privacy-title" class="h2">Nothing to leak.</h2>
+        <p class="lede">
           Your data never leaves your devices — unless you send it to storage you own.
-        </h2>
+        </p>
       </header>
 
       <div
@@ -112,7 +113,8 @@ const claims = [
   padding: 72px 56px 56px;
   border-radius: 28px;
   background:
-    radial-gradient(80% 60% at 50% 0%, rgb(99 102 241 / 0.16), transparent 70%), var(--sc-surface);
+    radial-gradient(80% 60% at 50% 0%, rgb(var(--sc-accent-rgb) / 0.16), transparent 70%),
+    var(--sc-surface);
   box-shadow: 0 0 0 1px var(--sc-border);
 }
 
@@ -123,7 +125,13 @@ const claims = [
   right: 15%;
   z-index: -1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, #818cf8, #22d3ee, transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--sc-accent),
+    rgb(var(--sc-glow-2)),
+    transparent
+  );
 }
 
 .head {
@@ -134,21 +142,34 @@ const claims = [
 
 .kicker {
   margin: 0;
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
   font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
+  font-weight: 800;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .h2 {
-  margin: 14px 0 0;
+  margin: 16px 0 0;
   color: var(--vp-c-text-1);
-  font-size: clamp(28px, 3.8vw, 42px);
-  font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: -0.03em;
+  font-family: var(--sc-font-display);
+  font-size: clamp(32px, 5vw, 60px);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
   text-wrap: balance;
+}
+
+.lede {
+  max-width: 560px;
+  margin: 20px auto 0;
+  color: var(--vp-c-text-2);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.55;
+  text-wrap: pretty;
 }
 
 .flow {
@@ -178,13 +199,13 @@ const claims = [
 }
 
 .node svg {
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
 }
 
 .node.store {
   width: 156px;
   box-shadow:
-    inset 0 0 0 1px rgb(99 102 241 / 0.5),
+    inset 0 0 0 1px rgb(var(--sc-accent-rgb) / 0.5),
     0 0 40px -10px var(--sc-glow);
 }
 
@@ -268,7 +289,7 @@ const claims = [
 }
 
 .claim-icon {
-  color: var(--sc-accent);
+  color: var(--sc-accent-text);
 }
 
 .claim h3 {

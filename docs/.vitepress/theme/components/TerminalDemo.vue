@@ -214,7 +214,7 @@ onBeforeUnmount(() => {
   color: #7e86a3;
 }
 .accent {
-  color: #a5b4fc;
+  color: var(--sc-accent-text);
 }
 .cyan {
   color: #7be2ee;
