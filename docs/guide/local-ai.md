@@ -53,3 +53,5 @@ AI is never used for autocomplete. Completion is a separate, deterministic engin
 ## Performance
 
 Inference uses [llama.cpp](https://github.com/ggml-org/llama.cpp) on the CPU; Apple silicon builds can offload to the GPU through Metal. Speed depends on your hardware, which is why phones and tablets use the smaller model.
+
+On Windows on ARM, the engine needs the ARMv8.2 dot-product instructions, which every Windows 11 ARM device has (Snapdragon 850 and later). On a processor without them, Local AI reports itself as unavailable instead of starting.
