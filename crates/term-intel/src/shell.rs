@@ -138,6 +138,9 @@ impl ShellIntegrationParser {
                     }
                     if matches!(e, ShellEvent::PromptStart) {
                         line.clear();
+                        // A command line reported after its `C` mark must not leak into the
+                        // next command.
+                        *pending_command = None;
                     }
                     emit(e);
                 }

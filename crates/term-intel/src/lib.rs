@@ -12,6 +12,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod scripts;
 pub mod shell;
 pub mod vt;
 
