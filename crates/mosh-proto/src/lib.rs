@@ -6,14 +6,19 @@
 //!   packet sequence number. Datagram = last 8 nonce bytes ‖ ciphertext ‖ 16-byte tag.
 //!   Datagrams are authenticated before anything is parsed.
 //! * **Packets** ([`packet`]): plaintext = 16-bit send timestamp ‖ 16-bit timestamp reply ‖
-//!   payload.
+//!   fragment.
+//! * **Fragments** ([`fragment`]): instruction id ‖ fragment number (top bit = final) ‖ bytes,
+//!   reassembled with bounded memory, then zlib-inflated (bounded) into a
+//!   `TransportBuffers.Instruction` ([`proto`]).
 
 #![forbid(unsafe_code)]
 
 pub mod crypto;
 mod error;
+pub mod fragment;
 mod key;
 pub mod packet;
+pub mod proto;
 
 pub use error::{Error, Result};
 pub use key::{MoshKey, PRINTABLE_KEY_LEN};

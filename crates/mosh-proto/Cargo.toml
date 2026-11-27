@@ -12,7 +12,9 @@ publish.workspace = true
 [dependencies]
 aes = { version = "0.9", features = ["zeroize"] }
 base64 = "0.22"
+flate2 = "1"
 ocb3 = { version = "0.2", default-features = false }
+prost = { version = "0.14", default-features = false, features = ["derive", "std"] }
 thiserror = "2"
 zeroize = { version = "1", features = ["derive"] }
 
