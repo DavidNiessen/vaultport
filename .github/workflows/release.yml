@@ -113,6 +113,67 @@ jobs:
             echo "::notice::Updater signing key not configured; building without updater artifacts."
             echo "json=false" >> "$GITHUB_OUTPUT"
           fi
+      # llama.cpp builds portably for Windows on ARM only with clang: MSVC needs GGML_NATIVE=ON,
+      # which would tie the binary to the runner's CPU. Build it with clang-cl and Ninja in the
+      # native ARM64 developer environment. llama-cpp-sys-2 forwards the CMAKE_* variables, and
+      # the target-suffixed generator only reaches CMake builds for this target.
+      - name: Build llama.cpp with clang-cl
+        if: matrix.name == 'Windows arm64'
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -property installationPath
+          $before = @{}
+          Get-ChildItem env: | ForEach-Object { $before[$_.Name] = $_.Value }
+          cmd /c "`"$vs\VC\Auxiliary\Build\vcvarsall.bat`" arm64 >nul && set" | ForEach-Object {
+            if ($_ -match '^([^=]+)=(.*)$' -and $before[$matches[1]] -ne $matches[2]) {
+              "$($matches[1])=$($matches[2])" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+            }
+          }
+          $clang = @("$env:ProgramFiles\LLVM\bin\clang-cl.exe", "$vs\VC\Tools\Llvm\ARM64\bin\clang-cl.exe") |
+            Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $clang) {
+            choco install llvm -y --no-progress
+            $clang = "$env:ProgramFiles\LLVM\bin\clang-cl.exe"
+          }
+          $ninja = "$vs\Common7\IDE\CommonExtensions\Microsoft\CMake\Ninja\ninja.exe"
+          if (-not (Test-Path $ninja)) {
+            choco install ninja -y --no-progress
+            $ninja = (Get-Command ninja).Source
+          }
+          & $clang --version
+          $clang = $clang -replace '\\', '/'
+          $ninja = $ninja -replace '\\', '/'
+          @(
+            'CMAKE_GENERATOR_aarch64_pc_windows_msvc=Ninja',
+            "CMAKE_MAKE_PROGRAM=$ninja",
+            "CMAKE_C_COMPILER=$clang",
+            "CMAKE_CXX_COMPILER=$clang",
+            "CMAKE_ASM_COMPILER=$clang",
+            'CMAKE_C_COMPILER_TARGET=aarch64-pc-windows-msvc',
+            'CMAKE_CXX_COMPILER_TARGET=aarch64-pc-windows-msvc',
+            'CMAKE_ASM_COMPILER_TARGET=aarch64-pc-windows-msvc'
+          ) | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+      # Tauri signs and notarizes whenever APPLE_CERTIFICATE is set, even to an empty string, and
+      # an unset secret expands to one. Export only the Apple secrets that are configured.
+      - name: Export Apple signing secrets
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          eof="EOF_$(openssl rand -hex 16)"
+          for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY \
+            APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
+            if [ -n "${!name}" ]; then
+              printf '%s<<%s\n%s\n%s\n' "$name" "$eof" "${!name}" "$eof" >> "$GITHUB_ENV"
+            fi
+          done
+          [ -n "$APPLE_CERTIFICATE" ] || echo "::notice::Apple signing not configured; building an unsigned macOS app."
       - name: Import Windows code-signing certificate
         if: runner.os == 'Windows' && env.HAS_WINDOWS_CERT == 'true'
         shell: pwsh
@@ -132,12 +193,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         with:
           projectPath: apps/desktop
           tauriScript: pnpm tauri

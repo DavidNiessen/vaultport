@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.1](https://github.com/DavidNiessen/vaultport/compare/v0.1.0...v0.1.1) (2026-11-27)
+
+
+### Bug Fixes
+
+* **mobile:** compile the Android plugin against API 36 ([83a14f7](https://github.com/DavidNiessen/vaultport/commit/83a14f75403a6e25ec188248b040d08646c9802b))
+
+
+### Documentation
+
+* update the README design with Readme Studio [skip ci] ([a8b4262](https://github.com/DavidNiessen/vaultport/commit/a8b4262ddb6fc85e25d647240c7942e5c380b6d4))
+
 ## 0.1.0 (2026-11-27)
 
 
