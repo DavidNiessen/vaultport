@@ -4,7 +4,37 @@ use std::process::Command;
 
 fn main() {
     link_clang_runtime();
-    tauri_build::build();
+    let embed_manifest = windows_msvc();
+    let mut attributes = tauri_build::Attributes::new();
+    if embed_manifest {
+        attributes = attributes
+            .windows_attributes(tauri_build::WindowsAttributes::new_without_app_manifest());
+    }
+    if let Err(e) = tauri_build::try_build(attributes) {
+        panic!("tauri-build failed: {e:#}");
+    }
+    if embed_manifest {
+        embed_windows_manifest();
+    }
+}
+
+fn windows_msvc() -> bool {
+    std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows")
+        && std::env::var("CARGO_CFG_TARGET_ENV").as_deref() == Ok("msvc")
+}
+
+/// Embeds the Common Controls v6 manifest into every executable of this package on MSVC.
+///
+/// tauri-build puts the manifest in the app's resource file, which only the app binary links.
+/// Test executables then lack it, load Common Controls v5 and fail to start with
+/// `STATUS_ENTRYPOINT_NOT_FOUND` (`TaskDialogIndirect` only exists in v6). Linker arguments
+/// apply to the app and its test binaries alike.
+fn embed_windows_manifest() {
+    let manifest = PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR"))
+        .join("windows-app-manifest.xml");
+    println!("cargo:rerun-if-changed={}", manifest.display());
+    println!("cargo:rustc-link-arg=/MANIFEST:EMBED");
+    println!("cargo:rustc-link-arg=/MANIFESTINPUT:{}", manifest.display());
 }
 
 /// Links clang's compiler runtime on Apple targets when llama.cpp is built in.
