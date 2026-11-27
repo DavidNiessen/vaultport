@@ -4,6 +4,7 @@ import { CloudOff, Fingerprint, KeyRound, Lock, RefreshCw, ShieldCheck } from 'l
 import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Select, Switch } from '@/components/ui/controls';
 import { Field, Input, PasswordInput } from '@/components/ui/input';
@@ -26,13 +27,9 @@ function Brand() {
   const { t } = useTranslation();
   return (
     <div className="mb-8 flex flex-col items-center text-center lg:items-start lg:text-left">
-      <img
-        src="/logo.svg"
-        alt=""
-        className="mb-5 size-14 drop-shadow-[0_8px_24px_rgb(99_102_241/0.35)]"
-      />
-      <h1 className="text-[28px] leading-tight font-semibold tracking-tight">vaultport</h1>
-      <p className="text-muted mt-1.5 text-[14px]">{t('lock.tagline')}</p>
+      <Logo className="mb-6 size-14" />
+      <h1 className="font-display text-[44px] leading-none uppercase sm:text-[52px]">vaultport</h1>
+      <p className="text-muted mt-3 text-[15px] font-semibold">{t('lock.tagline')}</p>
     </div>
   );
 }
@@ -57,11 +54,11 @@ function Promises() {
     <ul className="hidden flex-col gap-5 lg:flex">
       {items.map((i) => (
         <li key={i.title} className="flex gap-3.5">
-          <span className="bg-surface-2 border-border text-accent-text flex size-9 shrink-0 items-center justify-center rounded-[9px] border [&>svg]:size-4">
+          <span className="bg-text/[0.07] text-accent-text flex size-10 shrink-0 items-center justify-center rounded-full [&>svg]:size-[18px]">
             {i.icon}
           </span>
           <span>
-            <span className="block text-[14px] font-semibold">{i.title}</span>
+            <span className="block text-[15px] font-extrabold">{i.title}</span>
             <span className="text-muted mt-0.5 block text-[13px] leading-relaxed">{i.body}</span>
           </span>
         </li>
@@ -71,7 +68,7 @@ function Promises() {
 }
 
 const panel =
-  'bg-surface-1 border-border flex flex-col gap-4 rounded-2xl border p-6 shadow-[var(--shadow)] sm:p-7';
+  'bg-surface-1/80 border-border-strong flex flex-col gap-4 rounded-[24px] border p-6 shadow-[var(--shadow)] backdrop-blur-xl sm:p-7';
 
 function RestoreOrPair({
   mode,
@@ -113,7 +110,7 @@ function RestoreOrPair({
   };
   return (
     <div className={panel}>
-      <h2 className="text-[17px] font-semibold tracking-tight">
+      <h2 className="text-[18px] font-extrabold tracking-tight">
         {mode === 'restore' ? t('lock.restoreTitle') : t('lock.pairTitle')}
       </h2>
       <p className="text-muted text-[13px]">
@@ -159,7 +156,7 @@ function RestoreOrPair({
           {t('common.back')}
         </Button>
         <Button
-          variant="primary"
+          variant="accent"
           className="flex-1"
           loading={busy}
           disabled={!secret || !name || (mode === 'pair' && (!payload || !code))}
@@ -232,11 +229,7 @@ export function LockScreen({
   };
 
   return (
-    <div className="bg-bg bg-grid safe-top safe-bottom relative flex min-h-full items-center justify-center overflow-y-auto px-4 py-10">
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-[420px] bg-[radial-gradient(60%_100%_at_50%_0%,var(--accent-soft),transparent)]"
-        aria-hidden
-      />
+    <div className="aura safe-top safe-bottom relative flex min-h-full items-center justify-center overflow-y-auto px-4 py-10">
       <div className="relative grid w-full max-w-sm items-center gap-14 lg:max-w-[920px] lg:grid-cols-[1fr_400px]">
         <div>
           <Brand />
@@ -248,7 +241,7 @@ export function LockScreen({
           ) : (
             <form onSubmit={(e) => void submit(e)} className={panel}>
               <div className="flex items-center gap-3">
-                <span className="bg-accent-soft text-accent-text flex size-9 items-center justify-center rounded-[9px]">
+                <span className="bg-accent-soft text-accent-text flex size-10 items-center justify-center rounded-full">
                   {mode === 'create' ? (
                     <ShieldCheck className="size-[18px]" />
                   ) : (
@@ -256,11 +249,11 @@ export function LockScreen({
                   )}
                 </span>
                 <div>
-                  <h2 className="text-[17px] leading-tight font-semibold tracking-tight">
+                  <h2 className="text-[18px] leading-tight font-extrabold tracking-tight">
                     {mode === 'create' ? t('lock.createTitle') : t('lock.unlockTitle')}
                   </h2>
                   {mode === 'unlock' ? (
-                    <p className="text-muted mt-0.5 font-mono text-[12px]">{name}</p>
+                    <p className="text-accent-text mt-0.5 font-mono text-[12px]">{name}</p>
                   ) : null}
                 </div>
               </div>
@@ -346,7 +339,7 @@ export function LockScreen({
 
               <Button
                 type="submit"
-                variant="primary"
+                variant="accent"
                 size="lg"
                 loading={busy}
                 disabled={mode === 'create' ? !canCreate : password.length === 0}
@@ -366,7 +359,7 @@ export function LockScreen({
           <div className="mt-5 text-center">
             <button
               type="button"
-              className="text-accent-text text-[13px] font-medium hover:underline"
+              className="text-accent-text text-[13.5px] font-bold hover:underline"
               onClick={() => {
                 setMode(mode === 'create' ? 'unlock' : 'create');
                 setError(null);
@@ -376,7 +369,7 @@ export function LockScreen({
             >
               {mode === 'create' ? t('lock.haveVault') : t('lock.newVault')}
             </button>
-            <div className="text-muted mt-3 flex items-center justify-center gap-3 text-[13px]">
+            <div className="text-muted mt-3 flex items-center justify-center gap-3 text-[13px] font-semibold">
               <button
                 type="button"
                 className="hover:text-text transition-colors"

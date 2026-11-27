@@ -248,17 +248,18 @@ export function HostsView({ onImport }: { onImport: () => void }) {
             }}
             className={cn(
               'bg-surface-2 border-border flex w-full items-center gap-3 border text-left transition-[background-color,border-color,box-shadow] duration-150',
-              'hover:border-border-strong hover:bg-surface-3/60',
+              // Hover: a soft wash of the preset colour with an accent edge.
+              'hover:border-border-strong hover:bg-[linear-gradient(90deg,var(--accent-soft),transparent_85%)] hover:shadow-[inset_3px_0_0_var(--accent)]',
               grid
-                ? 'rounded-[var(--radius-card)] p-3 pr-12 shadow-xs'
-                : 'h-12 rounded-[10px] px-3 pr-12 pointer-coarse:h-14',
+                ? 'rounded-[var(--radius-card)] p-3.5 pr-12'
+                : 'h-14 rounded-[14px] px-3.5 pr-12',
               isSelected && 'border-accent! ring-accent-soft ring-3',
             )}
           >
             <OsIcon os={h.os} size={grid ? 'md' : 'sm'} />
             <span className={cn('min-w-0 flex-1', !grid && 'flex items-center gap-4')}>
               <span className={cn('flex items-center gap-1.5', !grid && 'w-56 shrink-0')}>
-                <span className="truncate text-[13px] font-semibold">{h.label}</span>
+                <span className="truncate text-[14px] font-extrabold">{h.label}</span>
                 {h.favorite ? (
                   <Star
                     className="text-warning size-3 shrink-0 fill-current"
@@ -310,8 +311,8 @@ export function HostsView({ onImport }: { onImport: () => void }) {
               aria-label={`${t('hosts.connect')} ${h.label}`}
               onClick={() => sessions.connectHost(h)}
               className={cn(
-                'bg-accent text-accent-fg hover:bg-accent-hover absolute right-3 flex size-7 items-center justify-center rounded-[7px] opacity-0 shadow-xs transition-[opacity,transform] duration-150 group-focus-within/card:opacity-100 group-hover/card:opacity-100',
-                grid ? 'top-3' : 'top-1/2 -translate-y-1/2',
+                'bg-accent text-accent-fg hover:bg-accent-hover absolute right-3.5 flex size-8 items-center justify-center rounded-full opacity-0 shadow-[0_4px_14px_-4px_var(--accent)] transition-[opacity,transform] duration-150 group-focus-within/card:opacity-100 group-hover/card:opacity-100',
+                grid ? 'top-3.5' : 'top-1/2 -translate-y-1/2',
               )}
             >
               <Play className="size-3.5 fill-current" />
@@ -336,7 +337,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
               <>
                 {platform.localTerminal ? (
                   <Button
-                    size="sm"
+                    variant="secondary"
                     onClick={() => sessions.openLocal()}
                     title={formatShortcut(platform, 'Mod+L')}
                   >
@@ -344,7 +345,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
                     {t('hosts.terminal')}
                   </Button>
                 ) : null}
-                <Button size="sm" onClick={() => sessions.openSerialPicker()}>
+                <Button variant="secondary" onClick={() => sessions.openSerialPicker()}>
                   <Usb className="size-4" />
                   {t('hosts.serial')}
                 </Button>
@@ -356,24 +357,24 @@ export function HostsView({ onImport }: { onImport: () => void }) {
 
         <div className={cn('flex items-center gap-2', !phone && 'mt-6')}>
           <form onSubmit={onSubmit} className="relative min-w-0 flex-1">
-            <Search className="text-subtle pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2" />
+            <Search className="text-subtle pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2" />
             <input
               ref={inputRef}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('hosts.omnibox')}
               aria-label={t('hosts.omnibox')}
-              className="bg-surface-1 border-border-input text-text placeholder:text-subtle hover:border-border-strong focus:border-accent focus:ring-accent-soft h-11 w-full rounded-[10px] border pr-32 pl-10 text-[14px] shadow-xs transition-[border-color,box-shadow] duration-150 focus:ring-3 focus:outline-none"
+              className="bg-surface-3 border-border-input text-text placeholder:text-subtle hover:border-border-strong focus:border-accent focus:ring-accent-soft h-11 w-full rounded-full border pr-32 pl-11 text-[14px] font-semibold transition-[border-color,box-shadow] duration-150 focus:ring-3 focus:outline-none"
               autoCapitalize="off"
               autoCorrect="off"
               spellCheck={false}
             />
             <Button
               type="submit"
-              variant={quick ? 'primary' : 'ghost'}
+              variant={quick ? 'accent' : 'ghost'}
               size="sm"
               disabled={!quick && visibleHosts.length === 0}
-              className="absolute top-1/2 right-1.5 h-8 -translate-y-1/2"
+              className="absolute top-1/2 right-1.5 h-9 -translate-y-1/2"
             >
               {t('hosts.connect')}
               <ArrowRight className="size-3.5" />
@@ -383,9 +384,10 @@ export function HostsView({ onImport }: { onImport: () => void }) {
             <DropdownMenu
               trigger={
                 <Button
-                  size="sm"
-                  variant={tagFilter.length ? 'secondary' : 'ghost'}
+                  size={tagFilter.length ? 'md' : 'icon'}
+                  variant={tagFilter.length ? 'accent' : 'secondary'}
                   aria-label={t('hosts.filterTags')}
+                  className="h-11 min-w-11"
                 >
                   <Tag className="size-4" />
                   {tagFilter.length ? tagFilter.length : null}
@@ -425,7 +427,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
                   icon: <List />,
                 },
               ]}
-              className="[&_button]:px-2"
+              className="h-11 [&_button]:h-9 [&_button]:px-3"
             />
           </div>
         </div>
@@ -447,7 +449,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
               >
                 <button
                   type="button"
-                  className="hover:text-text hover:bg-surface-3 rounded-md px-1.5 py-0.5 transition-colors"
+                  className="hover:text-text hover:bg-text/[0.07] rounded-full px-2 py-0.5 font-semibold transition-colors"
                   onClick={() => setCurrentGroup(null)}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => dropOnGroup(e, null)}
@@ -502,13 +504,13 @@ export function HostsView({ onImport }: { onImport: () => void }) {
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => dropOnGroup(e, g.id)}
                     className={cn(
-                      'bg-surface-2 border-border hover:border-border-strong hover:bg-surface-3/60 group flex h-14 items-center gap-3 rounded-[var(--radius-card)] border px-3 text-left shadow-xs transition-[background-color,border-color,box-shadow] duration-150',
+                      'bg-surface-2 border-border hover:border-border-strong hover:bg-text/[0.04] group flex h-16 items-center gap-3 rounded-[var(--radius-card)] border px-3.5 text-left transition-[background-color,border-color,box-shadow] duration-150',
                       selected?.id === g.id && 'border-accent! ring-accent-soft ring-3',
                     )}
                   >
                     <GroupIcon />
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-semibold">{g.label}</span>
+                      <span className="block truncate text-[14px] font-extrabold">{g.label}</span>
                       <span className="text-muted block text-xs">
                         {t('hosts.hostCount', { count: counts.get(g.id) ?? 0 })}
                       </span>
@@ -556,7 +558,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
             action={
               filtering ? undefined : (
                 <div className="flex gap-2">
-                  <Button variant="primary" onClick={createHost}>
+                  <Button variant="accent" onClick={createHost}>
                     <Plus className="size-4" />
                     {t('hosts.newHost')}
                   </Button>
@@ -586,10 +588,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
 
 function ProtocolBadge({ protocol }: { protocol: 'ssh' | 'mosh' | 'telnet' }) {
   return (
-    <Badge
-      tone={protocol === 'ssh' ? 'neutral' : protocol === 'mosh' ? 'info' : 'warning'}
-      className="font-mono tracking-tight uppercase"
-    >
+    <Badge tone={protocol === 'ssh' ? 'accent' : protocol === 'mosh' ? 'info' : 'warning'}>
       {protocol}
     </Badge>
   );
@@ -608,7 +607,7 @@ function CreateButton({
   const { t } = useTranslation();
   return (
     <div className="flex">
-      <Button variant="primary" size="sm" onClick={onHost} className="rounded-r-none">
+      <Button variant="primary" onClick={onHost} className="rounded-r-none pr-3.5">
         <Plus className="size-4" />
         {t('hosts.newHost')}
       </Button>
@@ -617,8 +616,7 @@ function CreateButton({
         trigger={
           <Button
             variant="primary"
-            size="sm"
-            className="rounded-l-none border-l border-white/20 px-2"
+            className="border-primary-fg/15 rounded-l-none border-l pr-3 pl-2.5"
             aria-label={t('hosts.moreCreate')}
           >
             <ChevronDown className="size-4" />
