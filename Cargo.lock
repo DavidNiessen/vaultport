@@ -3539,7 +3539,7 @@ name = "hw-keys"
 version = "0.1.1"
 dependencies = [
  "async-trait",
- "base64 0.22.1",
+ "base64 0.23.1",
  "core-foundation 0.10.1",
  "core-model",
  "ctap-hid-fido2",
@@ -3796,7 +3796,7 @@ dependencies = [
 name = "importers"
 version = "0.1.1"
 dependencies = [
- "base64 0.22.1",
+ "base64 0.23.1",
  "core-model",
  "csv",
  "hmac 0.12.1",
@@ -4598,7 +4598,7 @@ name = "mosh-proto"
 version = "0.1.1"
 dependencies = [
  "aes 0.9.4",
- "base64 0.22.1",
+ "base64 0.23.1",
  "flate2",
  "getrandom 0.3.4",
  "ocb3",
@@ -7447,7 +7447,7 @@ name = "ssh-engine"
 version = "0.1.1"
 dependencies = [
  "async-trait",
- "base64 0.22.1",
+ "base64 0.23.1",
  "core-model",
  "hmac 0.13.0",
  "russh",
@@ -7629,7 +7629,7 @@ name = "sync"
 version = "0.1.1"
 dependencies = [
  "async-trait",
- "base64 0.22.1",
+ "base64 0.23.1",
  "cloud-inventory",
  "core-model",
  "gix",
@@ -8840,7 +8840,7 @@ name = "vault"
 version = "0.1.1"
 dependencies = [
  "argon2 0.5.3",
- "base64 0.22.1",
+ "base64 0.23.1",
  "chacha20poly1305",
  "core-model",
  "getrandom 0.3.4",
@@ -8864,7 +8864,7 @@ name = "vaultport"
 version = "0.1.1"
 dependencies = [
  "async-trait",
- "base64 0.22.1",
+ "base64 0.23.1",
  "cloud-inventory",
  "core-model",
  "dirs 6.0.0",

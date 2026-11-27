@@ -18,7 +18,7 @@ fido2-hid = ["dep:ctap-hid-fido2", "dep:hidapi"]
 [dependencies]
 core-model = { path = "../core-model" }
 async-trait = "0.1"
-base64 = "0.22"
+base64 = "0.23"
 ed25519-dalek = "3"
 getrandom = "0.3"
 hex = "0.4"

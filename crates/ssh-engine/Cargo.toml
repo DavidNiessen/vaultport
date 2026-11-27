@@ -21,7 +21,7 @@ core-model = { path = "../core-model" }
 russh = { version = "0.65.4", default-features = false, features = ["ring", "rsa", "flate2"] }
 russh-sftp = "4.0.0"
 async-trait = "0.1"
-base64 = "0.22"
+base64 = "0.23"
 hmac = "0.13"
 sha1 = "0.11"
 thiserror = "2"
