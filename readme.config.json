@@ -41,7 +41,7 @@
     "headingFont": "space-grotesk",
     "radius": 14,
     "border": 1,
-    "texture": "lines",
+    "texture": "dots",
     "motion": "full",
     "surface": true
   },
@@ -61,7 +61,7 @@
             "stats": true,
             "third": "contributors",
             "install": "",
-            "emblem": "",
+            "emblem": "vault",
             "emblemStyle": "orbit",
             "scanline": false,
             "glow": true
@@ -100,7 +100,8 @@
           "id": "intro",
           "type": "markdown",
           "options": {
-            "text": "**A secure, serverless SSH, SFTP, Mosh, Telnet and serial client for Windows, macOS, Linux, Android and iOS.** Your hosts, keys and snippets live in an end-to-end encrypted vault on your devices and sync only through storage you control. There are no accounts, no telemetry and no servers run by this project.\n\n[Website & docs](https://vaultport.niessen.dev/) · [Download](https://vaultport.niessen.dev/download) · [llms.txt](https://vaultport.niessen.dev/llms.txt) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)"
+            "text": "**A secure, serverless SSH, SFTP, Mosh, Telnet and serial client for Windows, macOS, Linux, Android and iOS.** Your hosts, keys and snippets live in an end-to-end encrypted vault on your devices and sync only through storage you control. There are no accounts, no telemetry and no servers run by this project.\n\n[Website & docs](https://vaultport.niessen.dev/) · [Download](https://vaultport.niessen.dev/download) · [llms.txt](https://vaultport.niessen.dev/llms.txt) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)",
+            "align": "left"
           }
         }
       ]
@@ -113,7 +114,8 @@
           "id": "screenshots",
           "type": "markdown",
           "options": {
-            "text": "![Hosts view](.github/screenshots/hosts.png)\n\n<table>\n  <tr>\n    <td><img src=\".github/screenshots/terminal.png\" alt=\"Terminal session\" /></td>\n    <td><img src=\".github/screenshots/agent-approval.png\" alt=\"Approving an AI agent's command\" /></td>\n    <td width=\"22%\"><img src=\".github/screenshots/phone.png\" alt=\"Phone layout\" /></td>\n  </tr>\n</table>"
+            "text": "![Hosts view](.github/screenshots/hosts.png)\n\n<table>\n  <tr>\n    <td><img src=\".github/screenshots/terminal.png\" alt=\"Terminal session\" /></td>\n    <td><img src=\".github/screenshots/agent-approval.png\" alt=\"Approving an AI agent's command\" /></td>\n    <td width=\"22%\"><img src=\".github/screenshots/phone.png\" alt=\"Phone layout\" /></td>\n  </tr>\n</table>",
+            "align": "left"
           }
         }
       ]
@@ -169,7 +171,8 @@
                 "anchor": "",
                 "level": "1"
               }
-            ]
+            ],
+            "align": "left"
           }
         }
       ]
@@ -182,7 +185,8 @@
           "id": "highlights-heading",
           "type": "markdown",
           "options": {
-            "text": "## Highlights"
+            "text": "## Highlights",
+            "align": "left"
           }
         }
       ]
@@ -258,7 +262,8 @@
           "id": "features-table",
           "type": "markdown",
           "options": {
-            "text": "## Features\n\n| Area              | What you get                                                                                                                                                                                                                                                      |\n| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Connections       | SSH with post-quantum key exchange (`mlkem768x25519-sha256`), jump-host chains, HTTP/SOCKS proxies, agent forwarding with confirmation, env vars, startup snippets, keep-alive and auto-reconnect. Native Mosh (no external binary), Telnet, serial, local shell. |\n| Terminal          | xterm.js with WebGL, truecolor, OSC 7/8/52/133, search, themes and fonts, split workspaces with broadcast input, session pills and an accessory bar on mobile.                                                                                                    |\n| SFTP              | Dual-pane local↔remote and remote↔remote browser, transfer queue with resume, drag and drop, permissions, edit locally and re-upload.                                                                                                                             |\n| Keys & identities | Ed25519/ECDSA/RSA generation and import, OpenSSH certificates, FIDO2 `sk-` keys, non-exportable keys in the Secure Enclave, Windows Hello/TPM and Android Keystore, identities shared across hosts, \"install on host\".                                            |\n| Organisation      | Groups with per-setting inheritance, tags, snippets with `{{variables}}`, port-forwarding rules, known hosts with strict host-key checking, encrypted session logs with replay.                                                                                   |\n| Import            | `~/.ssh/config`, `known_hosts`, CSV, PuTTY, MobaXterm, SecureCRT; AWS, DigitalOcean and Azure inventories (credentials stay on the device).                                                                                                                       |\n| Sync              | End-to-end encrypted, conflict-free sync through a folder (iCloud Drive, Dropbox, Syncthing…), WebDAV or S3-compatible storage, encrypted `.vaultport` backups, QR pairing.                                                                                        |\n| Local AI          | Optional command generation with a small model that downloads automatically and runs fully on the device. Suggestions are inserted, never executed.                                                                                                               |\n| AI agents         | Built-in [MCP](https://modelcontextprotocol.io) server: Claude Code, Claude Desktop, Cursor, VS Code or Codex can list hosts, run commands, read and write files and manage tunnels — locally, without seeing credentials, with your approval in the app.         |\n| Design            | Native-feeling custom title bar per OS, dark/light themes, keyboard-first with a command palette, responsive from phone to desktop, English and German.                                                                                                           |"
+            "text": "## Features\n\n| Area              | What you get                                                                                                                                                                                                                                                      |\n| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Connections       | SSH with post-quantum key exchange (`mlkem768x25519-sha256`), jump-host chains, HTTP/SOCKS proxies, agent forwarding with confirmation, env vars, startup snippets, keep-alive and auto-reconnect. Native Mosh (no external binary), Telnet, serial, local shell. |\n| Terminal          | xterm.js with WebGL, truecolor, OSC 7/8/52/133, search, themes and fonts, split workspaces with broadcast input, session pills and an accessory bar on mobile.                                                                                                    |\n| SFTP              | Dual-pane local↔remote and remote↔remote browser, transfer queue with resume, drag and drop, permissions, edit locally and re-upload.                                                                                                                             |\n| Keys & identities | Ed25519/ECDSA/RSA generation and import, OpenSSH certificates, FIDO2 `sk-` keys, non-exportable keys in the Secure Enclave, Windows Hello/TPM and Android Keystore, identities shared across hosts, \"install on host\".                                            |\n| Organisation      | Groups with per-setting inheritance, tags, snippets with `{{variables}}`, port-forwarding rules, known hosts with strict host-key checking, encrypted session logs with replay.                                                                                   |\n| Import            | `~/.ssh/config`, `known_hosts`, CSV, PuTTY, MobaXterm, SecureCRT; AWS, DigitalOcean and Azure inventories (credentials stay on the device).                                                                                                                       |\n| Sync              | End-to-end encrypted, conflict-free sync through a folder (iCloud Drive, Dropbox, Syncthing…), WebDAV or S3-compatible storage, encrypted `.vaultport` backups, QR pairing.                                                                                        |\n| Local AI          | Optional command generation with a small model that downloads automatically and runs fully on the device. Suggestions are inserted, never executed.                                                                                                               |\n| AI agents         | Built-in [MCP](https://modelcontextprotocol.io) server: Claude Code, Claude Desktop, Cursor, VS Code or Codex can list hosts, run commands, read and write files and manage tunnels — locally, without seeing credentials, with your approval in the app.         |\n| Design            | Native-feeling custom title bar per OS, dark/light themes, keyboard-first with a command palette, responsive from phone to desktop, English and German.                                                                                                           |",
+            "align": "left"
           }
         }
       ]
@@ -271,7 +276,8 @@
           "id": "security",
           "type": "markdown",
           "options": {
-            "text": "## Security at a glance\n\n- **Secrets never reach the web UI.** Keys and passwords live only in the Rust core and are\n  zeroised after use.\n- **Vault encryption:** XChaCha20-Poly1305 per record. The vault key is wrapped by an\n  Argon2id-derived key and/or a device key in the OS key store.\n- **Hardened app shell:** Tauri isolation pattern, strict CSP, least-privilege capabilities.\n- **Defaults that refuse weak crypto:** legacy algorithms are opt-in per host.\n- **Sync backends only ever see ciphertext.** Hash chains detect rollback and truncation.\n- **Supply chain:**\n  - every GitHub Action is pinned by SHA; checks with cargo-deny, CodeQL, OpenSSF Scorecard and nightly fuzzing;\n  - releases ship SHA-256 checksums signed with Sigstore, an SPDX SBOM and build provenance.\n\nRead the [security documentation](https://vaultport.niessen.dev/security/) and the\n[threat model](https://vaultport.niessen.dev/security/). Report vulnerabilities as\ndescribed in [SECURITY.md](SECURITY.md)."
+            "text": "## Security at a glance\n\n- **Secrets never reach the web UI.** Keys and passwords live only in the Rust core and are\n  zeroised after use.\n- **Vault encryption:** XChaCha20-Poly1305 per record. The vault key is wrapped by an\n  Argon2id-derived key and/or a device key in the OS key store.\n- **Hardened app shell:** Tauri isolation pattern, strict CSP, least-privilege capabilities.\n- **Defaults that refuse weak crypto:** legacy algorithms are opt-in per host.\n- **Sync backends only ever see ciphertext.** Hash chains detect rollback and truncation.\n- **Supply chain:**\n  - every GitHub Action is pinned by SHA; checks with cargo-deny, CodeQL, OpenSSF Scorecard and nightly fuzzing;\n  - releases ship SHA-256 checksums signed with Sigstore, an SPDX SBOM and build provenance.\n\nRead the [security documentation](https://vaultport.niessen.dev/security/) and the\n[threat model](https://vaultport.niessen.dev/security/). Report vulnerabilities as\ndescribed in [SECURITY.md](SECURITY.md).",
+            "align": "left"
           }
         }
       ]
@@ -284,7 +290,8 @@
           "id": "ai-agents",
           "type": "markdown",
           "options": {
-            "text": "## Use with AI agents\n\nTurn on **Settings → AI agents**, then register Vaultport as an MCP server. For example, with\nClaude Code:\n\n```bash\nclaude mcp add --scope user vaultport -- /path/to/vaultport mcp\n```\n\nThe app shows the exact command or JSON for each supported client. Agents connect through a\nlocal socket that only your user can open. Every action that changes something needs your\napproval, and so does every read unless you relax that. You can restrict agents to selected\nhosts or to read-only tools, and every call is listed in the activity log."
+            "text": "## Use with AI agents\n\nTurn on **Settings → AI agents**, then register Vaultport as an MCP server. For example, with\nClaude Code:\n\n```bash\nclaude mcp add --scope user vaultport -- /path/to/vaultport mcp\n```\n\nThe app shows the exact command or JSON for each supported client. Agents connect through a\nlocal socket that only your user can open. Every action that changes something needs your\napproval, and so does every read unless you relax that. You can restrict agents to selected\nhosts or to read-only tools, and every call is listed in the activity log.",
+            "align": "left"
           }
         }
       ]
@@ -339,7 +346,8 @@
           "id": "building",
           "type": "markdown",
           "options": {
-            "text": "## Building from source\n\nPrerequisites:\n\n- Rust: the version in `rust-toolchain.toml` (rustup installs it).\n- Node.js 22 and pnpm 10.\n- The [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your platform.\n\n```bash\npnpm install\n```\n\n```bash\npnpm dev\n```\n\n```bash\npnpm build\n```\n\nRun the checks CI runs:\n\n```bash\ncargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace\n```\n\n```bash\npnpm lint && pnpm typecheck && pnpm test && pnpm format:check\n```\n\nThe protocol integration tests use Docker test servers. See\n[docker/test-servers](docker/test-servers/README.md) and [CONTRIBUTING.md](CONTRIBUTING.md).\nMobile builds use `pnpm tauri android build` and `pnpm tauri ios build` from `apps/desktop`."
+            "text": "## Building from source\n\nPrerequisites:\n\n- Rust: the version in `rust-toolchain.toml` (rustup installs it).\n- Node.js 22 and pnpm 10.\n- The [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your platform.\n\n```bash\npnpm install\n```\n\n```bash\npnpm dev\n```\n\n```bash\npnpm build\n```\n\nRun the checks CI runs:\n\n```bash\ncargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace\n```\n\n```bash\npnpm lint && pnpm typecheck && pnpm test && pnpm format:check\n```\n\nThe protocol integration tests use Docker test servers. See\n[docker/test-servers](docker/test-servers/README.md) and [CONTRIBUTING.md](CONTRIBUTING.md).\nMobile builds use `pnpm tauri android build` and `pnpm tauri ios build` from `apps/desktop`.",
+            "align": "left"
           }
         }
       ]
@@ -352,7 +360,8 @@
           "id": "layout",
           "type": "markdown",
           "options": {
-            "text": "## Repository layout\n\n```text\napps/desktop/        Tauri app: React UI (src/) and Rust shell (src-tauri/)\ncrates/              core libraries: vault, ssh-engine, sftp-engine, mosh-proto, telnet-proto,\n                     serial-io, hw-keys, sync, importers, cloud-inventory, session-log,\n                     term-intel, local-ai, mcp-server, core-model\nplugins/mobile/      native Android (Kotlin) and iOS (Swift) services\ndocs/                website and documentation (VitePress), deployed to GitHub Pages\nfuzz/                cargo-fuzz targets for every parser and decoder\ndocker/test-servers/ OpenSSH and friends for integration tests\n```"
+            "text": "## Repository layout\n\n```text\napps/desktop/        Tauri app: React UI (src/) and Rust shell (src-tauri/)\ncrates/              core libraries: vault, ssh-engine, sftp-engine, mosh-proto, telnet-proto,\n                     serial-io, hw-keys, sync, importers, cloud-inventory, session-log,\n                     term-intel, local-ai, mcp-server, core-model\nplugins/mobile/      native Android (Kotlin) and iOS (Swift) services\ndocs/                website and documentation (VitePress), deployed to GitHub Pages\nfuzz/                cargo-fuzz targets for every parser and decoder\ndocker/test-servers/ OpenSSH and friends for integration tests\n```",
+            "align": "left"
           }
         }
       ]
@@ -380,7 +389,8 @@
           "id": "status",
           "type": "markdown",
           "options": {
-            "text": "## Project status\n\nVaultport is pre-1.0. These parts are not finished yet:\n\n- **Git sync:** the engine supports it, but the app does not offer it yet.\n- **Autocomplete:** the deterministic autocomplete engine is not yet connected to the terminal.\n- **Not yet tested on real hardware:**\n  - FIDO2 keys, Secure Enclave, Windows Hello, Android Keystore and serial devices;\n  - Mosh against a real `mosh-server`;\n  - the mobile builds.\n\nIssues and pull requests are welcome."
+            "text": "## Project status\n\nVaultport is pre-1.0. These parts are not finished yet:\n\n- **Git sync:** the engine supports it, but the app does not offer it yet.\n- **Autocomplete:** the deterministic autocomplete engine is not yet connected to the terminal.\n- **Not yet tested on real hardware:**\n  - FIDO2 keys, Secure Enclave, Windows Hello, Android Keystore and serial devices;\n  - Mosh against a real `mosh-server`;\n  - the mobile builds.\n\nIssues and pull requests are welcome.",
+            "align": "left"
           }
         }
       ]
@@ -411,24 +421,8 @@
           "id": "license",
           "type": "markdown",
           "options": {
-            "text": "## License\n\nVaultport is free software under the [GNU General Public License v3.0 or later](LICENSE).\nThird-party licenses are listed in [LICENSES](LICENSES) and in each release's SBOM."
-          }
-        }
-      ]
-    },
-    {
-      "id": "footer",
-      "align": "center",
-      "blocks": [
-        {
-          "id": "footer",
-          "type": "footer",
-          "options": {
-            "message": "rebuilt every night by readme studio",
-            "stamp": true,
-            "barcode": true,
-            "waves": true,
-            "credit": false
+            "text": "## License\n\nVaultport is free software under the [GNU General Public License v3.0 or later](LICENSE).\nThird-party licenses are listed in [LICENSES](LICENSES) and in each release's SBOM.",
+            "align": "left"
           }
         }
       ]
