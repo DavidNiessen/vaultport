@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Domain model for ssh-client.
+//! Domain model for vaultport.
 //!
 //! The model mirrors how people think about infrastructure: **groups** (nestable, not folders)
 //! contain **hosts**; both carry a sparse [`HostConfig`] whose fields are inherited per

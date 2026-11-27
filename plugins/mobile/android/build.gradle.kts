@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "dev.niessen.sshclient.mobile"
+    namespace = "dev.niessen.vaultport.mobile"
     compileSdk = 35
 
     defaultConfig {

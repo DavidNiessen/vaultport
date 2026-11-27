@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-package dev.niessen.sshclient.mobile
+package dev.niessen.vaultport.mobile
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -38,7 +38,7 @@ class KeepAliveService : Service() {
         )
         val text = if (sessions == 1) "1 connection is open" else "$sessions connections are open"
         val notification: Notification = NotificationCompat.Builder(this, CHANNEL)
-            .setContentTitle("ssh-client")
+            .setContentTitle("vaultport")
             .setContentText(text)
             .setSmallIcon(android.R.drawable.stat_sys_upload_done)
             .setOngoing(true)
@@ -56,7 +56,7 @@ class KeepAliveService : Service() {
 
     companion object {
         const val EXTRA_SESSIONS = "sessions"
-        private const val CHANNEL = "ssh-client-connections"
+        private const val CHANNEL = "vaultport-connections"
         private const val NOTIFICATION_ID = 4022
     }
 }

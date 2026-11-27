@@ -20,9 +20,9 @@ use crate::error::{CmdError, ErrorCode};
 use crate::state::AppState;
 
 /// Usage notes sent to the model in `initialize`.
-pub const INSTRUCTIONS: &str = "ssh-client gives you access to the servers saved in the user's \
-ssh-client vault. Start with list_hosts and refer to hosts by their id or label. Credentials \
-never leave ssh-client: connections are opened by the app with the user's saved keys. Actions \
+pub const INSTRUCTIONS: &str = "Vaultport gives you access to the servers saved in the user's \
+Vaultport vault. Start with list_hosts and refer to hosts by their id or label. Credentials \
+never leave Vaultport: connections are opened by the app with the user's saved keys. Actions \
 may require the user's approval in the app, so calls can take a while; if a call is denied, do \
 not retry it unchanged — ask the user. Commands run non-interactively (no TTY): avoid pagers and \
 prompts (use flags like -y, --no-pager), and prefer read-only inspection before changing \
@@ -58,7 +58,7 @@ const DEFS: &[Def] = &[
     Def {
         name: "list_hosts",
         title: "List hosts",
-        description: "Lists the SSH hosts the user saved in ssh-client (id, label, address, port, \
+        description: "Lists the SSH hosts the user saved in Vaultport (id, label, address, port, \
                       username, group, tags, OS). Never includes credentials.",
         changes: false,
         destructive: false,
@@ -238,7 +238,7 @@ const DEFS: &[Def] = &[
     Def {
         name: "open_terminal",
         title: "Open terminal",
-        description: "Opens an interactive terminal tab for the user in ssh-client. You cannot \
+        description: "Opens an interactive terminal tab for the user in Vaultport. You cannot \
                       read or type into it; use it to hand over to the user.",
         changes: true,
         destructive: false,
@@ -329,7 +329,7 @@ enum Encoding {
 fn cmd_err(e: &CmdError) -> String {
     match e.code {
         ErrorCode::Locked | ErrorCode::NoVault => {
-            "The ssh-client vault is locked. Ask the user to unlock ssh-client, then try again."
+            "The Vaultport vault is locked. Ask the user to unlock Vaultport, then try again."
                 .to_owned()
         }
         _ => e.message.clone(),
@@ -1007,7 +1007,7 @@ impl mcp_server::Handler for AgentHandler {
             return ToolResult::error("agent access was turned off by the user");
         }
         if settings.read_only && def.changes {
-            return ToolResult::error("ssh-client only allows read-only tools for agents");
+            return ToolResult::error("Vaultport only allows read-only tools for agents");
         }
         let mut entry = AuditEntry {
             id: uuid::Uuid::now_v7().to_string(),
@@ -1057,7 +1057,7 @@ impl mcp_server::Handler for AgentHandler {
                 entry.outcome = AuditOutcome::Denied;
                 self.state.record(&self.app, entry);
                 return ToolResult::error(
-                    "The user denied this action in ssh-client. Do not retry it unchanged.",
+                    "The user denied this action in Vaultport. Do not retry it unchanged.",
                 );
             }
         }

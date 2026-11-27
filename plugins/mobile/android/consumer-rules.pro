@@ -1,1 +1,1 @@
--keep class dev.niessen.sshclient.mobile.** { *; }
+-keep class dev.niessen.vaultport.mobile.** { *; }

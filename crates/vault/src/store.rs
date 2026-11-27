@@ -442,7 +442,7 @@ impl Vault {
     /// Derives a purpose-specific 256-bit subkey from the vault key with HKDF-SHA256
     /// (e.g. `"session-log"`). Subkeys never decrypt vault records.
     pub fn derive_subkey(&self, purpose: &str) -> Result<SymmetricKey, VaultError> {
-        if purpose.is_empty() || purpose.starts_with("ssh-client/") {
+        if purpose.is_empty() || purpose.starts_with("vaultport/") {
             return Err(VaultError::Invalid("invalid subkey purpose".into()));
         }
         let vk = &self.unlocked()?.key;
@@ -450,7 +450,7 @@ impl Vault {
             hkdf::Hkdf::<sha2::Sha256>::new(Some(self.header.vault_id.as_bytes()), vk.as_bytes());
         let mut out = zeroize::Zeroizing::new([0u8; crate::crypto::KEY_LEN]);
         hk.expand(
-            format!("ssh-client/subkey/v1|{purpose}").as_bytes(),
+            format!("vaultport/subkey/v1|{purpose}").as_bytes(),
             out.as_mut(),
         )
         .map_err(|_| VaultError::Crypto("hkdf expand".into()))?;
@@ -831,15 +831,15 @@ fn read_doc_raw(
 }
 
 fn doc_aad(vault_id: Uuid, record: &str) -> String {
-    format!("ssh-client/doc/v1|{vault_id}|{record}")
+    format!("vaultport/doc/v1|{vault_id}|{record}")
 }
 
 fn op_aad(vault_id: Uuid, op: Uuid) -> String {
-    format!("ssh-client/op/v1|{vault_id}|{op}")
+    format!("vaultport/op/v1|{vault_id}|{op}")
 }
 
 fn wrap_aad(method: &str, vault_id: Uuid) -> String {
-    format!("ssh-client/vk-wrap/v1|{method}|{vault_id}")
+    format!("vaultport/vk-wrap/v1|{method}|{vault_id}")
 }
 
 fn wrap_password(

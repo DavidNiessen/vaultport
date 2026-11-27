@@ -10,7 +10,7 @@
 
     <application>
         <service
-            android:name="dev.niessen.sshclient.mobile.KeepAliveService"
+            android:name="dev.niessen.vaultport.mobile.KeepAliveService"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
     </application>

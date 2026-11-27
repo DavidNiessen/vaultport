@@ -204,7 +204,7 @@ impl ConnectOptions {
             post_quantum: true,
             compression: false,
             agent_confirm: true,
-            client_id: concat!("ssh-client_", env!("CARGO_PKG_VERSION")).to_owned(),
+            client_id: concat!("vaultport_", env!("CARGO_PKG_VERSION")).to_owned(),
         }
     }
 

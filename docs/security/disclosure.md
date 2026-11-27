@@ -1,13 +1,13 @@
 ---
 title: Reporting a vulnerability
-description: How to report security vulnerabilities in ssh-client privately, which versions are supported, and what to expect afterwards.
+description: How to report security vulnerabilities in Vaultport privately, which versions are supported, and what to expect afterwards.
 ---
 
 # Reporting a vulnerability
 
 **Please do not open a public issue for security problems.**
 
-Report vulnerabilities privately through [GitHub Security Advisories](https://github.com/davidniessen/ssh-client/security/advisories/new). Include:
+Report vulnerabilities privately through [GitHub Security Advisories](https://github.com/DavidNiessen/vaultport/security/advisories/new). Include:
 
 - the affected version(s) and platform(s),
 - a description of the issue and its impact,
@@ -43,7 +43,7 @@ In scope:
 Out of scope:
 
 - vulnerabilities in SSH servers you connect to,
-- issues that require a fully compromised operating system or a malicious, already-installed application with the same privileges as ssh-client,
+- issues that require a fully compromised operating system or a malicious, already-installed application with the same privileges as Vaultport,
 - denial of service by the user against their own device.
 
-The canonical version of this policy is [`SECURITY.md`](https://github.com/davidniessen/ssh-client/blob/main/SECURITY.md) in the repository.
+The canonical version of this policy is [`SECURITY.md`](https://github.com/DavidNiessen/vaultport/blob/main/SECURITY.md) in the repository.

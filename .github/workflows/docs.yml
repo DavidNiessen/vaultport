@@ -17,6 +17,9 @@ on:
   release:
     # Rebuild when a release is published so the download page and llms.txt stay current.
     types: [published]
+  # Releases created with the default GITHUB_TOKEN (release-please) do not emit `release`
+  # events to other workflows; the release workflow can call this one instead.
+  workflow_call:
   workflow_dispatch:
 
 permissions:
@@ -53,7 +56,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter @ssh-client/docs
+        run: pnpm install --frozen-lockfile --filter @vaultport/docs
 
       - name: Configure Pages
         id: pages
@@ -63,12 +66,12 @@ jobs:
       - name: Build
         env:
           # Follows the Pages configuration, so a custom domain works without code changes.
-          DOCS_BASE: ${{ steps.pages.outcome == 'success' && format('{0}/', steps.pages.outputs.base_path) || '/ssh-client/' }}
-          DOCS_ORIGIN: ${{ steps.pages.outputs.origin || 'https://davidniessen.github.io' }}
-        run: pnpm --filter @ssh-client/docs build
+          DOCS_BASE: ${{ steps.pages.outcome == 'success' && format('{0}/', steps.pages.outputs.base_path) || '/' }}
+          DOCS_ORIGIN: ${{ steps.pages.outputs.origin || 'https://vaultport.niessen.dev' }}
+        run: pnpm --filter @vaultport/docs build
 
       - name: Type-check theme
-        run: pnpm --filter @ssh-client/docs typecheck
+        run: pnpm --filter @vaultport/docs typecheck
 
       - name: Upload Pages artifact
         if: github.event_name != 'pull_request'

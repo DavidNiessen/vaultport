@@ -24,7 +24,7 @@ fn export_import_roundtrip_and_failures() {
     a.put_secret(b"device-only", true).unwrap();
 
     let file = export_file_with(&a, b"correct horse", KdfParams::insecure_for_tests()).unwrap();
-    assert_eq!(&file[..8], b"SSHVAULT");
+    assert_eq!(&file[..8], b"VAULTPRT");
     assert!(!file.windows(7).any(|w| w == b"hunter2"));
     let info = inspect_file(&file).unwrap();
     assert_eq!(info.vault_id, a.vault_id());
@@ -60,7 +60,7 @@ fn export_import_roundtrip_and_failures() {
         Err(SyncError::Authentication)
     ));
     assert!(matches!(
-        import_file(b"SSHVAULT\0\x09", b"x", &dest, &opts()),
+        import_file(b"VAULTPRT\0\x09", b"x", &dest, &opts()),
         Err(SyncError::Format(_))
     ));
     assert!(!dest.exists());
@@ -110,13 +110,13 @@ async fn pairing_roundtrip_then_sync() {
         .unwrap();
 
     let now = 1_800_000_000_000;
-    let backend = serde_json::json!({"type": "folder", "path": "/Users/me/iCloud/ssh-client"});
+    let backend = serde_json::json!({"type": "folder", "path": "/Users/me/iCloud/vaultport"});
     let offer =
         create_offer_at(&a, backend.clone(), Some(b"webdav-password"), cheap(), now).unwrap();
     assert_eq!(offer.code().len(), 9);
     assert!(!format!("{offer:?}").contains(offer.code()));
     let qr = offer.payload.to_qr_string().unwrap();
-    assert!(qr.starts_with("sshclient-pair:1:"));
+    assert!(qr.starts_with("vaultport-pair:1:"));
 
     // Device B scans the QR code and types the code (any case, without the dash).
     let scanned = PairingPayload::from_qr_string(&qr).unwrap();
@@ -187,5 +187,5 @@ fn pairing_rejects_wrong_codes_expiry_and_tampering() {
     assert!(accept_offer_at(p, offer.code(), now).is_ok());
 
     assert!(PairingPayload::from_qr_string("https://example.com").is_err());
-    assert!(PairingPayload::from_qr_string("sshclient-pair:1:!!!").is_err());
+    assert!(PairingPayload::from_qr_string("vaultport-pair:1:!!!").is_err());
 }

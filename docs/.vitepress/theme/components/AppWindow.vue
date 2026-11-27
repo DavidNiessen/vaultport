@@ -27,7 +27,7 @@ const snippets = [
   <figure
     class="window"
     role="img"
-    aria-label="ssh-client window: a terminal connected to prod-eu-1 through a jump host with post-quantum key exchange and a FIDO2 key, next to the snippets panel."
+    aria-label="Vaultport window: a terminal connected to prod-eu-1 through a jump host with post-quantum key exchange and a FIDO2 key, next to the snippets panel."
   >
     <div class="titlebar" aria-hidden="true">
       <div class="lights">

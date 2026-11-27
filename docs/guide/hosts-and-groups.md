@@ -56,13 +56,13 @@ Create a group with **New group**, nest it under another group, and move hosts i
 
 Double-click a host, press <kbd>Enter</kbd> on it, or use **Connect**. Select several hosts and choose **Connect all**, or create a [workspace](/guide/workspaces) from the selection. Use **Open in SFTP** to browse its files instead.
 
-While connected, the tab's status dot shows the state: connecting, connected (with an indicator for unread output in background tabs), error or disconnected. If the network drops, ssh-client reconnects automatically (Settings → Terminal → _Reconnect automatically after network loss_), and **Reconnect** is always one click away.
+While connected, the tab's status dot shows the state: connecting, connected (with an indicator for unread output in background tabs), error or disconnected. If the network drops, Vaultport reconnects automatically (Settings → Terminal → _Reconnect automatically after network loss_), and **Reconnect** is always one click away.
 
 ## The local terminal
 
 On desktop, <kbd>Mod</kbd>+<kbd>L</kbd> opens your local shell in a new tab. It starts your login shell (`$SHELL`, or Windows PowerShell on Windows). To use another program, enter it under **Settings → Terminal → Local shell**, for example `/opt/homebrew/bin/fish` or `pwsh.exe`; leave the field empty for the system default.
 
-With **Shell integration** on, local bash, zsh and fish shells load ssh-client's integration script automatically, without changes to your dotfiles. Your usual startup files are still read.
+With **Shell integration** on, local bash, zsh and fish shells load Vaultport's integration script automatically, without changes to your dotfiles. Your usual startup files are still read.
 
 ## Terminal features
 
@@ -72,13 +72,13 @@ With **Shell integration** on, local bash, zsh and fish shells load ssh-client's
 - **OSC 52** clipboard writes from tmux or vim: _Ask_ (default), _Allow_ or _Deny_.
 - **Remote titles**: let programs set the tab title.
 - Copy on select, right-click to paste, Option as Meta key (macOS), cursor style and blink, scrollback size (10 000 lines by default).
-- **Shell integration**: if the remote shell emits the common shell-integration escape sequences (OSC 133 or OSC 633 prompt and command marks, OSC 7 working directory), ssh-client records each command in the host's [history](/guide/snippets#command-history). Password prompts are detected so that what you type there is never recorded.
+- **Shell integration**: if the remote shell emits the common shell-integration escape sequences (OSC 133 or OSC 633 prompt and command marks, OSC 7 working directory), Vaultport records each command in the host's [history](/guide/snippets#command-history). Password prompts are detected so that what you type there is never recorded.
 
 ## Shell integration, OS detection and history import
 
 These switches are under **Settings → Terminal**.
 
-- **Shell integration** (off by default) loads ssh-client's integration script into [local shells](#the-local-terminal). For SSH sessions it sends the variable `SSH_CLIENT_SHELL_INTEGRATION=1` with the shell request. The scripts for bash, zsh and fish are in [`crates/term-intel/scripts`](https://github.com/davidniessen/ssh-client/tree/main/crates/term-intel/scripts). They do nothing unless that variable is set, so you can source one from your remote dotfile (for example `~/.bashrc`). The server must accept the variable (`AcceptEnv SSH_CLIENT_SHELL_INTEGRATION` in `sshd_config`); otherwise export it yourself before sourcing the script.
+- **Shell integration** (off by default) loads Vaultport's integration script into [local shells](#the-local-terminal). For SSH sessions it sends the variable `VAULTPORT_SHELL_INTEGRATION=1` with the shell request. The scripts for bash, zsh and fish are in [`crates/term-intel/scripts`](https://github.com/DavidNiessen/vaultport/tree/main/crates/term-intel/scripts). They do nothing unless that variable is set, so you can source one from your remote dotfile (for example `~/.bashrc`). The server must accept the variable (`AcceptEnv VAULTPORT_SHELL_INTEGRATION` in `sshd_config`); otherwise export it yourself before sourcing the script.
 - **Detect remote operating system** (on by default) checks `/etc/os-release` or `uname` after you log in to a saved host whose operating system is not set, and fills it in so the host shows the right icon. An operating system you picked yourself is never changed.
 - **Import remote shell history** (off by default) reads the end of `~/.bash_history`, `~/.zsh_history` and `~/.local/share/fish/fish_history` once per saved host and adds the commands to the host's [history](/guide/snippets#command-history).
 

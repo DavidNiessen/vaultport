@@ -1,6 +1,6 @@
 ---
 title: Host-key policy
-description: The exact decision order ssh-client uses to verify SSH host keys and certificates, plus the default algorithm lists and legacy fallbacks.
+description: The exact decision order Vaultport uses to verify SSH host keys and certificates, plus the default algorithm lists and legacy fallbacks.
 ---
 
 # Host-key policy & algorithms

@@ -1,6 +1,6 @@
 # Governance
 
-ssh-client is an independent open-source project licensed under GPL-3.0-or-later.
+Vaultport is an independent open-source project licensed under GPL-3.0-or-later.
 
 ## Roles
 

@@ -160,7 +160,7 @@ export const useApp = create<AppState>()(
       setNewTabOpen: (newTabOpen) => set({ newTabOpen }),
     }),
     {
-      name: 'ssh-client:ui',
+      name: 'vaultport:ui',
       version: 1,
       // Only persist harmless view preferences; never tabs/sessions.
       partialize: (s) => ({

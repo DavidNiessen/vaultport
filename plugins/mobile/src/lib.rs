@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Native mobile services for ssh-client.
+//! Native mobile services for Vaultport.
 //!
 //! The plugin exposes **no commands to the web UI**: it is used only from the Rust core.
 //!
@@ -164,7 +164,7 @@ impl<R: Runtime, T: Manager<R>> MobileServicesExt<R> for T {
 
 /// Initializes the plugin.
 pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("ssh-client-mobile")
+    Builder::new("vaultport-mobile")
         .setup(|app, api| {
             #[cfg(mobile)]
             let services = MobileServices {

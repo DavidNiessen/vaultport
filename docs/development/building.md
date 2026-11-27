@@ -1,6 +1,6 @@
 ---
 title: Build from source
-description: Prerequisites and commands to build ssh-client for desktop and mobile from source, run the tests and work on this documentation site.
+description: Prerequisites and commands to build Vaultport for desktop and mobile from source, run the tests and work on this documentation site.
 ---
 
 # Build from source
@@ -27,8 +27,8 @@ For mobile targets you additionally need Android Studio (SDK and NDK) and, on ma
 ## Get the code and run it
 
 ```bash
-git clone https://github.com/davidniessen/ssh-client.git
-cd ssh-client
+git clone https://github.com/DavidNiessen/vaultport.git
+cd vaultport
 pnpm install
 pnpm dev            # desktop app with hot reload
 ```
@@ -36,24 +36,24 @@ pnpm dev            # desktop app with hot reload
 Mobile development builds:
 
 ```bash
-pnpm --filter @ssh-client/desktop tauri android dev
-pnpm --filter @ssh-client/desktop tauri ios dev
+pnpm --filter @vaultport/desktop tauri android dev
+pnpm --filter @vaultport/desktop tauri ios dev
 ```
 
 A release build for your platform:
 
 ```bash
-pnpm build          # = pnpm --filter @ssh-client/desktop tauri build
+pnpm build          # = pnpm --filter @vaultport/desktop tauri build
 ```
 
-The UI also runs in a plain browser (`pnpm --filter @ssh-client/desktop dev`) against a mock backend, which is handy for UI work and screenshots.
+The UI also runs in a plain browser (`pnpm --filter @vaultport/desktop dev`) against a mock backend, which is handy for UI work and screenshots.
 
 ### Without local AI
 
 The `local-ai` cargo feature (default) compiles llama.cpp from source. To build without it — for example when CMake is not available — disable the app's default features:
 
 ```bash
-cargo build -p ssh-client --no-default-features
+cargo build -p vaultport --no-default-features
 ```
 
 The app then reports local AI as unavailable; everything else works. On Apple silicon, the `metal` feature enables GPU offload.
@@ -86,9 +86,9 @@ cargo test -p sftp-engine --features integration
 The site lives in `docs/` and is built with [VitePress](https://vitepress.dev/):
 
 ```bash
-pnpm --filter @ssh-client/docs dev       # live preview
-pnpm --filter @ssh-client/docs build     # static output in docs/.vitepress/dist
-pnpm --filter @ssh-client/docs preview   # serve the build
+pnpm --filter @vaultport/docs dev       # live preview
+pnpm --filter @vaultport/docs build     # static output in docs/.vitepress/dist
+pnpm --filter @vaultport/docs preview   # serve the build
 ```
 
-The build also writes `llms.txt`, `llms-full.txt`, `robots.txt` and a Markdown copy of every page. Set `DOCS_BASE=/` to build for a custom domain instead of `/ssh-client/`.
+The build also writes `llms.txt`, `llms-full.txt`, `robots.txt` and a Markdown copy of every page. Set `DOCS_BASE=/` to build for a custom domain instead of `/vaultport/`.

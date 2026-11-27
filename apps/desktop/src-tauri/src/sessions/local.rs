@@ -129,7 +129,7 @@ pub fn spawn(
     }
     cmd.env("TERM", "xterm-256color");
     cmd.env("COLORTERM", "truecolor");
-    cmd.env("TERM_PROGRAM", "ssh-client");
+    cmd.env("TERM_PROGRAM", "vaultport");
     if let Some(home) = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")) {
         cmd.cwd(home);
     }

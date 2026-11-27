@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Telnet client (RFC 854) for the ssh-client terminal.
+//! Telnet client (RFC 854) for the Vaultport terminal.
 //!
 //! # Protocol overview
 //!

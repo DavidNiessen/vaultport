@@ -1,8 +1,8 @@
 {
   "agents": {
     "title": "KI-Agenten",
-    "description": "Erlaube KI-Werkzeugen wie Claude Code, Claude Desktop, Cursor oder VS Code, über ssh-client mit deinen Servern zu arbeiten – per Model Context Protocol (MCP). Alles bleibt auf diesem Gerät: Agenten verbinden sich lokal, sehen nie deine Passwörter oder Schlüssel, und du bestätigst, was sie tun.",
-    "desktopOnly": "KI-Agenten verbinden sich mit ssh-client auf deinem Computer. Aktiviere dies in der Desktop-App.",
+    "description": "Erlaube KI-Werkzeugen wie Claude Code, Claude Desktop, Cursor oder VS Code, über Vaultport mit deinen Servern zu arbeiten – per Model Context Protocol (MCP). Alles bleibt auf diesem Gerät: Agenten verbinden sich lokal, sehen nie deine Passwörter oder Schlüssel, und du bestätigst, was sie tun.",
+    "desktopOnly": "KI-Agenten verbinden sich mit Vaultport auf deinem Computer. Aktiviere dies in der Desktop-App.",
     "enable": "KI-Agenten erlauben",
     "enableHint": "Aus: kein Agent kann sich verbinden",
     "listening": "An: Agenten auf diesem Computer können sich verbinden",
@@ -15,7 +15,7 @@
     "selectedHosts": "Ausgewählte",
     "noHosts": "Noch keine Hosts gespeichert.",
     "setup": "Client verbinden",
-    "setupHint": "ssh-client arbeitet als MCP-Server: Füge ihn einmal zu deinem KI-Werkzeug hinzu. Das Werkzeug startet ihn bei Bedarf; ssh-client öffnet sich, falls es nicht läuft.",
+    "setupHint": "vaultport arbeitet als MCP-Server: Füge ihn einmal zu deinem KI-Werkzeug hinzu. Das Werkzeug startet ihn bei Bedarf; Vaultport öffnet sich, falls es nicht läuft.",
     "addTo": "In {{file}} eintragen:",
     "runInTerminal": "Im Terminal ausführen:",
     "connected": "Verbundene Agenten",
@@ -34,7 +34,7 @@
     },
     "approval": {
       "title": "{{client}} möchte handeln",
-      "description": "Ein mit ssh-client verbundener KI-Agent bittet um Erlaubnis.",
+      "description": "Ein mit Vaultport verbundener KI-Agent bittet um Erlaubnis.",
       "on": "auf {{host}}",
       "changes": "Nimmt Änderungen vor",
       "deny": "Ablehnen",
@@ -265,6 +265,8 @@
     "regionsHint": "Kommagetrennt, z. B. us-east-1,eu-central-1",
     "result": "{{hosts}} Hosts, {{groups}} Gruppen, {{keys}} Schlüssel und {{knownHosts}} bekannte Hosts importiert.",
     "securecrt": "Sitzungen und Ordner aus einem SecureCRT-XML-Export",
+    "subscriptions": "Abonnement-IDs",
+    "subscriptionsHint": "Kommagetrennt, z. B. 00000000-0000-0000-0000-000000000000",
     "title": "Importieren",
     "token": "API-Token mit Lesezugriff"
   },
@@ -343,7 +345,7 @@
     "rememberDevice": "Mit diesem Gerät entsperren",
     "rememberDeviceHint": "Speichert einen Entsperrschlüssel in {{store}}",
     "restore": "Aus Backup wiederherstellen",
-    "restoreDescription": "Wähle eine .sshvault-Datei. Sie wird zu einem neuen Tresor auf diesem Gerät, geschützt durch die Backup-Passphrase.",
+    "restoreDescription": "Wähle eine .vaultport-Datei. Sie wird zu einem neuen Tresor auf diesem Gerät, geschützt durch die Backup-Passphrase.",
     "restoreTitle": "Verschlüsseltes Backup wiederherstellen",
     "serverless": "Kein Konto. Keine Cloud. Keine Telemetrie. Deine Daten verlassen deine Geräte nur, wenn du Sync zu deinem eigenen Speicher einrichtest.",
     "strength": "Passwortstärke {{score}} von 4",

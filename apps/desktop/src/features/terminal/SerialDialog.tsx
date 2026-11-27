@@ -32,8 +32,8 @@ export function SerialDialog() {
 
   useEffect(() => {
     const on = () => setOpen(true);
-    window.addEventListener('ssh-client:serial-picker', on);
-    return () => window.removeEventListener('ssh-client:serial-picker', on);
+    window.addEventListener('vaultport:serial-picker', on);
+    return () => window.removeEventListener('vaultport:serial-picker', on);
   }, []);
 
   const connect = () => {

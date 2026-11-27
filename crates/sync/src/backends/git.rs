@@ -4,7 +4,7 @@
 //! # What is implemented here
 //!
 //! [`GitBackend`] stores objects as files in the tree of one branch
-//! (`refs/heads/ssh-client-sync` by default) of a **local** repository (bare or not; the
+//! (`refs/heads/vaultport-sync` by default) of a **local** repository (bare or not; the
 //! working tree is never touched). Every `put`/`delete` writes blobs and trees directly into
 //! the object database and creates a commit, updating the branch with compare-and-swap
 //! semantics. No worktree, index or user git configuration is involved.
@@ -42,7 +42,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 /// Default branch used for sync data.
-pub const DEFAULT_BRANCH: &str = "ssh-client-sync";
+pub const DEFAULT_BRANCH: &str = "vaultport-sync";
 const MAX_DEPTH: usize = 8;
 const MAX_WALK: usize = 1_000_000;
 
@@ -277,8 +277,8 @@ fn commit(
     message: &str,
 ) -> Result<ObjectId, SyncError> {
     let sig = gix::actor::Signature {
-        name: "ssh-client".into(),
-        email: "sync@ssh-client.invalid".into(),
+        name: "Vaultport".into(),
+        email: "sync@vaultport.invalid".into(),
         time: gix::date::Time::now_utc(),
     };
     let mut buf = gix::date::parse::TimeBuf::default();

@@ -1,0 +1,436 @@
+{
+  "$schema": "https://readme.niessen.dev/schema.json",
+  "version": 1,
+  "kind": "project",
+  "profile": {
+    "login": "DavidNiessen",
+    "links": [
+      {
+        "icon": "website",
+        "label": "Website",
+        "url": "https://vaultport.niessen.dev/",
+        "handle": "vaultport.niessen.dev"
+      },
+      {
+        "icon": "github",
+        "label": "GitHub",
+        "url": "https://github.com/DavidNiessen/vaultport",
+        "handle": "DavidNiessen/vaultport"
+      }
+    ]
+  },
+  "project": {
+    "repo": "DavidNiessen/vaultport",
+    "packages": {
+      "npm": "",
+      "pypi": "",
+      "crates": ""
+    }
+  },
+  "theme": {
+    "preset": "tokyo",
+    "accent": "#6366F1",
+    "overrides": {},
+    "font": "inter",
+    "headingFont": "space-grotesk",
+    "radius": 14,
+    "border": 1,
+    "texture": "grid",
+    "motion": "subtle",
+    "surface": true
+  },
+  "layout": [
+    {
+      "id": "hero",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "hero",
+          "type": "project-hero",
+          "options": {
+            "title": "Vaultport",
+            "tagline": "Secure, serverless SSH for every device. Your keys stay yours.",
+            "align": "center",
+            "version": true,
+            "stats": true,
+            "third": "contributors",
+            "install": "",
+            "emblem": "",
+            "emblemStyle": "orbit",
+            "scanline": false,
+            "glow": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "shields",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "shields",
+          "type": "shields",
+          "options": {
+            "badges": [
+              "license",
+              "ci",
+              "stars",
+              "contributors",
+              "issues"
+            ],
+            "style": "rounded",
+            "color": "accent",
+            "icons": true,
+            "custom": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "intro",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "intro",
+          "type": "markdown",
+          "options": {
+            "text": "**A secure, serverless SSH, SFTP, Mosh, Telnet and serial client for Windows, macOS, Linux, Android and iOS.** Your hosts, keys and snippets live in an end-to-end encrypted vault on your devices and sync only through storage you control. There are no accounts, no telemetry and no servers run by this project.\n\n[Website & docs](https://vaultport.niessen.dev/) · [Download](https://vaultport.niessen.dev/download) · [llms.txt](https://vaultport.niessen.dev/llms.txt) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)"
+          }
+        }
+      ]
+    },
+    {
+      "id": "screenshots",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "screenshots",
+          "type": "markdown",
+          "options": {
+            "text": "![Hosts view](.github/screenshots/hosts.png)\n\n<table>\n  <tr>\n    <td><img src=\".github/screenshots/terminal.png\" alt=\"Terminal session\" /></td>\n    <td><img src=\".github/screenshots/agent-approval.png\" alt=\"Approving an AI agent's command\" /></td>\n    <td width=\"22%\"><img src=\".github/screenshots/phone.png\" alt=\"Phone layout\" /></td>\n  </tr>\n</table>"
+          }
+        }
+      ]
+    },
+    {
+      "id": "toc",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "toc",
+          "type": "toc",
+          "options": {
+            "title": "## Contents",
+            "numbered": false,
+            "entries": [
+              {
+                "title": "Highlights",
+                "anchor": "",
+                "level": "1"
+              },
+              {
+                "title": "Features",
+                "anchor": "",
+                "level": "1"
+              },
+              {
+                "title": "Security at a glance",
+                "anchor": "",
+                "level": "1"
+              },
+              {
+                "title": "Use with AI agents",
+                "anchor": "",
+                "level": "1"
+              },
+              {
+                "title": "Building from source",
+                "anchor": "",
+                "level": "1"
+              },
+              {
+                "title": "Repository layout",
+                "anchor": "",
+                "level": "1"
+              },
+              {
+                "title": "Project status",
+                "anchor": "",
+                "level": "1"
+              },
+              {
+                "title": "License",
+                "anchor": "",
+                "level": "1"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "highlights-heading",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "highlights-heading",
+          "type": "markdown",
+          "options": {
+            "text": "## Highlights"
+          }
+        }
+      ]
+    },
+    {
+      "id": "features",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "features",
+          "type": "features",
+          "options": {
+            "label": "why vaultport",
+            "columns": "3",
+            "style": "cards",
+            "numbered": false,
+            "items": [
+              {
+                "icon": "terminal",
+                "title": "Every protocol",
+                "text": "SSH with post-quantum key exchange, jump hosts and proxies, native Mosh, Telnet, serial and a local shell."
+              },
+              {
+                "icon": "briefcase",
+                "title": "Encrypted vault",
+                "text": "XChaCha20-Poly1305 per record, Argon2id or a device key. Secrets never reach the UI."
+              },
+              {
+                "icon": "fork",
+                "title": "Dual-pane SFTP",
+                "text": "Local and remote side by side, a resumable transfer queue, drag and drop, edit and re-upload."
+              },
+              {
+                "icon": "globe",
+                "title": "Serverless sync",
+                "text": "End-to-end encrypted sync through a folder, WebDAV or S3 you own. No account, no telemetry."
+              },
+              {
+                "icon": "check",
+                "title": "Hardware keys",
+                "text": "FIDO2 security keys and non-exportable keys in the Secure Enclave, Windows Hello and Android Keystore."
+              },
+              {
+                "icon": "link",
+                "title": "Tunnels & workspaces",
+                "text": "Local, remote and SOCKS forwarding, split panes with broadcast input, snippets with variables."
+              },
+              {
+                "icon": "claude",
+                "title": "AI agents over MCP",
+                "text": "Claude Code, Cursor or VS Code can manage your servers through Vaultport, with your approval."
+              },
+              {
+                "icon": "sparkle",
+                "title": "Local AI",
+                "text": "Optional command generation with a small model that runs fully on your device."
+              },
+              {
+                "icon": "rocket",
+                "title": "Desktop & mobile",
+                "text": "Windows, macOS, Linux, Android and iOS, with a native-feeling title bar on every OS."
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "features-table",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "features-table",
+          "type": "markdown",
+          "options": {
+            "text": "## Features\n\n| Area              | What you get                                                                                                                                                                                                                                                      |\n| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Connections       | SSH with post-quantum key exchange (`mlkem768x25519-sha256`), jump-host chains, HTTP/SOCKS proxies, agent forwarding with confirmation, env vars, startup snippets, keep-alive and auto-reconnect. Native Mosh (no external binary), Telnet, serial, local shell. |\n| Terminal          | xterm.js with WebGL, truecolor, OSC 7/8/52/133, search, themes and fonts, split workspaces with broadcast input, session pills and an accessory bar on mobile.                                                                                                    |\n| SFTP              | Dual-pane local↔remote and remote↔remote browser, transfer queue with resume, drag and drop, permissions, edit locally and re-upload.                                                                                                                             |\n| Keys & identities | Ed25519/ECDSA/RSA generation and import, OpenSSH certificates, FIDO2 `sk-` keys, non-exportable keys in the Secure Enclave, Windows Hello/TPM and Android Keystore, identities shared across hosts, \"install on host\".                                            |\n| Organisation      | Groups with per-setting inheritance, tags, snippets with `{{variables}}`, port-forwarding rules, known hosts with strict host-key checking, encrypted session logs with replay.                                                                                   |\n| Import            | `~/.ssh/config`, `known_hosts`, CSV, PuTTY, MobaXterm, SecureCRT; AWS, DigitalOcean and Azure inventories (credentials stay on the device).                                                                                                                       |\n| Sync              | End-to-end encrypted, conflict-free sync through a folder (iCloud Drive, Dropbox, Syncthing…), WebDAV or S3-compatible storage, encrypted `.vaultport` backups, QR pairing.                                                                                        |\n| Local AI          | Optional command generation with a small model that downloads automatically and runs fully on the device. Suggestions are inserted, never executed.                                                                                                               |\n| AI agents         | Built-in [MCP](https://modelcontextprotocol.io) server: Claude Code, Claude Desktop, Cursor, VS Code or Codex can list hosts, run commands, read and write files and manage tunnels — locally, without seeing credentials, with your approval in the app.         |\n| Design            | Native-feeling custom title bar per OS, dark/light themes, keyboard-first with a command palette, responsive from phone to desktop, English and German.                                                                                                           |"
+          }
+        }
+      ]
+    },
+    {
+      "id": "security",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "security",
+          "type": "markdown",
+          "options": {
+            "text": "## Security at a glance\n\n- **Secrets never reach the web UI.** Keys and passwords live only in the Rust core and are\n  zeroised after use.\n- **Vault encryption:** XChaCha20-Poly1305 per record. The vault key is wrapped by an\n  Argon2id-derived key and/or a device key in the OS key store.\n- **Hardened app shell:** Tauri isolation pattern, strict CSP, least-privilege capabilities.\n- **Defaults that refuse weak crypto:** legacy algorithms are opt-in per host.\n- **Sync backends only ever see ciphertext.** Hash chains detect rollback and truncation.\n- **Supply chain:**\n  - every GitHub Action is pinned by SHA; checks with cargo-deny, CodeQL, OpenSSF Scorecard and nightly fuzzing;\n  - releases ship SHA-256 checksums signed with Sigstore, an SPDX SBOM and build provenance.\n\nRead the [security documentation](https://vaultport.niessen.dev/security/) and the\n[threat model](https://vaultport.niessen.dev/security/). Report vulnerabilities as\ndescribed in [SECURITY.md](SECURITY.md)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "ai-agents",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "ai-agents",
+          "type": "markdown",
+          "options": {
+            "text": "## Use with AI agents\n\nTurn on **Settings → AI agents**, then register Vaultport as an MCP server. For example, with\nClaude Code:\n\n```bash\nclaude mcp add --scope user vaultport -- /path/to/vaultport mcp\n```\n\nThe app shows the exact command or JSON for each supported client. Agents connect through a\nlocal socket that only your user can open. Every action that changes something needs your\napproval, and so does every read unless you relax that. You can restrict agents to selected\nhosts or to read-only tools, and every call is listed in the activity log."
+          }
+        }
+      ]
+    },
+    {
+      "id": "stack",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "stack",
+          "type": "stack",
+          "options": {
+            "label": "built with tauri",
+            "emblem": "tauri",
+            "legend": true,
+            "rings": [
+              {
+                "label": "Core",
+                "icons": [
+                  "rust"
+                ]
+              },
+              {
+                "label": "Interface",
+                "icons": [
+                  "react",
+                  "typescript",
+                  "tailwindcss",
+                  "vite"
+                ]
+              },
+              {
+                "label": "Platforms",
+                "icons": [
+                  "linux",
+                  "apple",
+                  "android",
+                  "githubactions",
+                  "docker"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "building",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "building",
+          "type": "markdown",
+          "options": {
+            "text": "## Building from source\n\nPrerequisites:\n\n- Rust: the version in `rust-toolchain.toml` (rustup installs it).\n- Node.js 22 and pnpm 10.\n- The [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) for your platform.\n\n```bash\npnpm install\n```\n\n```bash\npnpm dev\n```\n\n```bash\npnpm build\n```\n\nRun the checks CI runs:\n\n```bash\ncargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings && cargo test --workspace\n```\n\n```bash\npnpm lint && pnpm typecheck && pnpm test && pnpm format:check\n```\n\nThe protocol integration tests use Docker test servers. See\n[docker/test-servers](docker/test-servers/README.md) and [CONTRIBUTING.md](CONTRIBUTING.md).\nMobile builds use `pnpm tauri android build` and `pnpm tauri ios build` from `apps/desktop`."
+          }
+        }
+      ]
+    },
+    {
+      "id": "layout",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "layout",
+          "type": "markdown",
+          "options": {
+            "text": "## Repository layout\n\n```text\napps/desktop/        Tauri app: React UI (src/) and Rust shell (src-tauri/)\ncrates/              core libraries: vault, ssh-engine, sftp-engine, mosh-proto, telnet-proto,\n                     serial-io, hw-keys, sync, importers, cloud-inventory, session-log,\n                     term-intel, local-ai, mcp-server, core-model\nplugins/mobile/      native Android (Kotlin) and iOS (Swift) services\ndocs/                website and documentation (VitePress), deployed to GitHub Pages\nfuzz/                cargo-fuzz targets for every parser and decoder\ndocker/test-servers/ OpenSSH and friends for integration tests\n```"
+          }
+        }
+      ]
+    },
+    {
+      "id": "commit-activity",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "commit-activity",
+          "type": "commit-activity",
+          "options": {}
+        }
+      ]
+    },
+    {
+      "id": "status",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "status",
+          "type": "markdown",
+          "options": {
+            "text": "## Project status\n\nVaultport is pre-1.0. These parts are not finished yet:\n\n- **Git sync:** the engine supports it, but the app does not offer it yet.\n- **Autocomplete:** the deterministic autocomplete engine is not yet connected to the terminal.\n- **Not yet tested on real hardware:**\n  - FIDO2 keys, Secure Enclave, Windows Hello, Android Keystore and serial devices;\n  - Mosh against a real `mosh-server`;\n  - the mobile builds.\n\nIssues and pull requests are welcome."
+          }
+        }
+      ]
+    },
+    {
+      "id": "contributors",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "contributors",
+          "type": "contributors",
+          "options": {
+            "label": "contributors",
+            "max": 30,
+            "size": "md",
+            "names": true,
+            "shape": "circle",
+            "sort": "contributions"
+          }
+        }
+      ]
+    },
+    {
+      "id": "license",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "license",
+          "type": "markdown",
+          "options": {
+            "text": "## License\n\nVaultport is free software under the [GNU General Public License v3.0 or later](LICENSE).\nThird-party licenses are listed in [LICENSES](LICENSES) and in each release's SBOM."
+          }
+        }
+      ]
+    },
+    {
+      "id": "footer",
+      "align": "center",
+      "blocks": [
+        {
+          "id": "footer",
+          "type": "footer",
+          "options": {
+            "message": "rebuilt every night by readme studio",
+            "stamp": true,
+            "barcode": true,
+            "waves": true,
+            "credit": false
+          }
+        }
+      ]
+    }
+  ],
+  "output": {
+    "branch": "readme-studio",
+    "modes": [
+      "dark",
+      "light"
+    ],
+    "repository": "",
+    "schedule": "17 2 * * *"
+  }
+}

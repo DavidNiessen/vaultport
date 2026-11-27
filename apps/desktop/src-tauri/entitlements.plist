@@ -16,7 +16,7 @@
   <true/>
   <key>keychain-access-groups</key>
   <array>
-    <string>$(AppIdentifierPrefix)dev.niessen.sshclient</string>
+    <string>$(AppIdentifierPrefix)dev.niessen.vaultport</string>
   </array>
 </dict>
 </plist>

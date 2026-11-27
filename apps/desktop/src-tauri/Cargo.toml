@@ -1,5 +1,5 @@
 [package]
-name = "ssh-client"
+name = "vaultport"
 description = "A secure, serverless, cross-platform SSH, SFTP, Mosh and Telnet client"
 version.workspace = true
 edition.workspace = true
@@ -8,10 +8,10 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 publish.workspace = true
-default-run = "ssh-client"
+default-run = "vaultport"
 
 [lib]
-name = "ssh_client_lib"
+name = "vaultport_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -55,7 +55,7 @@ zeroize = "1"
 base64 = "0.22"
 getrandom = "0.3"
 parking_lot = "0.12"
-tauri-plugin-ssh-client-mobile = { path = "../../../plugins/mobile" }
+tauri-plugin-vaultport-mobile = { path = "../../../plugins/mobile" }
 mcp-server = { path = "../../../crates/mcp-server" }
 dirs = "6"
 qrcode = { version = "0.14", default-features = false, features = ["svg"] }

@@ -19,7 +19,7 @@ Throw-away OpenSSH (Alpine) servers for the `integration` test suites of `ssh-en
 ## Running the integration tests
 
 ```sh
-docker build -t ssh-client-test-sshd:1 docker/test-servers/sshd   # optional, tests build it if missing
+docker build -t vaultport-test-sshd:1 docker/test-servers/sshd   # optional, tests build it if missing
 cargo test -p ssh-engine -p sftp-engine --features integration
 ```
 
@@ -31,7 +31,7 @@ Behind a TLS-intercepting proxy, build with the proxy CA as a BuildKit secret:
 
 ```sh
 docker build --network host --secret id=ca,src=/path/to/proxy-ca.crt \
-  --build-arg https_proxy="$https_proxy" -t ssh-client-test-sshd:1 docker/test-servers/sshd
+  --build-arg https_proxy="$https_proxy" -t vaultport-test-sshd:1 docker/test-servers/sshd
 ```
 
 ## Manual playground

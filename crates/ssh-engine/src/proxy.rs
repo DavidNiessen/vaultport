@@ -128,7 +128,7 @@ pub async fn http_connect<S: AsyncRead + AsyncWrite + Unpin>(
     reject_controls(host)?;
     let target = authority(host, port);
     let mut req = Zeroizing::new(format!(
-        "CONNECT {target} HTTP/1.1\r\nHost: {target}\r\nUser-Agent: ssh-client\r\n"
+        "CONNECT {target} HTTP/1.1\r\nHost: {target}\r\nUser-Agent: vaultport\r\n"
     ));
     if let Some(a) = auth {
         let creds = Zeroizing::new(format!("{}:{}", a.username, a.password.as_str()));

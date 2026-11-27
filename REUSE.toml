@@ -1,12 +1,12 @@
 version = 1
-SPDX-PackageName = "ssh-client"
+SPDX-PackageName = "vaultport"
 SPDX-PackageSupplier = "David Niessen"
-SPDX-PackageDownloadLocation = "https://github.com/davidniessen/ssh-client"
+SPDX-PackageDownloadLocation = "https://github.com/DavidNiessen/vaultport"
 
 [[annotations]]
 path = ["**"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2026 David Niessen and ssh-client contributors"
+SPDX-FileCopyrightText = "2026 David Niessen and Vaultport contributors"
 SPDX-License-Identifier = "GPL-3.0-or-later"
 
 [[annotations]]

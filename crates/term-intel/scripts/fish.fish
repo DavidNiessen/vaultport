@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# ssh-client shell integration for fish >= 3.1 (opt-in).
+# Vaultport shell integration for fish >= 3.1 (opt-in).
 # Emits OSC 7 (cwd) and, on fish 3 (fish 4 marks prompts natively), OSC 133 A/B/C/D and
 # OSC 633 E (command line). Safe to source twice.
-if status is-interactive; and set -q SSH_CLIENT_SHELL_INTEGRATION; and not set -q __sshc_si
+if status is-interactive; and set -q VAULTPORT_SHELL_INTEGRATION; and not set -q __sshc_si
     set -g __sshc_si 1
     function __sshc_osc7
         printf '\e]7;file://%s%s\a' $hostname (string escape --style=url -- $PWD)

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! File management for ssh-client: one async [`FileSystem`] trait over the local disk
+//! File management for vaultport: one async [`FileSystem`] trait over the local disk
 //! ([`Local`], `tokio::fs`) and SFTP ([`Remote`], `russh-sftp`), a [`TransferQueue`] and
 //! edit-and-upload support ([`edit`]).
 //!

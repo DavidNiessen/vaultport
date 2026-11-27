@@ -106,7 +106,7 @@ fn create_blocking(label: &str, policy: AccessPolicy) -> Result<PlatformKeyInfo>
     options
         .set_key_type(KeyType::ec_sec_prime_random())
         .set_size_in_bits(256)
-        .set_label(format!("ssh-client: {}", sanitize_label(label)))
+        .set_label(format!("vaultport: {}", sanitize_label(label)))
         .set_token(Token::SecureEnclave)
         .set_location(Location::DataProtectionKeychain)
         .set_access_control(access);
