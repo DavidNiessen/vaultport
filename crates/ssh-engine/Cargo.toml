@@ -1,0 +1,38 @@
+[package]
+name = "ssh-engine"
+description = "Async SSH client engine: jump hosts, proxies, strict host keys, auth, shells, forwarding"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+# Runs the docker-backed integration tests (`cargo test -p ssh-engine --features integration`).
+integration = []
+
+[dependencies]
+core-model = { path = "../core-model" }
+# Pure-Rust crypto only: `ring` backend instead of the default aws-lc-rs (which cross-compiles
+# badly to iOS/Android); RustCrypto `rsa`; `flate2` (miniz_oxide) for zlib compression.
+russh = { version = "0.65.4", default-features = false, features = ["ring", "rsa", "flate2"] }
+russh-sftp = "4.0.0"
+async-trait = "0.1"
+base64 = "0.22"
+hmac = "0.13"
+sha1 = "0.11"
+thiserror = "2"
+tokio = { version = "1", features = ["net", "rt", "sync", "time", "macros", "io-util"] }
+tracing = "0.1"
+zeroize = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+russh = { version = "0.65.4", default-features = false, features = ["ring", "rsa", "flate2"] }
+tokio = { version = "1", features = ["net", "rt", "rt-multi-thread", "sync", "time", "macros", "io-util", "process"] }
+tempfile = "3"
+
+[lints]
+workspace = true
