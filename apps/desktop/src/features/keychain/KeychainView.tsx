@@ -26,6 +26,7 @@ import { commands, errorMessage, newId, type Identity, type KeyMeta } from '@/li
 import { EMPTY } from '@/lib/empty';
 import {
   useDeleteIdentity,
+  useHosts,
   useDeleteKey,
   useIdentities,
   useKeys,
@@ -360,6 +361,53 @@ function IdentityDialog({ identity, onClose }: { identity: Identity; onClose: ()
   );
 }
 
+function ExportDialog({ keyMeta, onClose }: { keyMeta: KeyMeta; onClose: () => void }) {
+  const { t } = useTranslation();
+  const hosts = useHosts().data ?? EMPTY;
+  const [host, setHost] = useState('');
+  const [busy, setBusy] = useState(false);
+  const run = async () => {
+    setBusy(true);
+    try {
+      const added = await commands.keyExportToHost(keyMeta.id, host);
+      toast.success(added ? t('keychain.exported') : t('keychain.alreadyInstalled'));
+      onClose();
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Dialog
+      open
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+      title={t('keychain.exportTitle', { label: keyMeta.label })}
+      description={t('keychain.exportDescription')}
+      footer={
+        <Button variant="primary" loading={busy} disabled={!host} onClick={() => void run()}>
+          {t('keychain.install')}
+        </Button>
+      }
+    >
+      <Field label={t('forwarding.host')}>
+        {(id) => (
+          <Select id={id} value={host} onChange={(e) => setHost(e.target.value)}>
+            <option value="">{t('forwarding.chooseHost')}</option>
+            {hosts.map((h) => (
+              <option key={h.id} value={h.id}>
+                {h.label}
+              </option>
+            ))}
+          </Select>
+        )}
+      </Field>
+    </Dialog>
+  );
+}
+
 export function KeychainView() {
   const { t } = useTranslation();
   const keys = useKeys().data ?? EMPTY;
@@ -369,6 +417,7 @@ export function KeychainView() {
   const [tab, setTab] = useState<'keys' | 'identities'>('keys');
   const [dialog, setDialog] = useState<'generate' | 'import' | null>(null);
   const [editing, setEditing] = useState<Identity | null>(null);
+  const [exporting, setExporting] = useState<KeyMeta | null>(null);
 
   const copyPublic = async (k: KeyMeta) => {
     await writeText(k.publicKey);
@@ -480,6 +529,11 @@ export function KeychainView() {
                       icon: <Copy />,
                       onSelect: () => void copyPublic(k),
                     },
+                    {
+                      label: t('keychain.installOnHost'),
+                      icon: <Upload />,
+                      onSelect: () => setExporting(k),
+                    },
                     { separator: true },
                     {
                       label: t('common.delete'),
@@ -583,6 +637,7 @@ export function KeychainView() {
         onOpenChange={(o) => setDialog(o ? 'import' : null)}
       />
       {editing ? <IdentityDialog identity={editing} onClose={() => setEditing(null)} /> : null}
+      {exporting ? <ExportDialog keyMeta={exporting} onClose={() => setExporting(null)} /> : null}
     </div>
   );
 }

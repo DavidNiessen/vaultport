@@ -427,7 +427,7 @@ pub async fn sync_import_file(
             },
         )
         .map_err(map_sync)?;
-        let n = vault.all_syncable_ops().map(|o| o.len()).unwrap_or(0);
+        let n = vault.all_syncable_ops().map_or(0, |o| o.len());
         *slot.lock() = Some(OpenVault { name, vault });
         Ok(u32::try_from(n).unwrap_or(u32::MAX))
     })
@@ -444,8 +444,9 @@ pub fn sync_start_pairing(state: State<'_, AppState>) -> CmdResult<PairingInfo> 
         let backend = targets
             .targets
             .first()
-            .map(|t| serde_json::to_value(&t.config).unwrap_or_default())
-            .unwrap_or(serde_json::Value::Null);
+            .map_or(serde_json::Value::Null, |t| {
+                serde_json::to_value(&t.config).unwrap_or_default()
+            });
         let secret = match targets.targets.first().and_then(|t| t.secret) {
             Some(r) => Some(v.get_secret(r)?),
             None => None,

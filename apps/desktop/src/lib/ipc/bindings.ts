@@ -84,9 +84,12 @@ export const commands = {
 	keyImport: (request: ImportKeyRequest_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<string>("key_import", { request }, options),
 	/**  Reads a key file chosen by the user (max 64 KiB). */
 	readKeyFile: (path: string, options?: InvokeOptions) => __TAURI_INVOKE<string>("read_key_file", { path }, options),
-	/**  Enrolls a FIDO2 security key. */
+	/**  Enrolls a FIDO2 security key (touch and, if configured, PIN on the device). */
 	keyEnrollFido2: (label: string, options?: InvokeOptions) => __TAURI_INVOKE<string>("key_enroll_fido2", { label }, options),
-	/**  Creates a non-exportable key in the device's secure hardware. */
+	/**
+	 *  Creates a non-exportable key in the device's secure hardware (Secure Enclave, Windows
+	 *  Hello / TPM, Android Keystore).
+	 */
 	keyCreateHardware: (label: string, options?: InvokeOptions) => __TAURI_INVOKE<string>("key_create_hardware", { label }, options),
 	/**  Path of the user's OpenSSH client configuration, if it exists. */
 	defaultSshConfigPath: (options?: InvokeOptions) => __TAURI_INVOKE<string | null>("default_ssh_config_path", undefined, options),
@@ -138,14 +141,14 @@ export const commands = {
 	fsRename: (source: FsSource, from: string, to: string, options?: InvokeOptions) => __TAURI_INVOKE<null>("fs_rename", { source, from, to }, options),
 	/**  Changes Unix permissions. */
 	fsChmod: (source: FsSource, path: string, mode: number, options?: InvokeOptions) => __TAURI_INVOKE<null>("fs_chmod", { source, path, mode }, options),
-	/**  Deletes a file or (recursively, without following symlinks) a directory. */
+	/**  Deletes a file or (recursively, never following symlinks) a directory. */
 	fsRemove: (source: FsSource, path: string, recursive: boolean, options?: InvokeOptions) => __TAURI_INVOKE<null>("fs_remove", { source, path, recursive }, options),
 	/**
-	 *  Opens a file in the default local application (remote files are downloaded to a private
-	 *  temp folder and watched for changes).
+	 *  Opens a file in the default local application. Remote files are downloaded to a private
+	 *  temp folder and watched; when they change an `sftp://edited` event offers to upload them.
 	 */
 	fsEdit: (source: FsSource, path: string, options?: InvokeOptions) => __TAURI_INVOKE<null>("fs_edit", { source, path }, options),
-	/**  Downloads a remote file to the Downloads folder. */
+	/**  Downloads a remote file into the Downloads folder (via the transfer queue). */
 	fsDownload: (source: FsSource, path: string, options?: InvokeOptions) => __TAURI_INVOKE<string>("fs_download", { source, path }, options),
 	/**  Queues a copy of `paths` from `from` into directory `to_dir` on `to`. */
 	transferStart: (from: FsSource, paths: string[], to: FsSource, toDir: string, conflict: string, options?: InvokeOptions) => __TAURI_INVOKE<string[]>("transfer_start", { from, paths, to, toDir, conflict }, options),
@@ -163,13 +166,13 @@ export const commands = {
 	forwardStop: (ruleId: string, options?: InvokeOptions) => __TAURI_INVOKE<null>("forward_stop", { ruleId }, options),
 	/**  Model installation status. */
 	aiStatus: (options?: InvokeOptions) => __TAURI_INVOKE<AiStatus_Serialize>("ai_status", undefined, options),
-	/**  Downloads and verifies the model. */
+	/**  Starts downloading and verifying the model in the background. */
 	aiInstall: (options?: InvokeOptions) => __TAURI_INVOKE<null>("ai_install", undefined, options),
-	/**  Cancels a running download. */
+	/**  Cancels a running download (the partial file is kept for resuming). */
 	aiCancel: (options?: InvokeOptions) => __TAURI_INVOKE<void>("ai_cancel", undefined, options),
 	/**  Deletes the downloaded model. */
 	aiRemove: (options?: InvokeOptions) => __TAURI_INVOKE<null>("ai_remove", undefined, options),
-	/**  Generates one shell command for a natural-language request. */
+	/**  Generates one shell command for a natural-language request. Never executes anything. */
 	aiGenerateCommand: (prompt: string, tabId: string, selection: string | null, options?: InvokeOptions) => __TAURI_INVOKE<AiSuggestion>("ai_generate_command", { prompt, tabId, selection }, options),
 	/**  Generates a snippet script from a description. */
 	aiGenerateSnippet: (description: string, options?: InvokeOptions) => __TAURI_INVOKE<string>("ai_generate_snippet", { description }, options),
@@ -177,6 +180,14 @@ export const commands = {
 	updateCheck: (options?: InvokeOptions) => __TAURI_INVOKE<UpdateInfo_Serialize | null>("update_check", undefined, options),
 	/**  Downloads, verifies (minisign) and installs the update, then restarts. */
 	updateInstall: (options?: InvokeOptions) => __TAURI_INVOKE<null>("update_install", undefined, options),
+	/**  Answers a prompt raised for a background connection. */
+	promptRespond: (promptId: string, response: PromptResponse_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<null>("prompt_respond", { promptId, response }, options),
+	/**  Appends a key's public half to `~/.ssh/authorized_keys` on a saved host. */
+	keyExportToHost: (keyId: string, hostId: string, options?: InvokeOptions) => __TAURI_INVOKE<boolean>("key_export_to_host", { keyId, hostId }, options),
+	/**  Uploads a locally edited remote file. */
+	fsUploadEdit: (editId: string, force: boolean, options?: InvokeOptions) => __TAURI_INVOKE<null>("fs_upload_edit", { editId, force }, options),
+	/**  Serial ports available on this device. */
+	serialListPorts: (options?: InvokeOptions) => __TAURI_INVOKE<SerialPort_Serialize[]>("serial_list_ports", undefined, options),
 };
 
 /* Types */
@@ -853,6 +864,18 @@ export type RuleId = string;
 /**  Identifier of a secret blob stored in the vault (password, private key, token). */
 export type SecretRef = string;
 
+export type SerialPort = SerialPort_Serialize | SerialPort_Deserialize;
+
+export type SerialPort_Deserialize = {
+	path: string,
+	description?: string | null,
+};
+
+export type SerialPort_Serialize = {
+	path: string,
+	description: string | null,
+};
+
 /**  Events streamed from the core to a terminal tab. */
 export type SessionEvent = SessionEvent_Serialize | SessionEvent_Deserialize;
 
@@ -870,7 +893,7 @@ export type SessionEvent_Serialize =
 /**  The session ended. `reason` is `"network"` for recoverable network failures. */
 { type: "closed"; reason: string | null; error: boolean };
 
-export type SessionPhase = "connecting" | "authenticating" | "connected";
+export type SessionPhase = "connecting" | "connected";
 
 /**  What to connect to. */
 export type SessionTarget = SessionTarget_Serialize | SessionTarget_Deserialize;

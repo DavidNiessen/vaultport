@@ -5,12 +5,19 @@
 //! through the typed commands registered below (bindings are generated with tauri-specta).
 
 #![forbid(unsafe_code)]
-// Tauri commands receive owned arguments by design.
-#![allow(clippy::needless_pass_by_value)]
+// Tauri commands receive owned arguments and keep uniform `Result` signatures by design;
+// several matched enums come from `#[non_exhaustive]` engine crates.
+#![allow(
+    clippy::needless_pass_by_value,
+    clippy::unnecessary_wraps,
+    clippy::match_wildcard_for_single_variants,
+    clippy::items_after_statements
+)]
 
 mod commands;
 mod error;
 mod keystore;
+mod net;
 mod sessions;
 mod state;
 
@@ -115,6 +122,10 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         ai::ai_generate_snippet,
         update::update_check,
         update::update_install,
+        net::prompt_respond,
+        keys::key_export_to_host,
+        files::fs_upload_edit,
+        session_cmd::serial_list_ports,
     ])
 }
 
@@ -209,6 +220,11 @@ pub fn run() {
         std::fs::create_dir_all(&data_dir)?;
         app.manage(AppState::new(data_dir));
         app.manage(sessions::SessionManager::default());
+        app.manage(net::PromptBroker::default());
+        app.manage(net::ConnectionPool::default());
+        app.manage(forwarding::ForwardManager::default());
+        app.manage(files::FilesState::new());
+        app.manage(ai::AiManager::new(&app.path().app_data_dir()?));
         #[cfg(desktop)]
         configure_window(app);
         Ok(())

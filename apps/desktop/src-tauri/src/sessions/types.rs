@@ -59,7 +59,6 @@ pub enum HostKeyStatus {
 #[serde(rename_all = "camelCase")]
 pub enum SessionPhase {
     Connecting,
-    Authenticating,
     Connected,
 }
 

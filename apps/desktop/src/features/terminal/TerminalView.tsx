@@ -283,16 +283,18 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       }
     };
     const target =
-      tab.protocol === 'local'
-        ? ({ type: 'local' } as const)
-        : tab.hostId
-          ? ({ type: 'host', hostId: tab.hostId } as const)
-          : ({
-              type: 'quick',
-              host: tab.quick?.host ?? '',
-              port: tab.quick?.port ?? null,
-              username: tab.quick?.username ?? null,
-            } as const);
+      tab.protocol === 'serial' && tab.serial
+        ? ({ type: 'serial', ...tab.serial } as const)
+        : tab.protocol === 'local'
+          ? ({ type: 'local' } as const)
+          : tab.hostId
+            ? ({ type: 'host', hostId: tab.hostId } as const)
+            : ({
+                type: 'quick',
+                host: tab.quick?.host ?? '',
+                port: tab.quick?.port ?? null,
+                username: tab.quick?.username ?? null,
+              } as const);
     const { cols, rows } = term;
     commands
       .sessionOpen(

@@ -1,20 +1,209 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! SSH and Mosh sessions. Wired to the `ssh-engine` crate.
+//! SSH and Mosh sessions on top of `ssh-engine` and `mosh-proto`.
 
-use super::resolve::{SshPlan, unsupported};
-use super::{EventSink, Input};
+use super::record::Recorder;
+use super::resolve::SshPlan;
+use super::{EventSink, Input, SessionPhase};
 use crate::error::CmdResult;
+use crate::net::{self, Asker};
+use ssh_engine::{CloseCategory, ShellEvent, ShellRequest};
+use tauri::Manager;
 use tokio::sync::mpsc;
 
 pub fn spawn(
-    _app: &tauri::AppHandle,
-    _id: String,
-    _plan: SshPlan,
-    _cols: u16,
-    _rows: u16,
-    _input: mpsc::UnboundedReceiver<Input>,
+    app: &tauri::AppHandle,
+    id: String,
+    plan: SshPlan,
+    cols: u16,
+    rows: u16,
+    input: mpsc::UnboundedReceiver<Input>,
     sink: EventSink,
 ) -> CmdResult<()> {
-    sink.closed(Some("SSH engine not linked".into()), true);
-    Err(unsupported("SSH"))
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        run(&app, plan, cols, rows, input, &sink).await;
+        super::finish(&app, &id);
+    });
+    Ok(())
+}
+
+async fn run(
+    app: &tauri::AppHandle,
+    plan: SshPlan,
+    cols: u16,
+    rows: u16,
+    mut input: mpsc::UnboundedReceiver<Input>,
+    sink: &EventSink,
+) {
+    sink.status(SessionPhase::Connecting);
+    let conn = match net::connect(app, &plan, Asker::Session(sink.clone())).await {
+        Ok(c) => c,
+        Err(e) => {
+            sink.closed(Some(e.message), true);
+            return;
+        }
+    };
+    touch_host(app, &plan);
+    if let Some(cmd) = plan.mosh.clone() {
+        run_mosh(app, &plan, &conn, &cmd, cols, rows, input, sink).await;
+        return;
+    }
+    let request = ShellRequest {
+        term: plan.term_type.clone(),
+        cols: u32::from(cols),
+        rows: u32::from(rows),
+        env: plan.env.clone(),
+        agent_forwarding: plan.agent_forwarding,
+        command: None,
+    };
+    let (shell, mut events) = match conn.open_shell(request).await {
+        Ok(s) => s,
+        Err(e) => {
+            sink.closed(Some(e.to_string()), true);
+            conn.close().await;
+            return;
+        }
+    };
+    sink.status(SessionPhase::Connected);
+    let mut rec = Recorder::start(app, plan.host_id, &plan.label, cols, rows);
+    if let Some(script) = &plan.startup_script {
+        let mut s = script.clone();
+        if !s.ends_with('\n') {
+            s.push('\n');
+        }
+        let _ = shell.write(s.as_bytes()).await;
+    }
+    let closed = loop {
+        tokio::select! {
+            ev = events.recv() => match ev {
+                Some(ShellEvent::Data(d) | ShellEvent::ExtendedData { data: d, .. }) => {
+                    rec.output(&d);
+                    sink.output(&d);
+                }
+                Some(ShellEvent::ExitStatus(code)) => {
+                    if code != 0 {
+                        sink.output(format!("\r\n[exit status {code}]\r\n").as_bytes());
+                    }
+                }
+                Some(ShellEvent::Closed | ShellEvent::Eof) | None => break None,
+                Some(_) => {}
+            },
+            msg = input.recv() => match msg {
+                Some(Input::Data(d)) => { let _ = shell.write(&d).await; }
+                Some(Input::Resize { cols, rows }) => {
+                    rec.resize(cols, rows);
+                    let _ = shell.resize(u32::from(cols), u32::from(rows)).await;
+                }
+                Some(Input::Close) | None => {
+                    let _ = shell.close().await;
+                    break Some(());
+                }
+            },
+            reason = conn.closed() => {
+                let network = reason.category == CloseCategory::Network;
+                sink.closed(network.then(|| "network".to_owned()), false);
+                rec.finish();
+                return;
+            }
+        }
+    };
+    let _ = closed;
+    rec.finish();
+    conn.close().await;
+    sink.closed(None, false);
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn run_mosh(
+    app: &tauri::AppHandle,
+    plan: &SshPlan,
+    conn: &ssh_engine::Connection,
+    server_command: &str,
+    cols: u16,
+    rows: u16,
+    mut input: mpsc::UnboundedReceiver<Input>,
+    sink: &EventSink,
+) {
+    let out = match conn.exec(server_command).await {
+        Ok(o) => o,
+        Err(e) => {
+            sink.closed(Some(format!("could not start mosh-server: {e}")), true);
+            return;
+        }
+    };
+    let text = String::from_utf8_lossy(&out.stdout).into_owned();
+    let Some((port, key)) = mosh_proto::find_mosh_connect(&text) else {
+        sink.closed(
+            Some("mosh-server did not start (is mosh installed on the host?)".into()),
+            true,
+        );
+        return;
+    };
+    let Some(target) = plan.hops.last() else {
+        return;
+    };
+    let addr = match tokio::net::lookup_host((target.host.as_str(), port)).await {
+        Ok(mut a) => a.next(),
+        Err(_) => None,
+    };
+    let Some(addr) = addr else {
+        sink.closed(
+            Some("could not resolve the Mosh server address".into()),
+            true,
+        );
+        return;
+    };
+    // The SSH connection is only needed for bootstrapping.
+    conn.close().await;
+    let (session, mut events) = match mosh_proto::Session::connect_with(
+        addr,
+        &key,
+        cols,
+        rows,
+        mosh_proto::SessionConfig::default(),
+    )
+    .await
+    {
+        Ok(s) => s,
+        Err(e) => {
+            sink.closed(Some(format!("mosh: {e}")), true);
+            return;
+        }
+    };
+    sink.status(SessionPhase::Connected);
+    let _ = app.state::<crate::state::AppState>();
+    loop {
+        tokio::select! {
+            ev = events.recv() => match ev {
+                Some(mosh_proto::Event::Output(d)) => sink.output(&d),
+                Some(mosh_proto::Event::Status(_)) => {}
+                Some(mosh_proto::Event::Closed { .. }) | None => break,
+            },
+            msg = input.recv() => match msg {
+                Some(Input::Data(d)) => { let _ = session.write(&d).await; }
+                Some(Input::Resize { cols, rows }) => { let _ = session.resize(cols, rows).await; }
+                Some(Input::Close) | None => {
+                    let _ = session.close().await;
+                    break;
+                }
+            }
+        }
+    }
+    sink.closed(None, false);
+}
+
+fn touch_host(app: &tauri::AppHandle, plan: &SshPlan) {
+    let Some(hid) = plan.host_id else { return };
+    let state = app.state::<crate::state::AppState>();
+    let _ = state.with_vault(|v| {
+        if let Some(mut h) = v.get::<core_model::Host>(&hid.to_string())? {
+            h.last_connected_at = Some(
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map_or(0, |d| d.as_millis() as i64),
+            );
+            v.put(&h)?;
+        }
+        Ok(())
+    });
 }

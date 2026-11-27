@@ -37,6 +37,8 @@ import { TerminalSidePanel } from '../features/terminal/SidePanel';
 import { TerminalView } from '../features/terminal/TerminalView';
 import { useSessions } from '../features/terminal/sessions';
 import { WorkspaceView } from '../features/workspaces/WorkspaceView';
+import { SerialDialog } from '../features/terminal/SerialDialog';
+import { GlobalPrompts } from './GlobalPrompts';
 import { TitleBar } from './TitleBar';
 import { SECTIONS, VaultNav } from './VaultNav';
 
@@ -219,6 +221,8 @@ function DesktopShell({ status, onStatus, onLock }: ShellProps) {
       <CommandPalette onLock={onLock} onImport={() => setImportOpen(true)} />
       <NewTabDialog />
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} />
+      <SerialDialog />
+      <GlobalPrompts />
     </div>
   );
 }
@@ -444,6 +448,8 @@ function PhoneShell({ status, onStatus, onLock }: ShellProps) {
       <CommandPalette onLock={onLock} onImport={() => setImportOpen(true)} />
       <NewTabDialog />
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} />
+      <SerialDialog />
+      <GlobalPrompts />
     </div>
   );
 }

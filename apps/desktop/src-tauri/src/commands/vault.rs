@@ -134,6 +134,7 @@ pub async fn vault_create(
 #[tauri::command]
 #[specta::specta]
 pub async fn vault_unlock(
+    app: tauri::AppHandle,
     state: State<'_, AppState>,
     name: String,
     password: Option<String>,
@@ -172,13 +173,29 @@ pub async fn vault_unlock(
     })
     .await
     .map_err(|e| CmdError::internal(e.to_string()))??;
+    let app2 = app.clone();
+    tauri::async_runtime::spawn(async move {
+        crate::commands::forwarding::autostart(&app2).await;
+    });
     status(&state)
 }
 
 /// Locks the open vault and wipes decrypted data from memory.
 #[tauri::command]
 #[specta::specta]
-pub fn vault_lock(state: State<'_, AppState>) -> CmdResult<VaultStatus> {
+pub async fn vault_lock(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> CmdResult<VaultStatus> {
+    use tauri::Manager;
+    app.state::<crate::sessions::SessionManager>().close_all();
+    app.state::<crate::commands::forwarding::ForwardManager>()
+        .stop_all()
+        .await;
+    app.state::<crate::net::ConnectionPool>().close_all().await;
+    app.state::<crate::commands::files::FilesState>()
+        .reset()
+        .await;
     if let Some(open) = state.vault.lock().as_mut() {
         open.vault.lock();
     }

@@ -79,3 +79,24 @@ pub fn session_respond(
 ) -> CmdResult<()> {
     manager.respond(&id, &prompt_id, response)
 }
+
+#[derive(Debug, Clone, serde::Serialize, specta::Type)]
+#[serde(rename_all = "camelCase")]
+pub struct SerialPort {
+    pub path: String,
+    pub description: Option<String>,
+}
+
+/// Serial ports available on this device.
+#[tauri::command]
+#[specta::specta]
+pub fn serial_list_ports() -> CmdResult<Vec<SerialPort>> {
+    let ports = serial_io::list_ports().map_err(|e| CmdError::internal(e.to_string()))?;
+    Ok(ports
+        .into_iter()
+        .map(|p| SerialPort {
+            path: p.path,
+            description: p.description,
+        })
+        .collect())
+}

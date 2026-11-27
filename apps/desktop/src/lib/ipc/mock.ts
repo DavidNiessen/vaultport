@@ -357,6 +357,22 @@ const handlers: Record<string, Handler> = {
   session_resize: () => null,
   session_close: mockSessionClose,
   session_respond: () => null,
+  serial_list_ports: () => [{ path: '/dev/ttyUSB0', description: 'FTDI USB Serial' }],
+  prompt_respond: () => null,
+  list_logs: () => [],
+  forward_status: () => [],
+  transfer_list: () => [],
+  sync_list_targets: () => [],
+  history_list: () => [],
+  ai_status: () => ({
+    state: 'notInstalled',
+    modelName: 'Qwen2.5-Coder-1.5B-Instruct (Q4_K_M)',
+    license: 'Apache-2.0',
+    downloaded: 0,
+    total: 1117320768,
+    error: null,
+  }),
+  default_ssh_config_path: () => null,
   get_settings: (a) => db.settings.get(a.name as string) ?? null,
   save_settings: (a) => {
     db.settings.set(a.name as string, a.value);
@@ -365,7 +381,7 @@ const handlers: Record<string, Handler> = {
   },
 };
 
-const UNLOCKED_ONLY = /^(list_|save_|delete_|resolve_|store_|get_settings)/;
+const UNLOCKED_ONLY = /^(list_|save_|delete_|resolve_|store_|get_settings|sync_|history_)/;
 
 /** Registers an additional mock handler (used by feature modules, e.g. terminal sessions). */
 export function registerMockHandler(cmd: string, handler: Handler): void {

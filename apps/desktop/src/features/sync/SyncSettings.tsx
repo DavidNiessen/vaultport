@@ -260,6 +260,16 @@ function PairingDialog({ onClose }: { onClose: () => void }) {
             <p className="text-muted text-xs">{t('sync.pairCode')}</p>
             <p className="selectable font-mono text-2xl tracking-[0.3em]">{pairing.data.code}</p>
             <p className="text-subtle mt-1 text-xs">{t('sync.pairExpires')}</p>
+            <button
+              type="button"
+              className="text-accent mt-2 text-xs"
+              onClick={() => {
+                void navigator.clipboard.writeText(pairing.data.payload);
+                toast.success(t('sync.payloadCopied'));
+              }}
+            >
+              {t('sync.copyPayload')}
+            </button>
           </div>
         </div>
       ) : (

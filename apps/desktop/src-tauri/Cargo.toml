@@ -27,6 +27,11 @@ session-log = { path = "../../../crates/session-log" }
 importers = { path = "../../../crates/importers" }
 sync = { path = "../../../crates/sync" }
 cloud-inventory = { path = "../../../crates/cloud-inventory" }
+ssh-engine = { path = "../../../crates/ssh-engine" }
+sftp-engine = { path = "../../../crates/sftp-engine" }
+hw-keys = { path = "../../../crates/hw-keys" }
+serial-io = { path = "../../../crates/serial-io" }
+local-ai = { path = "../../../crates/local-ai", default-features = false }
 
 tauri = { version = "2", features = ["isolation"] }
 tauri-plugin-opener = "2"
@@ -65,8 +70,13 @@ window-vibrancy = "0.8"
 keyring = { version = "3", features = ["apple-native", "windows-native", "async-secret-service", "tokio", "crypto-rust"] }
 
 [features]
+default = ["local-ai"]
 # Enables the custom protocol in production builds (required by Tauri).
 custom-protocol = ["tauri/custom-protocol"]
+# On-device AI command generation (llama.cpp; needs cmake and clang to build).
+local-ai = ["local-ai/llama"]
+# Apple GPU acceleration for local AI.
+metal = ["local-ai", "local-ai/metal"]
 
 [lints]
 workspace = true

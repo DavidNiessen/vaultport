@@ -10,6 +10,7 @@ pub mod types;
 
 #[cfg(desktop)]
 mod local;
+mod record;
 pub mod resolve;
 mod serial;
 mod ssh;

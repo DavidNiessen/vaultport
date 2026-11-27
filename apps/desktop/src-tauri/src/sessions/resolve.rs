@@ -7,7 +7,7 @@ use crate::error::{CmdError, CmdResult, ErrorCode};
 use crate::state::AppState;
 use core_model::{
     Credential, Defaults, Group, Host, HostConfig, HostId, HostKeyPolicy, Identity, KeyId,
-    KnownHost, ProxyConfig, Resolver, SecretRef, Snippet, Validate, validate_hostname,
+    ProxyConfig, Resolver, SecretRef, Snippet, Validate, validate_hostname,
 };
 use std::time::Duration;
 use tauri::Manager;
@@ -15,7 +15,6 @@ use tauri::Manager;
 /// Credentials and address of one SSH hop.
 #[derive(Debug, Clone)]
 pub struct HopPlan {
-    pub label: String,
     pub host: String,
     pub port: u16,
     pub username: String,
@@ -57,7 +56,6 @@ pub struct Snapshot {
     pub groups: Vec<Group>,
     pub identities: Vec<Identity>,
     pub snippets: Vec<Snippet>,
-    pub known_hosts: Vec<KnownHost>,
 }
 
 pub fn snapshot(app: &tauri::AppHandle) -> CmdResult<Snapshot> {
@@ -68,7 +66,6 @@ pub fn snapshot(app: &tauri::AppHandle) -> CmdResult<Snapshot> {
             groups: v.list()?,
             identities: v.list()?,
             snippets: v.list()?,
-            known_hosts: v.list()?,
         })
     })
 }
@@ -96,7 +93,6 @@ fn hop_for(snap: &Snapshot, host: &Host, cfg: &HostConfig) -> HopPlan {
         None => (None, None, Vec::new()),
     };
     HopPlan {
-        label: host.label.clone(),
         host: host.address.clone(),
         port: cfg.ssh.port.unwrap_or(Defaults::SSH_PORT),
         username: username
@@ -216,7 +212,6 @@ pub fn plan_for_quick(
         host_id: None,
         label: host.clone(),
         hops: vec![HopPlan {
-            label: host.clone(),
             host,
             port: port.unwrap_or(Defaults::SSH_PORT),
             username: username

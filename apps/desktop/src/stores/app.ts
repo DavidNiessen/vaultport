@@ -24,6 +24,16 @@ export interface TerminalTab {
   quick?: { host: string; port: number | null; username: string | null } | undefined;
   /** Text sent once after the session connects (e.g. a snippet). */
   initialInput?: string | undefined;
+  serial?:
+    | {
+        path: string;
+        baudRate: number;
+        dataBits: number;
+        stopBits: number;
+        parity: string;
+        flowControl: string;
+      }
+    | undefined;
   /** Workspace the terminal belongs to, if any. */
   workspace?: string | undefined;
 }
