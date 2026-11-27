@@ -13,14 +13,14 @@ import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/cn';
 
 const fieldBase =
-  'w-full rounded-[var(--radius-control)] border border-border-input bg-surface-1 px-3 text-[13px] text-text shadow-xs placeholder:text-subtle transition-[border-color,box-shadow] duration-150 hover:border-border-strong focus:border-accent focus:ring-3 focus:ring-accent-soft focus:outline-none disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:ring-danger-soft pointer-coarse:text-[15px]';
+  'w-full rounded-[12px] border border-border-input bg-surface-3 px-3.5 text-[13.5px] font-medium text-text placeholder:text-subtle transition-[border-color,box-shadow,background-color] duration-150 hover:border-border-strong focus:border-accent focus:bg-surface-2 focus:ring-3 focus:ring-accent-soft focus:outline-none disabled:opacity-50 aria-[invalid=true]:border-danger aria-[invalid=true]:ring-danger-soft pointer-coarse:text-[15px]';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
   function Input({ className, ...props }, ref) {
     return (
       <input
         ref={ref}
-        className={cn(fieldBase, 'h-9 pointer-coarse:h-11', className)}
+        className={cn(fieldBase, 'h-10 pointer-coarse:h-11', className)}
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="off"
@@ -57,7 +57,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, InputHTMLAttributes<HT
         <input
           ref={ref}
           type={visible ? 'text' : 'password'}
-          className={cn(fieldBase, 'h-9 pr-10 pointer-coarse:h-11', className)}
+          className={cn(fieldBase, 'h-10 pr-10 pointer-coarse:h-11', className)}
           autoComplete="off"
           spellCheck={false}
           {...props}
@@ -89,7 +89,7 @@ export function Field({ label, hint, error, className, children }: FieldProps) {
   const id = useId();
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <label htmlFor={id} className="text-text text-[12px] font-medium">
+      <label htmlFor={id} className="text-text text-[12.5px] font-bold">
         {label}
       </label>
       {children(id)}
