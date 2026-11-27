@@ -646,6 +646,19 @@
     "vault": "Tresor"
   },
   "terminal": {
+    "autocomplete": {
+      "label": "Vorschläge",
+      "hint": "Tab zum Einfügen · ↑↓ zum Auswählen · Esc zum Schließen",
+      "kind": {
+        "path": "Pfad",
+        "value": "Wert",
+        "subcommand": "Unterbefehl",
+        "option": "Option",
+        "command": "Befehl",
+        "snippet": "Snippet",
+        "history": "Verlauf"
+      }
+    },
     "connecting": "Verbinde mit {{target}} …",
     "connectionFailed": "Verbindung fehlgeschlagen",
     "copiedByRemote": "Vom Programm auf dem Server kopiert",

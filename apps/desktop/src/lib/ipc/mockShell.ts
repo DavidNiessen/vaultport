@@ -197,7 +197,7 @@ export function mockTermComplete(args: Record<string, unknown>) {
         label: w,
         description: null,
         kind,
-        deleteBefore: [...current].length,
+        deleteBefore: current.length,
         deleteAfter: 0,
       })),
   };
