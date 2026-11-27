@@ -165,7 +165,7 @@ export function AgentSettingsCard() {
               <li key={c.id} className="flex items-center justify-between text-[13px]">
                 <span>{c.name}</span>
                 <span className="text-subtle text-xs">
-                  {new Date(c.connectedAt).toLocaleTimeString()}
+                  {new Date(c.connectedAt ?? 0).toLocaleTimeString()}
                 </span>
               </li>
             ))}
@@ -302,7 +302,7 @@ function ActivityLog({ entries }: { entries: AuditEntry[] }) {
                 <code className="text-muted truncate font-mono text-xs">{e.summary}</code>
               ) : null}
               <div className="text-subtle flex gap-2 text-xs">
-                <span>{new Date(e.at).toLocaleString()}</span>
+                <span>{new Date(e.at ?? 0).toLocaleString()}</span>
                 <span>{e.client}</span>
                 {e.message ? <span className="text-danger truncate">{e.message}</span> : null}
               </div>
