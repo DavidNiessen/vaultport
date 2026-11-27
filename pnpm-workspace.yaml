@@ -4,3 +4,11 @@ packages:
 
 onlyBuiltDependencies:
   - esbuild
+
+# xterm assigns `toString` on a plain object while loading, which throws once Tauri has frozen
+# `Object.prototype` (`freezePrototype` in tauri.conf.json) and leaves the window blank. The
+# patches define the property instead. Re-create them when bumping either package and drop
+# them once upstream no longer does this; the Playwright suite freezes the prototype to check.
+patchedDependencies:
+  '@xterm/addon-webgl@0.19.0': patches/@xterm__addon-webgl@0.19.0.patch
+  '@xterm/xterm@6.0.0': patches/@xterm__xterm@6.0.0.patch

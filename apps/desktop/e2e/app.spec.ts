@@ -2,6 +2,15 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
+// The Tauri webview runs with `freezePrototype` (tauri.conf.json); a plain browser does not.
+// Freeze it here as well, so a dependency that assigns over an inherited `Object.prototype`
+// property fails these tests instead of leaving the packaged app with a blank window.
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.freeze(Object.prototype);
+  });
+});
+
 async function unlock(page: Page) {
   await page.goto('/?platform=linux');
   await page.getByLabel('Master password').fill('password');

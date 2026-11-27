@@ -6,5 +6,6 @@
 *.woff2 binary
 *.ttf binary
 pnpm-lock.yaml linguist-generated=true -diff
+patches/*.patch linguist-generated=true -diff
 Cargo.lock linguist-generated=true
 apps/desktop/src/lib/ipc/bindings.ts linguist-generated=true
