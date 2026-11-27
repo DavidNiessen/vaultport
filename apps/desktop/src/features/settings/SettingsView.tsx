@@ -2,6 +2,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import {
+  Bot,
   Brain,
   Cloud,
   Info,
@@ -25,6 +26,7 @@ import { formatShortcut, useBreakpoint, usePlatform } from '@/lib/platform';
 import { useSettings } from '@/lib/queries';
 import { useApp, type ThemePref } from '@/stores/app';
 
+import { AgentSettingsCard } from '../agents/AgentSettings';
 import { AiSettingsCard } from '../ai/AiSettingsCard';
 import { SHORTCUTS } from '../palette/shortcuts';
 import { SyncSettings } from '../sync/SyncSettings';
@@ -32,7 +34,8 @@ import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from '../terminal/se
 import { TERMINAL_FONTS, TERMINAL_THEMES, findTheme } from '../terminal/themes';
 import { DEFAULT_SECURITY_SETTINGS, type SecuritySettings } from './security';
 
-type Section = 'appearance' | 'terminal' | 'security' | 'sync' | 'ai' | 'shortcuts' | 'about';
+type Section =
+  'appearance' | 'terminal' | 'security' | 'sync' | 'ai' | 'agents' | 'shortcuts' | 'about';
 
 const ACCENTS = [
   '#6366f1',
@@ -478,6 +481,7 @@ export function SettingsView({
     { id: 'security', icon: <Shield />, label: t('settings.security') },
     { id: 'sync', icon: <Cloud />, label: t('settings.sync') },
     { id: 'ai', icon: <Brain />, label: t('settings.ai') },
+    { id: 'agents', icon: <Bot />, label: t('settings.agents') },
     { id: 'shortcuts', icon: <Keyboard />, label: t('settings.shortcuts') },
     { id: 'about', icon: <Info />, label: t('settings.about') },
   ];
@@ -516,6 +520,7 @@ export function SettingsView({
           {section === 'security' && <Security status={status} onStatus={onStatus} />}
           {section === 'sync' && <SyncSettings />}
           {section === 'ai' && <AiSettingsCard />}
+          {section === 'agents' && <AgentSettingsCard />}
           {section === 'shortcuts' && <Shortcuts />}
           {section === 'about' && <About />}
           <p className="text-subtle flex items-center gap-1.5 pt-2 text-xs">

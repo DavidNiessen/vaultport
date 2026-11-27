@@ -61,3 +61,29 @@ test('has no critical accessibility violations', async ({ page }) => {
   const critical = results.violations.filter((v) => v.impact === 'critical');
   expect(critical, JSON.stringify(critical, null, 2)).toEqual([]);
 });
+
+test('configures AI agent access and approves an agent action', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'agents connect to the desktop app');
+  await unlock(page);
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'AI agents', exact: true }).click();
+  const toggle = page.getByRole('switch', { name: 'Allow AI agents' });
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('data-state', 'checked');
+  await expect(page.getByTestId('agent-config')).toContainText('claude mcp add');
+  await page.getByRole('radio', { name: 'Claude Desktop' }).click();
+  await expect(page.getByTestId('agent-config')).toContainText('"mcpServers"');
+
+  await page.evaluate(() =>
+    (window as unknown as { __mockAgentRequest: (d: string) => string }).__mockAgentRequest(
+      'systemctl restart nginx',
+    ),
+  );
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toContainText('Claude Code 2.1 wants to act');
+  await expect(dialog.getByTestId('agent-approval')).toContainText('systemctl restart nginx');
+  await dialog.getByRole('button', { name: 'Allow once' }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.getByText('run_command').first()).toBeVisible();
+  await expect(page.getByText('Done', { exact: true }).first()).toBeVisible();
+});

@@ -1,4 +1,53 @@
 {
+  "agents": {
+    "title": "KI-Agenten",
+    "description": "Erlaube KI-Werkzeugen wie Claude Code, Claude Desktop, Cursor oder VS Code, über ssh-client mit deinen Servern zu arbeiten – per Model Context Protocol (MCP). Alles bleibt auf diesem Gerät: Agenten verbinden sich lokal, sehen nie deine Passwörter oder Schlüssel, und du bestätigst, was sie tun.",
+    "desktopOnly": "KI-Agenten verbinden sich mit ssh-client auf deinem Computer. Aktiviere dies in der Desktop-App.",
+    "enable": "KI-Agenten erlauben",
+    "enableHint": "Aus: kein Agent kann sich verbinden",
+    "listening": "An: Agenten auf diesem Computer können sich verbinden",
+    "error": "Start fehlgeschlagen: {{error}}",
+    "readOnly": "Nur lesen",
+    "readOnlyHint": "Agenten können nur auflisten und lesen, aber keine Befehle ausführen oder Dateien ändern",
+    "hosts": "Hosts",
+    "hostsHint": "Welche gespeicherten Hosts Agenten sehen und nutzen dürfen",
+    "allHosts": "Alle Hosts",
+    "selectedHosts": "Ausgewählte",
+    "noHosts": "Noch keine Hosts gespeichert.",
+    "setup": "Client verbinden",
+    "setupHint": "ssh-client arbeitet als MCP-Server: Füge ihn einmal zu deinem KI-Werkzeug hinzu. Das Werkzeug startet ihn bei Bedarf; ssh-client öffnet sich, falls es nicht läuft.",
+    "addTo": "In {{file}} eintragen:",
+    "runInTerminal": "Im Terminal ausführen:",
+    "connected": "Verbundene Agenten",
+    "noClients": "Kein Agent ist verbunden.",
+    "disconnectAll": "Alle trennen",
+    "rotateToken": "Zugang zurücksetzen",
+    "tokenRotated": "Zugang zurückgesetzt. Agenten müssen sich neu verbinden.",
+    "activity": "Aktivität",
+    "noActivity": "Noch nichts. Jede Aktion eines Agenten wird hier aufgeführt.",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "outcome": {
+      "ok": "Erledigt",
+      "error": "Fehlgeschlagen",
+      "denied": "Abgelehnt"
+    },
+    "approval": {
+      "title": "{{client}} möchte handeln",
+      "description": "Ein mit ssh-client verbundener KI-Agent bittet um Erlaubnis.",
+      "on": "auf {{host}}",
+      "changes": "Nimmt Änderungen vor",
+      "deny": "Ablehnen",
+      "once": "Einmal erlauben",
+      "session": "Für diese Sitzung erlauben",
+      "sessionHint": "„Für diese Sitzung erlauben“ erlaubt diese Aktion auf diesem Host, bis der Agent sich trennt oder der Tresor gesperrt wird.",
+      "more": "{{count}} weitere warten",
+      "policy": "Nachfragen bei",
+      "policyHint": "Aktionen, die etwas ändern, brauchen immer deine Bestätigung",
+      "always": "Jeder Aktion",
+      "changesOnly": "Nur Änderungen"
+    }
+  },
   "ai": {
     "description": "Wandle Anfragen in natürlicher Sprache mit einem kleinen Modell, das vollständig auf diesem Gerät läuft, in Shell-Befehle um. Nichts von dem, was du eingibst, verlässt deinen Computer.",
     "download": "Modell herunterladen",
@@ -430,7 +479,8 @@
     "upToDate": "Du bist auf dem neuesten Stand",
     "updateAvailable": "Version {{version}} ist verfügbar",
     "vaultSecurity": "Tresor",
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "agents": "KI-Agenten"
   },
   "sftp": {
     "actions": "Aktionen",

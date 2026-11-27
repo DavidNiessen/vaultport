@@ -8,6 +8,8 @@ import { emit as tauriEmit } from '@tauri-apps/api/event';
 import { mockIPC, mockWindows } from '@tauri-apps/api/mocks';
 
 import type {
+  AgentApprovalRequest,
+  AuditEntry,
   Group,
   Host,
   Identity,
@@ -373,6 +375,32 @@ const handlers: Record<string, Handler> = {
     error: null,
   }),
   default_ssh_config_path: () => null,
+  agent_status: () => agentStatus(),
+  agent_save_settings: (a) => {
+    agent.settings = { ...agent.settings, ...(a.settings as typeof agent.settings) };
+    return agentStatus();
+  },
+  agent_respond: (a) => {
+    const id = a.id as string;
+    const pending = agent.pending.get(id);
+    if (!pending) throw { code: 'notFound', message: 'the request is no longer pending' };
+    agent.pending.delete(id);
+    agent.audit.unshift({
+      id: crypto.randomUUID(),
+      at: Date.now(),
+      client: pending.client,
+      tool: pending.tool,
+      host: pending.host,
+      summary: pending.details,
+      outcome: a.decision === 'deny' ? 'denied' : 'ok',
+      message: null,
+    });
+    void tauriEmit('agent://audit', null);
+    return null;
+  },
+  agent_audit_log: () => [...agent.audit],
+  agent_rotate_token: () => agentStatus(),
+  agent_disconnect_all: () => null,
   get_settings: (a) => db.settings.get(a.name as string) ?? null,
   save_settings: (a) => {
     db.settings.set(a.name as string, a.value);
@@ -380,6 +408,66 @@ const handlers: Record<string, Handler> = {
     return null;
   },
 };
+
+const agent = {
+  settings: {
+    enabled: false,
+    approval: 'always' as 'always' | 'changesOnly',
+    readOnly: false,
+    allHosts: true,
+    hosts: [] as string[],
+  },
+  pending: new Map<string, AgentApprovalRequest>(),
+  audit: [] as AuditEntry[],
+};
+
+function agentStatus() {
+  const command = '/usr/bin/ssh-client';
+  const desktop = JSON.stringify(
+    { mcpServers: { 'ssh-client': { command, args: ['mcp'] } } },
+    null,
+    2,
+  );
+  return {
+    supported: true,
+    settings: agent.settings,
+    listening: agent.settings.enabled,
+    error: null,
+    clients: [],
+    command,
+    configs: [
+      {
+        client: 'claude-code',
+        kind: 'shell',
+        location: null,
+        text: `claude mcp add --scope user ssh-client -- ${command} mcp`,
+      },
+      {
+        client: 'claude-desktop',
+        kind: 'json',
+        location: 'claude_desktop_config.json',
+        text: desktop,
+      },
+      { client: 'generic', kind: 'shell', location: null, text: `${command} mcp` },
+    ],
+  };
+}
+
+/** Simulates an agent asking for approval (dev and end-to-end tests). */
+function mockAgentRequest(details = 'systemctl restart nginx'): string {
+  const req: AgentApprovalRequest = {
+    id: crypto.randomUUID(),
+    client: 'Claude Code 2.1',
+    tool: 'run_command',
+    title: 'Run command',
+    host: 'web-01',
+    details,
+    destructive: true,
+  };
+  agent.pending.set(req.id, req);
+  void tauriEmit('agent://approval', req);
+  return req.id;
+}
 
 const UNLOCKED_ONLY = /^(list_|save_|delete_|resolve_|store_|get_settings|sync_|history_)/;
 
@@ -390,6 +478,8 @@ export function registerMockHandler(cmd: string, handler: Handler): void {
 
 export function installMockIpc(): void {
   mockWindows('main');
+  (window as unknown as { __mockAgentRequest: typeof mockAgentRequest }).__mockAgentRequest =
+    mockAgentRequest;
   mockIPC(
     (cmd, payload) => {
       const args = (payload ?? {}) as Record<string, unknown>;

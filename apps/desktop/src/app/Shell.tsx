@@ -35,6 +35,7 @@ import { SftpView } from '../features/sftp/SftpView';
 import { SnippetsView } from '../features/snippets/SnippetsView';
 import { TerminalSidePanel } from '../features/terminal/SidePanel';
 import { TerminalView } from '../features/terminal/TerminalView';
+import { AgentApprovals } from '../features/agents/AgentApprovals';
 import { useSessions } from '../features/terminal/sessions';
 import { WorkspaceView } from '../features/workspaces/WorkspaceView';
 import { SerialDialog } from '../features/terminal/SerialDialog';
@@ -223,6 +224,7 @@ function DesktopShell({ status, onStatus, onLock }: ShellProps) {
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} />
       <SerialDialog />
       <GlobalPrompts />
+      <AgentApprovals />
     </div>
   );
 }
@@ -450,6 +452,7 @@ function PhoneShell({ status, onStatus, onLock }: ShellProps) {
       <ImportDialog open={importOpen} onOpenChange={setImportOpen} />
       <SerialDialog />
       <GlobalPrompts />
+      <AgentApprovals />
     </div>
   );
 }

@@ -49,6 +49,12 @@ export type FsListing = B.FsListing;
 export type Transfer = B.Transfer;
 export type LogInfo = B.LogInfo;
 export type AiStatus = B.AiStatus;
+export type AgentStatus = B.AgentStatus_Serialize;
+export type AgentSettings = B.AgentSettings_Serialize;
+export type AgentClientConfig = B.AgentClientConfig_Serialize;
+export type AgentApprovalRequest = B.AgentApprovalRequest_Serialize;
+export type AgentDecision = B.AgentDecision;
+export type AuditEntry = B.AuditEntry_Serialize;
 
 /** `true` when running inside the Tauri webview (as opposed to a plain browser). */
 export function isTauri(): boolean {

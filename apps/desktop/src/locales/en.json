@@ -1,4 +1,53 @@
 {
+  "agents": {
+    "title": "AI agents",
+    "description": "Let AI tools such as Claude Code, Claude Desktop, Cursor or VS Code work with your servers through ssh-client using the Model Context Protocol (MCP). Everything stays on this device: agents connect locally, never see your passwords or keys, and you approve what they do.",
+    "desktopOnly": "AI agents connect to ssh-client on your computer. Turn this on in the desktop app.",
+    "enable": "Allow AI agents",
+    "enableHint": "Off: no agent can connect",
+    "listening": "On: agents on this computer can connect",
+    "error": "Could not start: {{error}}",
+    "readOnly": "Read-only",
+    "readOnlyHint": "Agents can only list and read; they cannot run commands or change files",
+    "hosts": "Hosts",
+    "hostsHint": "Which saved hosts agents can see and use",
+    "allHosts": "All hosts",
+    "selectedHosts": "Selected",
+    "noHosts": "No hosts saved yet.",
+    "setup": "Connect a client",
+    "setupHint": "ssh-client works as an MCP server: add it to your AI tool once. The tool starts it when needed; ssh-client opens if it is not running.",
+    "addTo": "Add to {{file}}:",
+    "runInTerminal": "Run in a terminal:",
+    "connected": "Connected agents",
+    "noClients": "No agent is connected.",
+    "disconnectAll": "Disconnect all",
+    "rotateToken": "Reset access",
+    "tokenRotated": "Access reset. Agents must reconnect.",
+    "activity": "Activity",
+    "noActivity": "Nothing yet. Every agent action is listed here.",
+    "copy": "Copy",
+    "copied": "Copied",
+    "outcome": {
+      "ok": "Done",
+      "error": "Failed",
+      "denied": "Denied"
+    },
+    "approval": {
+      "title": "{{client}} wants to act",
+      "description": "An AI agent connected to ssh-client asks for permission.",
+      "on": "on {{host}}",
+      "changes": "Makes changes",
+      "deny": "Deny",
+      "once": "Allow once",
+      "session": "Allow for this session",
+      "sessionHint": "\"Allow for this session\" allows this action on this host until the agent disconnects or the vault locks.",
+      "more": "{{count}} more waiting",
+      "policy": "Ask before",
+      "policyHint": "Actions that change something always need your approval",
+      "always": "Every action",
+      "changesOnly": "Changes only"
+    }
+  },
   "ai": {
     "description": "Turn plain-language requests into shell commands with a small model that runs entirely on this device. Nothing you type leaves your computer.",
     "download": "Download model",
@@ -430,7 +479,8 @@
     "upToDate": "You are up to date",
     "updateAvailable": "Version {{version}} is available",
     "vaultSecurity": "Vault",
-    "version": "Version {{version}}"
+    "version": "Version {{version}}",
+    "agents": "AI agents"
   },
   "sftp": {
     "actions": "Actions",
