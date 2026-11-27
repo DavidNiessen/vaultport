@@ -17,15 +17,9 @@
 <a href="https://github.com/DavidNiessen/vaultport/pulls"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-light.svg"><img alt="pull requests: 9 open" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/shields-prs-dark.svg" height="28"></picture></a>
 </p>
 
-<div align="center">
-
 **A secure, serverless SSH, SFTP, Mosh, Telnet and serial client for Windows, macOS, Linux, Android and iOS.** Your hosts, keys and snippets live in an end-to-end encrypted vault on your devices and sync only through storage you control. There are no accounts, no telemetry and no servers run by this project.
 
 [Website & docs](https://vaultport.niessen.dev/) · [Download](https://vaultport.niessen.dev/download) · [llms.txt](https://vaultport.niessen.dev/llms.txt) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
-
-</div>
-
-<div align="center">
 
 ![Hosts view](.github/screenshots/hosts.png)
 
@@ -36,10 +30,6 @@
     <td width="22%"><img src=".github/screenshots/phone.png" alt="Phone layout" /></td>
   </tr>
 </table>
-
-</div>
-
-<div align="center">
 
 ## Contents
 
@@ -52,19 +42,11 @@
 - [Project status](#project-status)
 - [License](#license)
 
-</div>
-
-<div align="center">
-
 ## Highlights
-
-</div>
 
 <p align="center">
 <a href="https://github.com/DavidNiessen/vaultport"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/features-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/features-light.svg"><img alt="why vaultport: Every protocol, Encrypted vault, Dual-pane SFTP, Serverless sync, Hardware keys, Tunnels &amp; workspaces, AI agents over MCP, Local AI, Desktop &amp; mobile" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/features-dark.svg" width="100%"></picture></a>
 </p>
-
-<div align="center">
 
 ## Features
 
@@ -80,10 +62,6 @@
 | Local AI          | Optional command generation with a small model that downloads automatically and runs fully on the device. Suggestions are inserted, never executed.                                                                                                               |
 | AI agents         | Built-in [MCP](https://modelcontextprotocol.io) server: Claude Code, Claude Desktop, Cursor, VS Code or Codex can list hosts, run commands, read and write files and manage tunnels — locally, without seeing credentials, with your approval in the app.         |
 | Design            | Native-feeling custom title bar per OS, dark/light themes, keyboard-first with a command palette, responsive from phone to desktop, English and German.                                                                                                           |
-
-</div>
-
-<div align="center">
 
 ## Security at a glance
 
@@ -102,10 +80,6 @@ Read the [security documentation](https://vaultport.niessen.dev/security/) and t
 [threat model](https://vaultport.niessen.dev/security/). Report vulnerabilities as
 described in [SECURITY.md](SECURITY.md).
 
-</div>
-
-<div align="center">
-
 ## Use with AI agents
 
 Turn on **Settings → AI agents**, then register Vaultport as an MCP server. For example, with
@@ -120,13 +94,9 @@ local socket that only your user can open. Every action that changes something n
 approval, and so does every read unless you relax that. You can restrict agents to selected
 hosts or to read-only tools, and every call is listed in the activity log.
 
-</div>
-
 <p align="center">
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/stack-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/stack-light.svg"><img alt="tech stack: Rust, React, TypeScript, Tailwind CSS, Vite, Linux, Apple, Android, GitHub Actions, Docker" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/stack-dark.svg" width="100%"></picture>
 </p>
-
-<div align="center">
 
 ## Building from source
 
@@ -162,10 +132,6 @@ The protocol integration tests use Docker test servers. See
 [docker/test-servers](docker/test-servers/README.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 Mobile builds use `pnpm tauri android build` and `pnpm tauri ios build` from `apps/desktop`.
 
-</div>
-
-<div align="center">
-
 ## Repository layout
 
 ```text
@@ -179,13 +145,9 @@ fuzz/                cargo-fuzz targets for every parser and decoder
 docker/test-servers/ OpenSSH and friends for integration tests
 ```
 
-</div>
-
 <p align="center">
-<a href="https://github.com/DavidNiessen/vaultport/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-light.svg"><img alt="140 commits to DavidNiessen/vaultport in the last year" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-dark.svg" width="100%"></picture></a>
+<a href="https://github.com/DavidNiessen/vaultport/commits/main"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-light.svg"><img alt="142 commits to DavidNiessen/vaultport in the last year" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/commit-activity-dark.svg" width="100%"></picture></a>
 </p>
-
-<div align="center">
 
 ## Project status
 
@@ -200,17 +162,11 @@ Vaultport is pre-1.0. These parts are not finished yet:
 
 Issues and pull requests are welcome.
 
-</div>
-
 <p align="center">
 <a href="https://github.com/DavidNiessen/vaultport/graphs/contributors"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-light.svg"><img alt="2 contributors to DavidNiessen/vaultport" src="https://raw.githubusercontent.com/DavidNiessen/vaultport/readme-studio/contributors-dark.svg" width="100%"></picture></a>
 </p>
-
-<div align="center">
 
 ## License
 
 Vaultport is free software under the [GNU General Public License v3.0 or later](LICENSE).
 Third-party licenses are listed in [LICENSES](LICENSES) and in each release's SBOM.
-
-</div>
