@@ -85,12 +85,12 @@ impl OsKind {
 pub struct Group {
     pub id: GroupId,
     pub label: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub parent: Option<GroupId>,
     #[serde(default)]
     pub config: HostConfig,
     /// When set, the group is mirrored from a cloud integration.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub integration: Option<IntegrationId>,
     #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
@@ -124,9 +124,9 @@ pub struct Host {
     pub label: String,
     /// Hostname, IPv4 or IPv6 address.
     pub address: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub group: Option<GroupId>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub tags: Vec<String>,
     #[serde(default)]
     pub config: HostConfig,
@@ -134,10 +134,10 @@ pub struct Host {
     pub os: OsKind,
     #[serde(default)]
     pub favorite: bool,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub notes: Option<String>,
     /// Stable id of the instance in a cloud provider, when imported by an integration.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub cloud_id: Option<String>,
     #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
@@ -146,7 +146,7 @@ pub struct Host {
     #[serde(default)]
     pub updated_at: Millis,
     #[cfg_attr(feature = "specta", specta(type = Option<f64>))]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub last_connected_at: Option<Millis>,
 }
 
@@ -203,9 +203,9 @@ pub struct Identity {
     pub id: IdentityId,
     pub label: String,
     pub username: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub password: Option<SecretRef>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub keys: Vec<KeyId>,
     #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
@@ -279,7 +279,7 @@ pub struct KeyMeta {
     pub label: String,
     pub algorithm: KeyAlgorithm,
     /// Bits for RSA keys.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub bits: Option<u32>,
     /// Public key in OpenSSH `authorized_keys` format.
     pub public_key: String,
@@ -290,10 +290,10 @@ pub struct KeyMeta {
     #[serde(default)]
     pub encrypted: bool,
     /// Stored passphrase (when the user chose "save passphrase").
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub passphrase: Option<SecretRef>,
     /// OpenSSH certificate (`*-cert.pub` contents) paired with this key.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub certificate: Option<String>,
     #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
@@ -331,12 +331,12 @@ pub struct Snippet {
     pub id: SnippetId,
     pub label: String,
     pub script: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub package: Option<PackageId>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub tags: Vec<String>,
     /// Hosts remembered by "save targets" for multi-host execution.
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub targets: Vec<HostId>,
     #[serde(default)]
     pub run_count: u32,
@@ -455,9 +455,9 @@ pub struct PortForwardRule {
     pub bind_address: String,
     pub bind_port: u16,
     /// Destination host (not used for dynamic).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub dest_host: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub dest_port: Option<u16>,
     #[serde(default)]
     pub auto_start: bool,
@@ -526,9 +526,9 @@ pub struct KnownHost {
     pub public_key: String,
     /// `SHA256:...` fingerprint.
     pub fingerprint: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub marker: Option<KnownHostMarker>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub comment: Option<String>,
     #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
@@ -604,11 +604,11 @@ pub enum WorkspaceMode {
 #[serde(rename_all = "camelCase")]
 pub struct WorkspacePane {
     pub host: HostId,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub title: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub cwd: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub command: Option<String>,
 }
 
@@ -622,7 +622,7 @@ pub struct WorkspaceTemplate {
     pub mode: WorkspaceMode,
     pub panes: Vec<WorkspacePane>,
     /// Column fractions for the grid layout (sum to 1.0).
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub column_sizes: Vec<f32>,
     #[cfg_attr(feature = "specta", specta(type = f64))]
     #[serde(default)]
@@ -664,9 +664,9 @@ pub struct CloudIntegration {
     #[serde(default)]
     pub sync_credentials: bool,
     #[cfg_attr(feature = "specta", specta(type = Option<f64>))]
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub last_sync_at: Option<Millis>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub last_error: Option<String>,
 }
 

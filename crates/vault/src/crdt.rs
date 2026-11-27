@@ -189,8 +189,13 @@ fn insert_path(root: &mut Value, path: &str, value: Value) {
 /// Computes the `Set` changes that turn `old` into `new` (both objects).
 #[must_use]
 pub fn diff(old: Option<&Value>, new: &Value) -> Vec<Change> {
-    let old_flat = old.map(flatten).unwrap_or_default();
-    let new_flat = flatten(new);
+    // `null` and "absent" are equivalent: materialized documents omit null leaves, so
+    // comparing them literally would re-emit every null and clobber concurrent writes.
+    let strip = |m: BTreeMap<String, Value>| -> BTreeMap<String, Value> {
+        m.into_iter().filter(|(_, v)| !v.is_null()).collect()
+    };
+    let old_flat = strip(old.map(flatten).unwrap_or_default());
+    let new_flat = strip(flatten(new));
     let mut changes = Vec::new();
     for (path, value) in &new_flat {
         if old_flat.get(path) != Some(value) {
@@ -273,6 +278,28 @@ mod tests {
             Some(
                 json!({"label": "web", "config": {"ssh": {"port": 2222}, "terminal": {"theme": "red"}}})
             )
+        );
+    }
+
+    #[test]
+    fn explicit_nulls_do_not_clobber_concurrent_writes() {
+        let base = json!({"label": "web", "port": null, "tags": []});
+        let a = json!({"label": "web", "port": 2222, "tags": []});
+        let b = json!({"label": "web", "port": null, "tags": ["prod"]});
+        let mut d = Doc::new("host");
+        for c in diff(None, &base) {
+            d.apply(h(1, 1), &c);
+        }
+        let seen = d.to_value();
+        let mut ops: Vec<(Hlc, Change)> = diff(None, &base)
+            .into_iter()
+            .map(|c| (h(1, 1), c))
+            .collect();
+        ops.extend(diff(seen.as_ref(), &a).into_iter().map(|c| (h(2, 1), c)));
+        ops.extend(diff(seen.as_ref(), &b).into_iter().map(|c| (h(3, 2), c)));
+        assert_eq!(
+            materialize(&ops),
+            Some(json!({"label": "web", "port": 2222, "tags": ["prod"]}))
         );
     }
 

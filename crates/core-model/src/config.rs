@@ -34,7 +34,7 @@ macro_rules! sparse_struct {
         #[cfg_attr(feature = "specta", derive(specta::Type))]
         #[serde(default, rename_all = "camelCase")]
         pub struct $name {
-            $( $(#[$fmeta])* #[serde(skip_serializing_if = "Option::is_none")] pub $field: Option<$ty>, )*
+            $( $(#[$fmeta])* pub $field: Option<$ty>, )*
         }
 
         impl Inherit for $name {
@@ -70,9 +70,9 @@ pub struct ProxyConfig {
     pub kind: ProxyKind,
     pub host: String,
     pub port: u16,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub username: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
     pub password: Option<SecretRef>,
 }
 
@@ -115,11 +115,11 @@ pub enum Credential {
     Identity { id: IdentityId },
     /// Inline credentials.
     Inline {
-        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
         username: Option<String>,
-        #[serde(default, skip_serializing_if = "Option::is_none")]
+        #[serde(default)]
         password: Option<SecretRef>,
-        #[serde(default, skip_serializing_if = "Vec::is_empty")]
+        #[serde(default)]
         keys: Vec<KeyId>,
     },
 }
@@ -318,12 +318,14 @@ mod tests {
     }
 
     #[test]
-    fn empty_config_serializes_compactly() {
+    fn empty_config_roundtrips() {
         let json = serde_json::to_string(&HostConfig::default()).unwrap_or_default();
-        assert_eq!(
-            json,
-            r#"{"ssh":{},"mosh":{},"telnet":{},"terminal":{},"sftp":{}}"#
-        );
+        let back: HostConfig = serde_json::from_str(&json).unwrap_or_default();
+        assert_eq!(back, HostConfig::default());
+        // Sparse configs written by older versions (absent keys) still deserialize.
+        let sparse: HostConfig =
+            serde_json::from_str(r#"{"ssh":{"port":2222}}"#).unwrap_or_default();
+        assert_eq!(sparse.ssh.port, Some(2222));
         assert!(SshConfig::default().is_empty());
     }
 
