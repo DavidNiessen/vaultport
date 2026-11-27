@@ -36,6 +36,7 @@ pub mod csv;
 mod error;
 mod finalize;
 pub mod known_hosts;
+pub mod putty;
 pub mod ssh_config;
 mod text;
 mod wire;
