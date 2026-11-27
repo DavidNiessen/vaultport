@@ -245,6 +245,22 @@ impl PlatformSigner {
         &self.platform_ref
     }
 
+    /// The `KeyMeta::algorithm` value for this key.
+    pub const fn key_algorithm(&self) -> core_model::KeyAlgorithm {
+        match self.kind {
+            SignerKind::EcdsaP256 => core_model::KeyAlgorithm::EcdsaP256,
+            SignerKind::Rsa => core_model::KeyAlgorithm::Rsa,
+        }
+    }
+
+    /// The `KeyMeta::storage` value for this key (device-bound, never synced).
+    pub fn key_storage(&self) -> core_model::KeyStorage {
+        core_model::KeyStorage::Hardware {
+            platform_ref: self.platform_ref.clone(),
+            device: self.backend.name().to_owned(),
+        }
+    }
+
     fn ecdsa_ssh_signature(&self, data: &[u8], signature: EcdsaP256Signature) -> Result<Vec<u8>> {
         let KeyData::Ecdsa(point) = self.public_key.key_data() else {
             return Err(Error::InvalidSignature);

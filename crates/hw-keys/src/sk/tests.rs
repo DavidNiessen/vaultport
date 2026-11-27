@@ -471,3 +471,37 @@ ZfG1KaT0PtFDJ/XFSqtiAAAAEHVzZXJAZXhhbXBsZS5jb20BAgMEBQ==
         Err(Error::Malformed { .. })
     ));
 }
+
+#[test]
+fn rebuild_from_stored_metadata() {
+    let original = key_from_pub(SK_ECDSA_PUB);
+    let core_model::KeyStorage::Fido2 {
+        application,
+        require_pin,
+        require_presence,
+        ..
+    } = original.key_storage(core_model::SecretRef::new())
+    else {
+        panic!("expected Fido2 storage");
+    };
+    assert_eq!(application, "ssh:");
+    assert!(require_presence && !require_pin);
+
+    // What the app persists: the OpenSSH line in KeyMeta, the handle in the vault.
+    let line = original.public_key_openssh("comment");
+    let public = PublicKey::from_openssh(&line).unwrap();
+    let flags = key_flags::from_requirements(require_presence, require_pin);
+    let rebuilt = SkKey::from_public_key(&public, flags, original.key_handle().to_vec()).unwrap();
+    assert_eq!(rebuilt, original);
+    assert_eq!(
+        core_model::KeyAlgorithm::from(rebuilt.algorithm()).ssh_name(),
+        SK_ECDSA_P256_ALGORITHM
+    );
+
+    let not_sk = PublicKey::from_openssh(
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILM+rvN+ot98qgEN796jTiQfZfG1KaT0PtFDJ/XFSqti",
+    )
+    .unwrap();
+    assert!(SkKey::from_public_key(&not_sk, 1, vec![1]).is_err());
+    assert_eq!(key_flags::from_requirements(false, true), 0x04);
+}

@@ -62,6 +62,19 @@ pub mod key_flags {
     pub const FORCE_OPERATION: u8 = 0x10;
     /// `SSH_SK_RESIDENT_KEY`: the credential is discoverable (stored on the authenticator).
     pub const RESIDENT_KEY: u8 = 0x20;
+
+    /// Flags for a non-resident key with the given requirements (as stored in
+    /// `KeyStorage::Fido2 { require_presence, require_pin }`).
+    pub const fn from_requirements(require_presence: bool, require_verification: bool) -> u8 {
+        let mut flags = 0;
+        if require_presence {
+            flags |= USER_PRESENCE_REQUIRED;
+        }
+        if require_verification {
+            flags |= USER_VERIFICATION_REQUIRED;
+        }
+        flags
+    }
 }
 
 /// Flags of the CTAP2 authenticator data (W3C WebAuthn §6.1).
@@ -210,6 +223,37 @@ impl SkKey {
             reserved: Vec::new(),
             ssh_public,
         })
+    }
+
+    /// Rebuilds a key from its public key (e.g. `KeyMeta::public_key` parsed with
+    /// [`PublicKey::from_openssh`]), flags and the key handle stored in the vault.
+    pub fn from_public_key(public_key: &PublicKey, flags: u8, key_handle: Vec<u8>) -> Result<Self> {
+        const WHAT: &str = "security key public key";
+        let blob = public_key.to_bytes()?;
+        let mut r = Reader::new(&blob, WHAT);
+        let algorithm = SkAlgorithm::from_ssh_name(r.string()?)
+            .ok_or(Error::malformed(WHAT, "not a security key (sk-*) key"))?;
+        let public = match algorithm {
+            SkAlgorithm::Ed25519 => r.string()?,
+            SkAlgorithm::EcdsaP256 => {
+                r.expect_string(b"nistp256", "unexpected curve")?;
+                r.string()?
+            }
+        };
+        let application = r.utf8()?.to_owned();
+        r.finish()?;
+        Self::new(algorithm, public, application, flags, key_handle)
+    }
+
+    /// The `KeyStorage` entry for this key, once its key handle has been stored as the
+    /// vault secret `secret`.
+    pub fn key_storage(&self, secret: core_model::SecretRef) -> core_model::KeyStorage {
+        core_model::KeyStorage::Fido2 {
+            secret,
+            application: self.application.clone(),
+            require_pin: self.requires_user_verification(),
+            require_presence: self.requires_user_presence(),
+        }
     }
 
     /// The key algorithm.

@@ -88,6 +88,14 @@ async fn bridge_signer_produces_verifiable_ecdsa_signatures() {
             .await
             .unwrap();
         assert_eq!(signer.platform_ref(), "alias-laptop");
+        assert_eq!(signer.key_algorithm(), core_model::KeyAlgorithm::EcdsaP256);
+        assert_eq!(
+            signer.key_storage(),
+            core_model::KeyStorage::Hardware {
+                platform_ref: "alias-laptop".into(),
+                device: "Test Keystore".into(),
+            }
+        );
         assert_eq!(signer.signature_algorithm(), "ecdsa-sha2-nistp256");
         assert!(
             signer
