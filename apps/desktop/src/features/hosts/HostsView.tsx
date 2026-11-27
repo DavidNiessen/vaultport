@@ -80,6 +80,7 @@ export function HostsView({ onImport }: { onImport: () => void }) {
   const [query, setQuery] = useState('');
   const [multi, setMulti] = useState<Set<string>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const quick = useMemo(() => parseQuickConnect(query), [query]);
   const visibleHosts = useMemo(
@@ -468,10 +469,18 @@ export function HostsView({ onImport }: { onImport: () => void }) {
                       } else if (phone) {
                         sessions.connectHost(h);
                       } else {
-                        select({ kind: 'host', id: h.id });
+                        // Opening the inspector reflows the grid; wait until a double-click
+                        // could no longer happen so the second click hits the same card.
+                        if (clickTimer.current) clearTimeout(clickTimer.current);
+                        clickTimer.current = setTimeout(() => {
+                          select({ kind: 'host', id: h.id });
+                        }, 220);
                       }
                     }}
-                    onDoubleClick={() => sessions.connectHost(h)}
+                    onDoubleClick={() => {
+                      if (clickTimer.current) clearTimeout(clickTimer.current);
+                      sessions.connectHost(h);
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') sessions.connectHost(h);
                     }}

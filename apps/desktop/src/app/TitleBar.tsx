@@ -168,34 +168,38 @@ export function TitleBar() {
         <LinuxControls actions={controls.start} />
       ) : null}
 
-      <div
-        role="tablist"
-        aria-label={t('tabs.label')}
-        data-tauri-drag-region
-        className="flex min-w-0 flex-1 items-center gap-1"
-      >
-        <PinnedTab
-          id={VAULT_TAB}
-          label={t('tabs.vault')}
-          icon={<Vault className="size-4" />}
-          active={activeTab === VAULT_TAB}
-        />
-        <PinnedTab
-          id={SFTP_TAB}
-          label={t('tabs.sftp')}
-          icon={<FolderOpen className="size-4" />}
-          active={activeTab === SFTP_TAB}
-        />
-        {tabs.length > 0 && <div className="bg-border-strong mx-1 h-5 w-px shrink-0" aria-hidden />}
+      <div data-tauri-drag-region className="flex min-w-0 flex-1 items-center gap-1">
         <div
+          role="tablist"
+          aria-label={t('tabs.label')}
           data-tauri-drag-region
-          className="flex min-w-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto"
+          className="flex min-w-0 items-center gap-1"
         >
-          {tabs
-            .filter((x) => x.kind !== 'sftp')
-            .map((tab, i) => (
-              <SessionTab key={tab.id} tab={tab} index={i} active={activeTab === tab.id} />
-            ))}
+          <PinnedTab
+            id={VAULT_TAB}
+            label={t('tabs.vault')}
+            icon={<Vault className="size-4" />}
+            active={activeTab === VAULT_TAB}
+          />
+          <PinnedTab
+            id={SFTP_TAB}
+            label={t('tabs.sftp')}
+            icon={<FolderOpen className="size-4" />}
+            active={activeTab === SFTP_TAB}
+          />
+          {tabs.length > 0 && (
+            <div className="bg-border-strong mx-1 h-5 w-px shrink-0" aria-hidden />
+          )}
+          <div
+            data-tauri-drag-region
+            className="flex min-w-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto"
+          >
+            {tabs
+              .filter((x) => x.kind !== 'sftp')
+              .map((tab, i) => (
+                <SessionTab key={tab.id} tab={tab} index={i} active={activeTab === tab.id} />
+              ))}
+          </div>
         </div>
         <Tooltip content={`${t('tabs.new')} (${formatShortcut(platform, 'Mod+T')})`}>
           <button
