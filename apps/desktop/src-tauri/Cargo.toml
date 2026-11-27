@@ -52,7 +52,7 @@ tracing = "0.1"
 log = "0.4"
 uuid = { version = "1", features = ["v7", "serde"] }
 zeroize = "1"
-base64 = "0.22"
+base64 = "0.23"
 getrandom = "0.3"
 parking_lot = "0.12"
 tauri-plugin-vaultport-mobile = { path = "../../../plugins/mobile" }
