@@ -7453,6 +7453,7 @@ dependencies = [
  "tauri-plugin-os",
  "tauri-plugin-process",
  "tauri-plugin-single-instance",
+ "tauri-plugin-ssh-client-mobile",
  "tauri-plugin-updater",
  "tauri-plugin-window-state",
  "tauri-specta",
@@ -8110,6 +8111,16 @@ dependencies = [
  "tracing",
  "windows-sys 0.61.2",
  "zbus 5.19.0",
+]
+
+[[package]]
+name = "tauri-plugin-ssh-client-mobile"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "tauri",
+ "tauri-plugin",
+ "thiserror 2.0.21",
 ]
 
 [[package]]

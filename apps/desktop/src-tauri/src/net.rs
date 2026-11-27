@@ -349,7 +349,7 @@ fn auth_for_key(v: &vault::Vault, meta: &KeyMeta, asker: &Asker) -> CmdResult<Op
         KeyStorage::Hardware { platform_ref, .. } => {
             let pk = ssh_engine::ssh_key::PublicKey::from_openssh(&meta.public_key)
                 .map_err(|e| CmdError::invalid(e.to_string()))?;
-            let backend = hw_keys::platform::default_backend();
+            let backend = crate::mobile::hardware_backend();
             match hw_keys::platform::PlatformSigner::new(backend, platform_ref.clone(), pk) {
                 Ok(s) => Some(AuthMethod::External(Arc::new(HwSigner(Arc::new(s))))),
                 Err(_) => None,

@@ -142,6 +142,11 @@ impl SessionManager {
         self.sessions.lock().remove(id);
     }
 
+    /// Number of open sessions.
+    pub fn count(&self) -> usize {
+        self.sessions.lock().len()
+    }
+
     pub fn send(&self, id: &str, input: Input) -> CmdResult<()> {
         let guard = self.sessions.lock();
         let h = guard
@@ -230,4 +235,5 @@ pub fn finish(app: &tauri::AppHandle, id: &str) {
     if let Some(m) = app.try_state::<SessionManager>() {
         m.remove(id);
     }
+    crate::mobile::update_keep_alive(app);
 }

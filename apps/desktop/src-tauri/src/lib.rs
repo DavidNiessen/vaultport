@@ -17,6 +17,7 @@
 mod commands;
 mod error;
 mod keystore;
+mod mobile;
 mod net;
 mod sessions;
 mod state;
@@ -213,6 +214,7 @@ pub fn run() {
     .plugin(tauri_plugin_clipboard_manager::init())
     .plugin(tauri_plugin_os::init())
     .plugin(tauri_plugin_process::init())
+    .plugin(tauri_plugin_ssh_client_mobile::init())
     .invoke_handler(builder.invoke_handler())
     .setup(move |app| {
         builder.mount_events(app);
@@ -225,6 +227,7 @@ pub fn run() {
         app.manage(forwarding::ForwardManager::default());
         app.manage(files::FilesState::new());
         app.manage(ai::AiManager::new(&app.path().app_data_dir()?));
+        mobile::init(app.handle());
         #[cfg(desktop)]
         configure_window(app);
         Ok(())

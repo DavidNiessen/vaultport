@@ -27,6 +27,11 @@ pub struct ForwardManager {
 }
 
 impl ForwardManager {
+    /// Number of running tunnels (0 while the map is busy).
+    pub fn count(&self) -> usize {
+        self.active.try_lock().map_or(0, |a| a.len())
+    }
+
     pub async fn stop_all(&self) {
         let mut active = self.active.lock().await;
         for (_, h) in active.drain() {

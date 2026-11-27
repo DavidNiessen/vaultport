@@ -27,6 +27,7 @@ pub fn session_open(
         manager.remove(&id);
         return Err(e);
     }
+    crate::mobile::update_keep_alive(&app);
     Ok(id)
 }
 

@@ -13,6 +13,7 @@ use base64::engine::general_purpose::STANDARD;
 use vault::SymmetricKey;
 use zeroize::Zeroizing;
 
+#[cfg(not(target_os = "android"))]
 const SERVICE: &str = "dev.niessen.sshclient";
 
 fn account(vault_id: &uuid::Uuid) -> String {
@@ -64,22 +65,55 @@ fn map_err(e: keyring::Error) -> CmdError {
     )
 }
 
-// Android: the device key is stored by the `secure-store` mobile plugin; until it is wired the
-// app falls back to password-only vaults.
+// Android: the device key is stored by the native plugin, wrapped by an AES-256-GCM key that
+// lives in the Android Keystore (StrongBox when available).
 #[cfg(target_os = "android")]
-pub fn store_device_key(_vault_id: &uuid::Uuid, _key: &SymmetricKey) -> CmdResult<()> {
-    Err(CmdError::new(
+fn services() -> CmdResult<&'static tauri_plugin_ssh_client_mobile::MobileServices<tauri::Wry>> {
+    use tauri_plugin_ssh_client_mobile::MobileServicesExt as _;
+    crate::mobile::app()
+        .map(|a| a.mobile_services())
+        .ok_or_else(|| CmdError::internal("the key store is not initialized"))
+}
+
+#[cfg(target_os = "android")]
+fn map_native(e: tauri_plugin_ssh_client_mobile::Error) -> CmdError {
+    CmdError::new(
         ErrorCode::Unsupported,
-        "device key storage is provided by the secure-store plugin",
-    ))
+        format!("the Android Keystore is unavailable: {e}"),
+    )
 }
 
+/// Stores a device key for a vault.
 #[cfg(target_os = "android")]
-pub fn load_device_key(_vault_id: &uuid::Uuid) -> CmdResult<Option<SymmetricKey>> {
-    Ok(None)
+pub fn store_device_key(vault_id: &uuid::Uuid, key: &SymmetricKey) -> CmdResult<()> {
+    let encoded = Zeroizing::new(STANDARD.encode(key.as_bytes()));
+    services()?
+        .secure_set(&account(vault_id), &encoded)
+        .map_err(map_native)
 }
 
+/// Loads the device key for a vault, if one was stored.
 #[cfg(target_os = "android")]
-pub fn delete_device_key(_vault_id: &uuid::Uuid) -> CmdResult<()> {
-    Ok(())
+pub fn load_device_key(vault_id: &uuid::Uuid) -> CmdResult<Option<SymmetricKey>> {
+    let Some(s) = services()?
+        .secure_get(&account(vault_id))
+        .map_err(map_native)?
+    else {
+        return Ok(None);
+    };
+    let s = Zeroizing::new(s);
+    let bytes = Zeroizing::new(
+        STANDARD
+            .decode(s.as_bytes())
+            .map_err(|_| CmdError::internal("corrupt device key in key store"))?,
+    );
+    Ok(Some(SymmetricKey::from_slice(&bytes)?))
+}
+
+/// Removes the device key for a vault.
+#[cfg(target_os = "android")]
+pub fn delete_device_key(vault_id: &uuid::Uuid) -> CmdResult<()> {
+    services()?
+        .secure_delete(&account(vault_id))
+        .map_err(map_native)
 }

@@ -291,7 +291,7 @@ pub async fn key_create_hardware(
     state: State<'_, AppState>,
     label: String,
 ) -> CmdResult<String> {
-    let backend = hw_keys::platform::default_backend();
+    let backend = crate::mobile::hardware_backend();
     if !backend.is_available().await {
         return Err(CmdError::new(
             ErrorCode::Unsupported,
