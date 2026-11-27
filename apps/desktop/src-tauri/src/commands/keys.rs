@@ -4,7 +4,7 @@
 
 use crate::commands::entities::{VAULT_CHANGED, VaultChanged};
 use crate::error::{CmdError, CmdResult, ErrorCode};
-use crate::net::{self, Asker};
+use crate::net;
 use crate::state::AppState;
 use core_model::{KeyAlgorithm, KeyId, KeyMeta, KeyStorage};
 use serde::Deserialize;
@@ -238,7 +238,7 @@ pub async fn key_enroll_fido2(
 ) -> CmdResult<String> {
     #[cfg(desktop)]
     {
-        let pin = crate::net::ui_pin(Asker::Global(app.clone()));
+        let pin = crate::net::ui_pin(crate::net::Asker::Global(app.clone()));
         let options = hw_keys::fido2::EnrollOptions {
             user_name: "vaultport".into(),
             ..hw_keys::fido2::EnrollOptions::default()

@@ -34,7 +34,7 @@ pub fn spawn(
     .map_err(|e| CmdError::invalid(format!("invalid serial settings: {e}")))?;
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
-        let (session, mut events) = match serial_io::Session::open(&path, &config).await {
+        let (session, mut events) = match open_port(&path, &config).await {
             Ok(s) => s,
             Err(e) => {
                 sink.closed(Some(e.to_string()), true);
@@ -75,4 +75,25 @@ pub fn spawn(
         super::finish(&app, &id);
     });
     Ok(())
+}
+
+/// Opens a native serial port.
+#[cfg(desktop)]
+async fn open_port(
+    path: &str,
+    config: &serial_io::SerialConfig,
+) -> serial_io::Result<(serial_io::Session, mpsc::Receiver<serial_io::Event>)> {
+    serial_io::Session::open(path, config).await
+}
+
+/// Mobile devices have no native serial ports; USB serial adapters need a platform transport
+/// that does not exist yet.
+#[cfg(mobile)]
+async fn open_port(
+    _path: &str,
+    _config: &serial_io::SerialConfig,
+) -> serial_io::Result<(serial_io::Session, mpsc::Receiver<serial_io::Event>)> {
+    Err(serial_io::Error::Unsupported(
+        "serial consoles are not available on this device yet",
+    ))
 }
