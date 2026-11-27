@@ -144,6 +144,7 @@ function Appearance() {
 
 function Terminal() {
   const { t } = useTranslation();
+  const platform = usePlatform();
   const { settings, update } = useSettings<TerminalSettings>('terminal', DEFAULT_TERMINAL_SETTINGS);
   const toggle = (key: keyof TerminalSettings, label: string, description?: string) => (
     <Row label={label} description={description}>
@@ -240,6 +241,24 @@ function Terminal() {
             <option value="deny">{t('settings.deny')}</option>
           </Select>
         </Row>
+        {!platform.mobile ? (
+          <Row label={t('settings.localShell')} description={t('settings.localShellHint')}>
+            <Input
+              key={settings.localShell}
+              aria-label={t('settings.localShell')}
+              className="w-48 font-mono"
+              spellCheck={false}
+              autoCapitalize="off"
+              autoCorrect="off"
+              placeholder={t('settings.systemDefault')}
+              defaultValue={settings.localShell}
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                if (value !== settings.localShell) update({ localShell: value });
+              }}
+            />
+          </Row>
+        ) : null}
         <Row label={t('settings.termType')}>
           <Select
             aria-label={t('settings.termType')}

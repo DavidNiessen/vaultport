@@ -482,7 +482,10 @@
     "agents": "KI-Agenten",
     "sessionLogs": "Sitzungsprotokolle",
     "recordSessions": "Sitzungen aufzeichnen",
-    "recordSessionsHint": "Verschlüsselte Aufzeichnung der Terminalausgabe. Tastatureingaben werden nicht aufgezeichnet."
+    "recordSessionsHint": "Verschlüsselte Aufzeichnung der Terminalausgabe. Tastatureingaben werden nicht aufgezeichnet.",
+    "localShell": "Lokale Shell",
+    "localShellHint": "Programm für lokale Terminals, z. B. /bin/zsh oder pwsh.exe. Leer lassen für die Systemvorgabe.",
+    "systemDefault": "Systemvorgabe"
   },
   "sftp": {
     "actions": "Aktionen",

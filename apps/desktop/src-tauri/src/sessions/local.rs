@@ -3,26 +3,69 @@
 
 use super::{EventSink, Input, SessionPhase};
 use crate::error::{CmdError, CmdResult};
+use crate::prefs::TerminalPrefs;
 use portable_pty::{CommandBuilder, PtySize, native_pty_system};
 use std::io::{Read, Write};
 use tokio::sync::mpsc;
 
-fn default_shell() -> CommandBuilder {
+/// Program and arguments for a local terminal.
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct ShellCmd {
+    program: String,
+    args: Vec<String>,
+}
+
+/// Shells that accept `-l` to start as a login shell.
+#[cfg(not(windows))]
+const LOGIN_SHELLS: &[&str] = &["bash", "zsh", "fish", "sh", "dash", "ksh", "mksh", "yash"];
+
+/// Picks the local shell: the configured program (Settings → Terminal → Local shell), else the
+/// system default (`$SHELL` on Unix, Windows PowerShell on Windows).
+#[cfg(not(windows))]
+fn shell_cmd(configured: &str, env_shell: Option<String>) -> ShellCmd {
+    let configured = configured.trim();
+    let program = if configured.is_empty() {
+        env_shell
+            .filter(|s| !s.is_empty())
+            .unwrap_or_else(|| "/bin/sh".into())
+    } else {
+        configured.to_owned()
+    };
+    let name = program.rsplit('/').next().unwrap_or(&program);
+    let args = if LOGIN_SHELLS.contains(&name) {
+        vec!["-l".to_owned()]
+    } else {
+        Vec::new()
+    };
+    ShellCmd { program, args }
+}
+
+#[cfg(windows)]
+fn shell_cmd(configured: &str, system_root: Option<String>) -> ShellCmd {
+    let configured = configured.trim();
+    if !configured.is_empty() {
+        return ShellCmd {
+            program: configured.to_owned(),
+            args: Vec::new(),
+        };
+    }
+    let program = system_root
+        .map(|root| format!("{root}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"))
+        .unwrap_or_else(|| "powershell.exe".into());
+    ShellCmd {
+        program,
+        args: vec!["-NoLogo".to_owned()],
+    }
+}
+
+fn system_shell_env() -> Option<String> {
     #[cfg(windows)]
     {
-        let ps = std::env::var("SystemRoot")
-            .map(|root| format!("{root}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe"))
-            .unwrap_or_else(|_| "powershell.exe".into());
-        let mut cmd = CommandBuilder::new(ps);
-        cmd.arg("-NoLogo");
-        cmd
+        std::env::var("SystemRoot").ok()
     }
     #[cfg(not(windows))]
     {
-        let shell = std::env::var("SHELL").unwrap_or_else(|_| "/bin/sh".into());
-        let mut cmd = CommandBuilder::new(shell);
-        cmd.arg("-l");
-        cmd
+        std::env::var("SHELL").ok()
     }
 }
 
@@ -43,17 +86,19 @@ pub fn spawn(
             pixel_height: 0,
         })
         .map_err(|e| CmdError::internal(format!("could not open a pseudo terminal: {e}")))?;
-    let mut cmd = default_shell();
+    let prefs: TerminalPrefs = crate::prefs::load(app, crate::prefs::TERMINAL);
+    let shell = shell_cmd(&prefs.local_shell, system_shell_env());
+    let mut cmd = CommandBuilder::new(&shell.program);
+    cmd.args(&shell.args);
     cmd.env("TERM", "xterm-256color");
     cmd.env("COLORTERM", "truecolor");
     cmd.env("TERM_PROGRAM", "ssh-client");
     if let Some(home) = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")) {
         cmd.cwd(home);
     }
-    let mut child = pair
-        .slave
-        .spawn_command(cmd)
-        .map_err(|e| CmdError::internal(format!("could not start the shell: {e}")))?;
+    let mut child = pair.slave.spawn_command(cmd).map_err(|e| {
+        CmdError::internal(format!("could not start the shell {}: {e}", shell.program))
+    })?;
     drop(pair.slave);
     let mut reader = pair
         .master
@@ -114,4 +159,28 @@ pub fn spawn(
         super::finish(&app, &id);
     });
     Ok(())
+}
+
+#[cfg(all(test, not(windows)))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn system_default_is_a_login_shell() {
+        let c = shell_cmd("", Some("/usr/bin/zsh".into()));
+        assert_eq!(c.program, "/usr/bin/zsh");
+        assert_eq!(c.args, ["-l"]);
+        assert_eq!(shell_cmd("  ", None).program, "/bin/sh");
+        assert_eq!(shell_cmd("", Some(String::new())).program, "/bin/sh");
+    }
+
+    #[test]
+    fn configured_shell_wins() {
+        let c = shell_cmd(" /opt/homebrew/bin/fish ", Some("/bin/zsh".into()));
+        assert_eq!(c.program, "/opt/homebrew/bin/fish");
+        assert_eq!(c.args, ["-l"]);
+        let c = shell_cmd("/usr/bin/nu", Some("/bin/zsh".into()));
+        assert_eq!(c.program, "/usr/bin/nu");
+        assert!(c.args.is_empty());
+    }
 }

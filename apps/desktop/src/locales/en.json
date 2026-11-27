@@ -482,7 +482,10 @@
     "agents": "AI agents",
     "sessionLogs": "Session logs",
     "recordSessions": "Record session logs",
-    "recordSessionsHint": "Encrypted recordings of terminal output. Keyboard input is not recorded."
+    "recordSessionsHint": "Encrypted recordings of terminal output. Keyboard input is not recorded.",
+    "localShell": "Local shell",
+    "localShellHint": "Program for local terminals, e.g. /bin/zsh or pwsh.exe. Leave empty for the system default.",
+    "systemDefault": "System default"
   },
   "sftp": {
     "actions": "Actions",
