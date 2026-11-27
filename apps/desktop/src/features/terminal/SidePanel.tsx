@@ -18,7 +18,7 @@ import { useApp } from '@/stores/app';
 import { DEFAULT_AI_SETTINGS, type AiSettings } from '../ai/settings';
 import { renderSnippet, snippetVariables } from '../snippets/SnippetsView';
 import { sendInput, terminalRegistry } from './registry';
-import { TERMINAL_THEMES, findTheme } from './themes';
+import { TERMINAL_THEMES, findTheme, themePreviewBackground } from './themes';
 
 type Panel = 'snippets' | 'history' | 'themes' | 'ai';
 
@@ -216,7 +216,7 @@ function ThemeList({ hostId }: { hostId: string | null }) {
             >
               <div
                 className="flex h-9 items-center gap-1 rounded-md px-2"
-                style={{ background: c.background }}
+                style={{ background: themePreviewBackground(findTheme(th.id, 'dark')) }}
               >
                 {[c.red, c.green, c.yellow, c.blue, c.magenta].map((col, i) => (
                   <span

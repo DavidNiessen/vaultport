@@ -25,7 +25,7 @@ export interface TerminalSettings {
 }
 
 export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
-  theme: 'midnight',
+  theme: 'pulse',
   fontFamily: 'JetBrains Mono',
   fontSize: 14,
   cursorStyle: 'block',
