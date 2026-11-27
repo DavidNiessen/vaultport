@@ -7,11 +7,13 @@
 pub mod algorithms;
 pub mod fingerprint;
 pub mod known_hosts;
+pub mod proxy;
 
 pub use algorithms::{AlgorithmOptions, NegotiatedAlgorithms};
 pub use known_hosts::{
     HostCertificateInfo, HostKeyCheck, HostKeyStatus, KnownHosts, MemoryKnownHosts,
 };
+pub use proxy::{Proxy, ProxyAuth, ProxyKind};
 
 /// Re-exported dependencies whose types appear in the public API.
 pub use russh::keys::ssh_key;
