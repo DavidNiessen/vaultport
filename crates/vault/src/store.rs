@@ -439,6 +439,24 @@ impl Vault {
         Ok(())
     }
 
+    /// Derives a purpose-specific 256-bit subkey from the vault key with HKDF-SHA256
+    /// (e.g. `"session-log"`). Subkeys never decrypt vault records.
+    pub fn derive_subkey(&self, purpose: &str) -> Result<SymmetricKey, VaultError> {
+        if purpose.is_empty() || purpose.starts_with("ssh-client/") {
+            return Err(VaultError::Invalid("invalid subkey purpose".into()));
+        }
+        let vk = &self.unlocked()?.key;
+        let hk =
+            hkdf::Hkdf::<sha2::Sha256>::new(Some(self.header.vault_id.as_bytes()), vk.as_bytes());
+        let mut out = zeroize::Zeroizing::new([0u8; crate::crypto::KEY_LEN]);
+        hk.expand(
+            format!("ssh-client/subkey/v1|{purpose}").as_bytes(),
+            out.as_mut(),
+        )
+        .map_err(|_| VaultError::Crypto("hkdf expand".into()))?;
+        Ok(SymmetricKey::from_bytes(*out))
+    }
+
     /// Exports the vault key wrapped with `transfer_key` for device pairing.
     pub fn export_wrapped_key(&self, transfer_key: &SymmetricKey) -> Result<String, VaultError> {
         let w = wrap_device(&self.unlocked()?.key, transfer_key, self.header.vault_id)?;

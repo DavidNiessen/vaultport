@@ -249,3 +249,17 @@ fn settings_roundtrip() {
     assert_eq!(v.get_settings("app").unwrap(), Some(s));
     assert!(v.put_settings("app", &serde_json::json!(1), false).is_err());
 }
+
+#[test]
+fn subkeys_are_deterministic_and_distinct() {
+    let dir = tempfile::tempdir().unwrap();
+    let mut v = Vault::create(dir.path().join("v.db"), &opts(b"pw")).unwrap();
+    let a = v.derive_subkey("session-log").unwrap();
+    let b = v.derive_subkey("session-log").unwrap();
+    let c = v.derive_subkey("other").unwrap();
+    assert_eq!(a.as_bytes(), b.as_bytes());
+    assert_ne!(a.as_bytes(), c.as_bytes());
+    assert!(v.derive_subkey("").is_err());
+    v.lock();
+    assert!(matches!(v.derive_subkey("x"), Err(VaultError::Locked)));
+}
