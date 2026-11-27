@@ -14,6 +14,8 @@
 //!    shell, cwd, recent commands, selection) into **one** validated command with a short
 //!    explanation, or into a multi-line snippet.
 //!
+//! [`ModelManager`] ties the pieces together and exposes the status shown in the UI.
+//!
 //! AI is never used for autocomplete; that is a separate, deterministic engine. Suggestions are
 //! only ever inserted into the prompt for the user to review — this crate executes nothing.
 //!
@@ -26,6 +28,7 @@
 //!   HTTPS `GET`s to Hugging Face (and the CDN hosts it redirects to), with a generic
 //!   `User-Agent` and no cookies or tokens. There are no API keys, no servers operated by this
 //!   project, no telemetry, no update pings.
+//! * Removing the model ([`ModelManager::remove`]) deletes every file this crate created.
 //!
 //! # Security
 //!
@@ -51,11 +54,13 @@ pub mod catalog;
 pub mod download;
 pub mod engine;
 mod error;
+pub mod manager;
 pub mod prompt;
 
 pub use catalog::{MODELS, ModelEntry, Tier, default_model};
 pub use download::{DownloadSpec, Downloader, Progress, UrlPolicy};
 pub use engine::{Engine, EngineOptions, is_available};
 pub use error::{Error, Result};
+pub use manager::{ModelManager, ModelStatus};
 pub use prompt::{CommandContext, GenerateRequest, Snippet, SnippetRequest, Suggestion};
 pub use tokio_util::sync::CancellationToken;
