@@ -1003,7 +1003,7 @@ version = "0.1.0"
 dependencies = [
  "core-model",
  "hex",
- "hmac 0.12.1",
+ "hmac 0.13.0",
  "percent-encoding",
  "quick-xml 0.42.0",
  "reqwest 0.12.28",
@@ -1290,7 +1290,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d045de693cb712d0b22c6a64be5b953f67b3ce00ab5ad3dd5d8b441886ab8e1a"
 dependencies = [
  "quote",
- "syn 3.0.10",
+ "syn 2.0.119",
 ]
 
 [[package]]
@@ -3799,7 +3799,7 @@ dependencies = [
  "base64 0.22.1",
  "core-model",
  "csv",
- "hmac 0.12.1",
+ "hmac 0.13.0",
  "proptest",
  "quick-xml 0.42.0",
  "serde",
