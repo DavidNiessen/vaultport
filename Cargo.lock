@@ -633,6 +633,7 @@ dependencies = [
  "proptest",
  "prost",
  "thiserror",
+ "tokio",
  "tracing",
  "zeroize",
 ]

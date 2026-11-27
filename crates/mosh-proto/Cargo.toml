@@ -17,6 +17,7 @@ getrandom = "0.3"
 ocb3 = { version = "0.2", default-features = false }
 prost = { version = "0.14", default-features = false, features = ["derive", "std"] }
 thiserror = "2"
+tokio = { version = "1", features = ["net", "rt", "sync", "time", "macros"] }
 tracing = "0.1"
 zeroize = { version = "1", features = ["derive"] }
 
