@@ -1,5 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
+pub mod ai;
+pub mod data;
 pub mod entities;
+pub mod files;
+pub mod forwarding;
+pub mod keys;
+pub mod logs;
 pub mod platform;
 pub mod sessions;
+pub mod sync;
+pub mod update;
 pub mod vault;

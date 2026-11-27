@@ -20,6 +20,13 @@ tauri-build = { version = "2", features = ["isolation"] }
 [dependencies]
 core-model = { path = "../../../crates/core-model", features = ["specta"] }
 vault = { path = "../../../crates/vault" }
+telnet-proto = { path = "../../../crates/telnet-proto" }
+mosh-proto = { path = "../../../crates/mosh-proto" }
+term-intel = { path = "../../../crates/term-intel" }
+session-log = { path = "../../../crates/session-log" }
+importers = { path = "../../../crates/importers" }
+sync = { path = "../../../crates/sync" }
+cloud-inventory = { path = "../../../crates/cloud-inventory" }
 
 tauri = { version = "2", features = ["isolation"] }
 tauri-plugin-opener = "2"
@@ -43,6 +50,7 @@ zeroize = "1"
 base64 = "0.22"
 getrandom = "0.3"
 parking_lot = "0.12"
+qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 async-trait = "0.1"
 futures = "0.3"
 

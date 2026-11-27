@@ -10,6 +10,10 @@ pub mod types;
 
 #[cfg(desktop)]
 mod local;
+pub mod resolve;
+mod serial;
+mod ssh;
+mod telnet;
 
 use crate::error::{CmdError, CmdResult, ErrorCode};
 use base64::Engine as _;
@@ -176,26 +180,46 @@ pub fn spawn(
     input: mpsc::UnboundedReceiver<Input>,
     sink: EventSink,
 ) -> CmdResult<()> {
-    let app = app.clone();
+    let (cols, rows) = (request.cols, request.rows);
     match request.target {
         #[cfg(desktop)]
-        SessionTarget::Local => {
-            local::spawn(&app, id, request.cols, request.rows, input, sink)?;
-            Ok(())
-        }
+        SessionTarget::Local => local::spawn(app, id, cols, rows, input, sink),
         #[cfg(mobile)]
         SessionTarget::Local => Err(CmdError::new(
             ErrorCode::Unsupported,
             "local terminals are not available on this platform",
         )),
-        other => {
-            let _ = (other, input, id, app);
-            sink.closed(Some("this protocol is not available yet".into()), true);
-            Err(CmdError::new(
-                ErrorCode::Unsupported,
-                "this protocol is not available yet",
-            ))
+        SessionTarget::Host { host_id } => {
+            let plan = resolve::plan_for_host(app, &host_id)?;
+            launch(app, id, plan, cols, rows, input, sink)
         }
+        SessionTarget::Quick {
+            host,
+            port,
+            username,
+        } => {
+            let plan = resolve::plan_for_quick(app, host, port, username)?;
+            launch(app, id, plan, cols, rows, input, sink)
+        }
+        SessionTarget::Serial { .. } => serial::spawn(app, id, request.target, input, sink),
+    }
+}
+
+fn launch(
+    app: &tauri::AppHandle,
+    id: String,
+    plan: resolve::Plan,
+    cols: u16,
+    rows: u16,
+    input: mpsc::UnboundedReceiver<Input>,
+    sink: EventSink,
+) -> CmdResult<()> {
+    match plan {
+        resolve::Plan::Telnet(t) => {
+            telnet::spawn(app, id, t, cols, rows, input, sink);
+            Ok(())
+        }
+        resolve::Plan::Ssh(s) => ssh::spawn(app, id, *s, cols, rows, input, sink),
     }
 }
 

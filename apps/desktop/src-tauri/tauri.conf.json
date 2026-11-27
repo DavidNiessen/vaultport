@@ -109,16 +109,10 @@
       },
       "nsis": {
         "installMode": "currentUser",
-        "languages": [
-          "English",
-          "German"
-        ]
+        "languages": ["English", "German"]
       },
       "wix": {
-        "language": [
-          "en-US",
-          "de-DE"
-        ]
+        "language": ["en-US", "de-DE"]
       }
     },
     "iOS": {

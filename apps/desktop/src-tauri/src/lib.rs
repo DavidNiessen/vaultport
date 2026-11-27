@@ -14,7 +14,10 @@ mod keystore;
 mod sessions;
 mod state;
 
-use commands::{entities, platform, sessions as session_cmd, vault as vault_cmd};
+use commands::{
+    ai, data, entities, files, forwarding, keys, logs, platform, sessions as session_cmd,
+    sync as sync_cmd, update, vault as vault_cmd,
+};
 use state::AppState;
 use tauri::Manager;
 use tauri_specta::{Builder, collect_commands};
@@ -67,6 +70,51 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
         session_cmd::session_resize,
         session_cmd::session_close,
         session_cmd::session_respond,
+        keys::key_generate,
+        keys::key_import,
+        keys::read_key_file,
+        keys::key_enroll_fido2,
+        keys::key_create_hardware,
+        data::default_ssh_config_path,
+        data::import_file,
+        data::cloud_add_integration,
+        data::cloud_sync,
+        sync_cmd::sync_list_targets,
+        sync_cmd::sync_add_target,
+        sync_cmd::sync_remove_target,
+        sync_cmd::sync_now,
+        sync_cmd::sync_export_file,
+        sync_cmd::sync_import_file,
+        sync_cmd::sync_start_pairing,
+        sync_cmd::sync_accept_pairing,
+        logs::list_logs,
+        logs::log_bookmark,
+        logs::log_delete,
+        logs::log_read,
+        logs::log_export,
+        logs::history_list,
+        files::fs_list,
+        files::fs_mkdir,
+        files::fs_rename,
+        files::fs_chmod,
+        files::fs_remove,
+        files::fs_edit,
+        files::fs_download,
+        files::transfer_start,
+        files::transfer_list,
+        files::transfer_cancel,
+        files::transfer_clear_finished,
+        forwarding::forward_status,
+        forwarding::forward_start,
+        forwarding::forward_stop,
+        ai::ai_status,
+        ai::ai_install,
+        ai::ai_cancel,
+        ai::ai_remove,
+        ai::ai_generate_command,
+        ai::ai_generate_snippet,
+        update::update_check,
+        update::update_install,
     ])
 }
 
