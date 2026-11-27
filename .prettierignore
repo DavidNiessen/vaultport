@@ -12,3 +12,7 @@ docs/.vitepress/cache/
 docs/.vitepress/dist/
 *.rs
 crates/term-intel/specs/
+
+# Rewritten by the Readme Studio workflow and re-exported by the studio.
+README.md
+readme.config.json
