@@ -104,7 +104,8 @@
   --accent-text: #0b6b63;
 }
 
-:root,
+/* Iris is the default, also before a preset is set (:root without data-preset). */
+:root:not([data-preset]),
 [data-preset='iris'] {
   --accent: #b3a6ff;
   --accent-hover: #c6bcff;
