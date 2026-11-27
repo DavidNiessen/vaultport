@@ -151,7 +151,10 @@ jobs:
             "CMAKE_ASM_COMPILER=$clang",
             'CMAKE_C_COMPILER_TARGET=aarch64-pc-windows-msvc',
             'CMAKE_CXX_COMPILER_TARGET=aarch64-pc-windows-msvc',
-            'CMAKE_ASM_COMPILER_TARGET=aarch64-pc-windows-msvc'
+            'CMAKE_ASM_COMPILER_TARGET=aarch64-pc-windows-msvc',
+            # cmake-rs replaces CMake's default C++ flags, which carry /EHsc, with cc-rs's own.
+            # cl only warns without it; clang-cl rejects llama.cpp's try/throw.
+            'CXXFLAGS_aarch64_pc_windows_msvc=/EHsc'
           ) | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
       # Tauri signs and notarizes whenever APPLE_CERTIFICATE is set, even to an empty string, and
       # an unset secret expands to one. Export only the Apple secrets that are configured.
