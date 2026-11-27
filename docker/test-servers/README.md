@@ -5,16 +5,16 @@ Throw-away OpenSSH (Alpine) servers for the `integration` test suites of `ssh-en
 
 ## Image (`sshd/`)
 
-| What | Details |
-|------|---------|
-| Users | `alice` / `alice-password` (password, keys, certificates, keyboard-interactive via PAM); `bob` / `bob-password` with `AuthenticationMethods publickey,password` (partial success) |
-| Host keys | fresh ed25519/ecdsa/rsa per container start, plus a per-container host CA (`/etc/ssh/host_ca.pub`) that signs the ed25519 host key (principals: `localhost,127.0.0.1,<hostname>`, override with `HOST_PRINCIPALS`) |
-| User CA | `TrustedUserCAKeys /etc/ssh/user_ca.pub` (empty; tests write their own CA into it) |
-| Forwarding | `AllowTcpForwarding yes`, `GatewayPorts clientspecified`, `AllowAgentForwarding yes`, `PermitOpen any` |
-| Environment | `AcceptEnv LANG LC_* SSHC_*` |
-| SFTP | `internal-sftp` |
-| Helpers (container-local) | `127.0.0.1:7777` TCP echo, `127.0.0.1:8080` tiny HTTP server (`/srv/www/index.txt`) |
-| Lifetime | set `SSHD_LIFETIME=<seconds>` to make the container stop itself |
+| What                      | Details                                                                                                                                                                                                            |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Users                     | `alice` / `alice-password` (password, keys, certificates, keyboard-interactive via PAM); `bob` / `bob-password` with `AuthenticationMethods publickey,password` (partial success)                                  |
+| Host keys                 | fresh ed25519/ecdsa/rsa per container start, plus a per-container host CA (`/etc/ssh/host_ca.pub`) that signs the ed25519 host key (principals: `localhost,127.0.0.1,<hostname>`, override with `HOST_PRINCIPALS`) |
+| User CA                   | `TrustedUserCAKeys /etc/ssh/user_ca.pub` (empty; tests write their own CA into it)                                                                                                                                 |
+| Forwarding                | `AllowTcpForwarding yes`, `GatewayPorts clientspecified`, `AllowAgentForwarding yes`, `PermitOpen any`                                                                                                             |
+| Environment               | `AcceptEnv LANG LC_* SSHC_*`                                                                                                                                                                                       |
+| SFTP                      | `internal-sftp`                                                                                                                                                                                                    |
+| Helpers (container-local) | `127.0.0.1:7777` TCP echo, `127.0.0.1:8080` tiny HTTP server (`/srv/www/index.txt`)                                                                                                                                |
+| Lifetime                  | set `SSHD_LIFETIME=<seconds>` to make the container stop itself                                                                                                                                                    |
 
 ## Running the integration tests
 
