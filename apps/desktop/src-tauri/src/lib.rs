@@ -190,6 +190,8 @@ pub fn run() {
         eprintln!("failed to export TypeScript bindings: {e}");
     }
 
+    // Desktop adds plugins below; mobile does not.
+    #[cfg_attr(mobile, allow(unused_mut))]
     let mut app = tauri::Builder::default();
 
     #[cfg(desktop)]
