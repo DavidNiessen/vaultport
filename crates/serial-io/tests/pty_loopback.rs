@@ -2,12 +2,12 @@
 //! End-to-end test of a native serial session against a pseudo-terminal pair: the pty
 //! slave is opened through `serialport` exactly like a real device node, and the test
 //! plays the device on the master side.
+//!
+//! Linux only: a Linux pty accepts the termios calls `serialport` makes, so it stands in for
+//! a device. macOS ptys reject the serial-only ioctls (`IOSSIOSPEED`, `TIOCEXCL`) with ENOTTY,
+//! which says nothing about real serial ports there.
 
-#![cfg(all(
-    unix,
-    feature = "native",
-    not(any(target_os = "android", target_os = "ios"))
-))]
+#![cfg(all(target_os = "linux", feature = "native"))]
 #![allow(clippy::unwrap_used)]
 
 use std::fs::File;
