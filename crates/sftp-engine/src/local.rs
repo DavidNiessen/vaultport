@@ -18,6 +18,27 @@ use tokio::io::AsyncSeekExt;
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Local;
 
+/// Opens `path` so its timestamps can be changed.
+///
+/// On Windows `SetFileTime` needs a handle with `FILE_WRITE_ATTRIBUTES`, which a read-only
+/// `File::open` does not have; backup semantics let the same call open directories.
+fn open_for_times(path: &str) -> std::io::Result<std::fs::File> {
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt as _;
+        const FILE_WRITE_ATTRIBUTES: u32 = 0x0100;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+        std::fs::OpenOptions::new()
+            .access_mode(FILE_WRITE_ATTRIBUTES)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)
+    }
+    #[cfg(not(windows))]
+    {
+        std::fs::File::open(path)
+    }
+}
+
 fn kind_of(m: &Metadata) -> EntryKind {
     let ft = m.file_type();
     if ft.is_symlink() {
@@ -227,7 +248,7 @@ impl FileSystem for Local {
     ) -> Result<(), FsError> {
         let p = path.to_owned();
         tokio::task::spawn_blocking(move || {
-            let f = std::fs::File::open(&p)?;
+            let f = open_for_times(&p)?;
             let mut t = std::fs::FileTimes::new().set_modified(modified);
             if let Some(a) = accessed {
                 t = t.set_accessed(a);
