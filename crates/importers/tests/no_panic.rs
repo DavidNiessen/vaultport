@@ -158,6 +158,36 @@ const XML_VOCAB: &[&str] = &[
     "<",
 ];
 
+const XML_LEAVES: &[&str] = &[
+    "<string name=\"Hostname\">h.example</string>",
+    "<string name=\"Hostname\">10.0.0.1</string>",
+    "<string name=\"Hostname\"/>",
+    "<string name=\"Protocol Name\">SSH2</string>",
+    "<string name=\"Protocol Name\">Telnet</string>",
+    "<string name=\"Protocol Name\">SSH1</string>",
+    "<string name=\"Username\">u&amp;v</string>",
+    "<dword name=\"[SSH2] Port\">2222</dword>",
+    "<dword name=\"[SSH2] Port\">99999</dword>",
+    "<string name=\"Identity Filename V2\">C:\\k.ppk::rawkey</string>",
+    "<string name=\"Password V2\">02:aa</string>",
+    "<array name=\"x\"><string>y</string></array>",
+];
+
+const XML_NAMES: &[&str] = &["Default", "Prod", "EU", "web", "a/b", "", "\u{1}"];
+
+/// Well-formed SecureCRT-like trees of nested keys.
+fn securecrt_tree() -> impl Strategy<Value = String> {
+    let leaf = prop::sample::select(XML_LEAVES).prop_map(str::to_owned);
+    leaf.prop_recursive(5, 128, 6, |inner| {
+        (
+            prop::sample::select(XML_NAMES),
+            prop::collection::vec(inner, 0..6),
+        )
+            .prop_map(|(n, kids)| format!("<key name=\"{n}\">{}</key>", kids.concat()))
+    })
+    .prop_map(|t| format!("<VanDyke version=\"3.0\"><key name=\"Sessions\">{t}</key></VanDyke>"))
+}
+
 const CSV_VOCAB: &[&str] = &[
     "label,address,port,username,password,group,tags,protocol",
     "a,h.example,22,u,p,A/B,t;u,ssh",
@@ -228,6 +258,11 @@ proptest! {
         if let Ok(b) = securecrt::parse(&s) {
             check(&b);
         }
+    }
+
+    #[test]
+    fn securecrt_trees(s in securecrt_tree()) {
+        check(&securecrt::parse(&s).unwrap());
     }
 
     #[test]
