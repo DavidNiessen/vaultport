@@ -9,19 +9,21 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
 type Size = 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-accent text-accent-fg hover:bg-accent-hover shadow-sm',
-  secondary: 'bg-surface-3 text-text hover:bg-surface-4',
+  primary:
+    'bg-accent text-accent-fg hover:bg-accent-hover shadow-xs shadow-[inset_0_1px_0_rgb(255_255_255/0.14)]',
+  secondary: 'bg-surface-3 text-text border border-border hover:bg-surface-4',
   ghost: 'bg-transparent text-muted hover:bg-surface-3 hover:text-text',
-  danger: 'bg-danger text-white hover:brightness-110',
-  outline: 'border border-border-strong bg-transparent text-text hover:bg-surface-3',
+  danger: 'bg-danger text-white hover:brightness-110 shadow-xs',
+  outline: 'border border-border-input bg-transparent text-text hover:bg-surface-3',
 };
 
+// Pointer-coarse (touch) screens get 44px hit targets.
 const sizes: Record<Size, string> = {
-  sm: 'h-8 px-3 text-[13px] gap-1.5',
-  md: 'h-9 px-3.5 text-sm gap-2',
-  lg: 'h-11 px-5 text-[15px] gap-2',
-  icon: 'h-9 w-9',
-  'icon-sm': 'h-7 w-7',
+  sm: 'h-8 px-3 text-[13px] gap-1.5 pointer-coarse:h-10',
+  md: 'h-9 px-3.5 text-[13px] gap-2 pointer-coarse:h-11',
+  lg: 'h-11 px-5 text-[14px] gap-2',
+  icon: 'size-9 pointer-coarse:size-11',
+  'icon-sm': 'size-7 pointer-coarse:size-10',
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -52,7 +54,8 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       type={asChild ? undefined : (type ?? 'button')}
       disabled={disabled ?? loading}
       className={cn(
-        'inline-flex shrink-0 items-center justify-center rounded-[var(--radius-control)] font-medium whitespace-nowrap transition-colors select-none',
+        'inline-flex shrink-0 items-center justify-center rounded-[var(--radius-control)] font-medium whitespace-nowrap select-none [&_svg]:shrink-0',
+        'transition-[background-color,color,border-color,box-shadow,transform] duration-150 active:translate-y-px',
         'disabled:pointer-events-none disabled:opacity-45',
         variants[variant],
         sizes[size],

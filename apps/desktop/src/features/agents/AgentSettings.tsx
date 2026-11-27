@@ -79,7 +79,7 @@ export function AgentSettingsCard() {
     <>
       <Card title={t('agents.title')}>
         <div className="flex gap-3">
-          <div className="bg-accent-soft text-accent flex size-10 shrink-0 items-center justify-center rounded-xl">
+          <div className="bg-accent-soft text-accent-text flex size-10 shrink-0 items-center justify-center rounded-xl">
             <Bot className="size-5" />
           </div>
           <p className="text-muted text-[13px]">{t('agents.description')}</p>

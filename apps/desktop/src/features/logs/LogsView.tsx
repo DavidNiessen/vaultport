@@ -145,7 +145,7 @@ export function LogsView() {
                       }}
                       className={cn(
                         'rounded-md p-1.5',
-                        l.bookmarked ? 'text-accent' : 'text-subtle hover:text-text',
+                        l.bookmarked ? 'text-accent-text' : 'text-subtle hover:text-text',
                       )}
                     >
                       {l.bookmarked ? (

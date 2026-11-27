@@ -609,7 +609,7 @@ export function KeychainView() {
                   onClick={() => setEditing(i)}
                   className="bg-surface-2 hover:bg-surface-3 flex items-center gap-3 rounded-[var(--radius-card)] p-3.5 text-left"
                 >
-                  <div className="bg-accent-soft text-accent flex size-9 items-center justify-center rounded-[11px]">
+                  <div className="bg-accent-soft text-accent-text flex size-9 items-center justify-center rounded-[11px]">
                     <UserRound className="size-4" />
                   </div>
                   <div className="min-w-0">

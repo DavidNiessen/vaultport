@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /**
- * Rounded-square host tiles. We deliberately use monograms and neutral colors instead of
- * distribution logos (trademarks), but keep each OS recognisable by color.
+ * Rounded-square host tiles. We deliberately use monograms instead of distribution logos
+ * (trademarks), but keep each OS recognisable by a tint of its color. Tiles are tinted rather
+ * than solid so a long host list stays calm; the monogram is mixed toward the text color so it
+ * stays legible on both themes.
  */
 import { Folder, Server } from 'lucide-react';
 
@@ -40,14 +42,17 @@ export function OsIcon({ os, size = 'md' }: { os: OsKind | undefined; size?: 'sm
   const meta = os ? OS[os] : undefined;
   const dims =
     size === 'sm'
-      ? 'size-7 text-[10px] rounded-lg'
+      ? 'size-7 text-[10px] rounded-[7px]'
       : size === 'lg'
-        ? 'size-12 text-[15px] rounded-2xl'
-        : 'size-9 text-[12px] rounded-[11px]';
+        ? 'size-12 text-[15px] rounded-[14px]'
+        : 'size-9 text-[12px] rounded-[9px]';
   if (!meta) {
     return (
       <div
-        className={cn('bg-surface-4 text-muted flex shrink-0 items-center justify-center', dims)}
+        className={cn(
+          'bg-surface-3 border-border text-muted flex shrink-0 items-center justify-center border',
+          dims,
+        )}
         aria-hidden
       >
         <Server className={size === 'sm' ? 'size-3.5' : 'size-4'} />
@@ -56,8 +61,15 @@ export function OsIcon({ os, size = 'md' }: { os: OsKind | undefined; size?: 'sm
   }
   return (
     <div
-      className={cn('flex shrink-0 items-center justify-center font-bold text-white', dims)}
-      style={{ backgroundColor: meta.bg }}
+      className={cn(
+        'flex shrink-0 items-center justify-center border font-semibold tracking-tight',
+        dims,
+      )}
+      style={{
+        backgroundColor: `color-mix(in oklab, ${meta.bg} 16%, var(--surface-2))`,
+        borderColor: `color-mix(in oklab, ${meta.bg} 32%, transparent)`,
+        color: `color-mix(in oklab, ${meta.bg} 55%, var(--text))`,
+      }}
       aria-hidden
     >
       {meta.label}
@@ -69,8 +81,8 @@ export function GroupIcon({ size = 'md' }: { size?: 'sm' | 'md' }) {
   return (
     <div
       className={cn(
-        'bg-accent-soft text-accent flex shrink-0 items-center justify-center',
-        size === 'sm' ? 'size-7 rounded-lg' : 'size-9 rounded-[11px]',
+        'bg-accent-soft text-accent-text border-accent/25 flex shrink-0 items-center justify-center border',
+        size === 'sm' ? 'size-7 rounded-[7px]' : 'size-9 rounded-[9px]',
       )}
       aria-hidden
     >

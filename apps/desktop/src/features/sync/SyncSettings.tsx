@@ -262,7 +262,7 @@ function PairingDialog({ onClose }: { onClose: () => void }) {
             <p className="text-subtle mt-1 text-xs">{t('sync.pairExpires')}</p>
             <button
               type="button"
-              className="text-accent mt-2 text-xs"
+              className="text-accent-text mt-2 text-xs"
               onClick={() => {
                 void navigator.clipboard.writeText(pairing.data.payload);
                 toast.success(t('sync.payloadCopied'));
@@ -330,7 +330,7 @@ export function SyncSettings() {
         <div className="grid gap-2">
           {targets.map((tg) => (
             <div key={tg.id} className="bg-surface-3 flex items-center gap-3 rounded-xl p-3">
-              <span className="text-accent [&>svg]:size-5">{icon(tg.config.type)}</span>
+              <span className="text-accent-text [&>svg]:size-5">{icon(tg.config.type)}</span>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 text-[13px] font-medium">
                   {tg.label}

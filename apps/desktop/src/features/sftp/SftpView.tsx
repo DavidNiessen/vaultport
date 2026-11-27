@@ -222,7 +222,7 @@ function Pane({ side, other }: { side: 'left' | 'right'; other: PaneSource | nul
         {host ? (
           <OsIcon os={host.os} size="sm" />
         ) : (
-          <div className="bg-accent-soft text-accent flex size-7 items-center justify-center rounded-lg">
+          <div className="bg-accent-soft text-accent-text flex size-7 items-center justify-center rounded-lg">
             <HardDrive className="size-3.5" />
           </div>
         )}

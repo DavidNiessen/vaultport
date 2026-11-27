@@ -366,7 +366,7 @@ export function SnippetsView() {
               >
                 <div className="bg-surface-2 group flex flex-col gap-2 rounded-[var(--radius-card)] p-3.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-accent min-w-0 flex-1 truncate font-medium">
+                    <span className="text-accent-text min-w-0 flex-1 truncate font-medium">
                       {s.label}
                     </span>
                     {s.runCount > 0 ? (

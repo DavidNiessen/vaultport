@@ -52,7 +52,7 @@ function KindCard({
         active && 'ring-accent',
       )}
     >
-      <span className="text-accent [&>svg]:size-5">{icon}</span>
+      <span className="text-accent-text [&>svg]:size-5">{icon}</span>
       <span className="text-[13px] font-medium">{title}</span>
       <span className="text-subtle text-xs">{description}</span>
     </button>
