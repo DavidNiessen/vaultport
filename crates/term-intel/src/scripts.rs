@@ -373,6 +373,51 @@ mod tests {
         }
     }
 
+    /// bash reports each recorded command line, escaped so the parser restores it exactly, and
+    /// skips commands that bash leaves out of its history.
+    #[test]
+    fn bash_reports_command_lines() {
+        use crate::{ShellEvent, ShellIntegrationParser};
+        use std::io::Write;
+        use std::process::{Command, Stdio};
+        if !usable("bash") {
+            return;
+        }
+        let tmp = std::env::temp_dir().join(format!("sshc-si-e-{}", std::process::id()));
+        std::fs::create_dir_all(&tmp).unwrap();
+        let script = tmp.join("bash.sh");
+        std::fs::write(&script, BASH).unwrap();
+        let rc = tmp.join("rc");
+        std::fs::write(&rc, format!(". {}\n", sh_quote(&script.to_string_lossy()))).unwrap();
+        let out = Command::new("bash")
+            .args(["--rcfile", &rc.to_string_lossy(), "-i"])
+            .env(ENABLE_VAR, "1")
+            .env("HOME", &tmp)
+            .env("HISTFILE", tmp.join("history"))
+            .env("HISTCONTROL", "ignorespace")
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .spawn()
+            .and_then(|mut c| {
+                c.stdin
+                    .take()
+                    .unwrap()
+                    .write_all(b"echo a; echo 'b\\c'\n echo hidden\necho again\nexit\n")?;
+                c.wait_with_output()
+            });
+        let _ = std::fs::remove_dir_all(&tmp);
+        let Ok(out) = out else { return };
+        let mut parser = ShellIntegrationParser::new();
+        let mut commands = Vec::new();
+        for ev in parser.feed(&[out.stdout, out.stderr].concat()) {
+            if let ShellEvent::CommandExecuted { command: Some(c) } = ev {
+                commands.push(c);
+            }
+        }
+        assert_eq!(commands, ["echo a; echo 'b\\c'", "echo again", "exit"]);
+    }
+
     /// Syntax-checks the scripts with locally installed shells, if any.
     #[test]
     fn scripts_parse_with_installed_shells() {
