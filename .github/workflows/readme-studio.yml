@@ -16,7 +16,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: readme-studio
+  # Per branch: a push elsewhere must not cancel the run that publishes from main.
+  group: readme-studio-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
