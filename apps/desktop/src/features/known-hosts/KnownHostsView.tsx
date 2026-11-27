@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/controls';
 import { Input } from '@/components/ui/input';
-import { EmptyState } from '@/components/ui/misc';
+import { EmptyState, PageHeader } from '@/components/ui/misc';
 import { ContextMenu } from '@/components/ui/overlay';
 import { useDeleteKnownHost, useKnownHosts } from '@/lib/queries';
 import { EMPTY } from '@/lib/empty';
@@ -30,7 +30,12 @@ export function KnownHostsView({ onImport }: { onImport: () => void }) {
   );
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center gap-2 px-4 pt-5 sm:px-6">
+      <PageHeader
+        title={t('nav.knownHosts')}
+        description={t('knownHosts.description')}
+        className="px-4 pt-4 sm:px-8 sm:pt-7"
+      />
+      <div className="flex flex-wrap items-center gap-2 px-4 pt-6 sm:px-8">
         <Input
           className="max-w-xs"
           aria-label={t('common.search')}
@@ -38,13 +43,12 @@ export function KnownHostsView({ onImport }: { onImport: () => void }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <Button size="sm" className="ml-auto" onClick={onImport}>
+        <Button variant="secondary" className="ml-auto" onClick={onImport}>
           <Upload className="size-4" />
           {t('knownHosts.import')}
         </Button>
       </div>
-      <p className="text-muted px-4 pt-3 text-[13px] sm:px-6">{t('knownHosts.description')}</p>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-8 sm:px-8">
         {filtered.length === 0 ? (
           <EmptyState
             icon={<Fingerprint />}

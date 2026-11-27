@@ -21,7 +21,7 @@ import { Logo } from '@/components/Logo';
 import { Button } from '@/components/ui/button';
 import { Kbd, Segmented, Select, Switch } from '@/components/ui/controls';
 import { Field, Input, PasswordInput } from '@/components/ui/input';
-import { Card, Row } from '@/components/ui/misc';
+import { Card, PageHeader, Row } from '@/components/ui/misc';
 import { cn } from '@/lib/cn';
 import { commands, errorMessage, type VaultStatus } from '@/lib/ipc';
 import { formatShortcut, useBreakpoint, usePlatform } from '@/lib/platform';
@@ -537,47 +537,56 @@ export function SettingsView({
     { id: 'about', icon: <Info />, label: t('settings.about') },
   ];
   return (
-    <div className={cn('flex h-full min-h-0', bp === 'phone' ? 'flex-col' : 'flex-row')}>
-      <nav
-        aria-label={t('nav.settings')}
-        className={cn(
-          bp === 'phone'
-            ? 'flex gap-1 overflow-x-auto px-4 pt-4'
-            : 'flex w-52 shrink-0 flex-col gap-1 px-3 pt-5',
-        )}
-      >
-        {items.map((i) => (
-          <button
-            key={i.id}
-            type="button"
-            aria-current={section === i.id ? 'page' : undefined}
-            onClick={() => setSection(i.id)}
-            className={cn(
-              'flex h-9 shrink-0 items-center gap-2.5 rounded-[10px] px-3 text-[13px] font-medium [&>svg]:size-4',
-              section === i.id
-                ? 'bg-surface-3 text-text'
-                : 'text-muted hover:bg-surface-2 hover:text-text',
-            )}
-          >
-            {i.icon}
-            {i.label}
-          </button>
-        ))}
-      </nav>
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-5 sm:px-6">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
-          {section === 'appearance' && <Appearance />}
-          {section === 'terminal' && <Terminal />}
-          {section === 'security' && <Security status={status} onStatus={onStatus} />}
-          {section === 'sync' && <SyncSettings />}
-          {section === 'ai' && <AiSettingsCard />}
-          {section === 'agents' && <AgentSettingsCard />}
-          {section === 'shortcuts' && <Shortcuts />}
-          {section === 'about' && <About />}
-          <p className="text-subtle flex items-center gap-1.5 pt-2 text-xs">
-            <Monitor className="size-3.5" />
-            {t('settings.storedEncrypted')}
-          </p>
+    <div className="flex h-full min-h-0 flex-col">
+      {bp === 'phone' ? null : (
+        <PageHeader
+          title={t('nav.settings')}
+          description={t('settings.intro')}
+          className="px-4 pt-4 sm:px-8 sm:pt-7"
+        />
+      )}
+      <div className={cn('flex min-h-0 flex-1', bp === 'phone' ? 'flex-col' : 'flex-row')}>
+        <nav
+          aria-label={t('nav.settings')}
+          className={cn(
+            bp === 'phone'
+              ? 'flex gap-1 overflow-x-auto px-4 pt-4'
+              : 'flex w-56 shrink-0 flex-col gap-1 pt-6 pr-2 pl-4 sm:pl-6',
+          )}
+        >
+          {items.map((i) => (
+            <button
+              key={i.id}
+              type="button"
+              aria-current={section === i.id ? 'page' : undefined}
+              onClick={() => setSection(i.id)}
+              className={cn(
+                'flex h-9 shrink-0 items-center gap-2.5 rounded-full px-3.5 text-[13.5px] font-bold transition-colors duration-150 [&>svg]:size-4',
+                section === i.id
+                  ? 'bg-text/[0.08] text-text [&>svg]:text-accent-text'
+                  : 'text-muted hover:bg-text/[0.05] hover:text-text',
+              )}
+            >
+              {i.icon}
+              {i.label}
+            </button>
+          ))}
+        </nav>
+        <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 pt-6 pb-8 sm:px-8">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-3">
+            {section === 'appearance' && <Appearance />}
+            {section === 'terminal' && <Terminal />}
+            {section === 'security' && <Security status={status} onStatus={onStatus} />}
+            {section === 'sync' && <SyncSettings />}
+            {section === 'ai' && <AiSettingsCard />}
+            {section === 'agents' && <AgentSettingsCard />}
+            {section === 'shortcuts' && <Shortcuts />}
+            {section === 'about' && <About />}
+            <p className="text-subtle flex items-center gap-1.5 pt-2 text-xs">
+              <Monitor className="size-3.5" />
+              {t('settings.storedEncrypted')}
+            </p>
+          </div>
         </div>
       </div>
     </div>

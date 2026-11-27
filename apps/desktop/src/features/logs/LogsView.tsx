@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { OsIcon } from '@/components/OsIcon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { EmptyState } from '@/components/ui/misc';
+import { EmptyState, PageHeader } from '@/components/ui/misc';
 import { ContextMenu } from '@/components/ui/overlay';
 import { cn } from '@/lib/cn';
 import { EMPTY } from '@/lib/empty';
@@ -58,7 +58,12 @@ export function LogsView() {
   };
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center gap-2 px-4 pt-5 sm:px-6">
+      <PageHeader
+        title={t('nav.logs')}
+        description={t('logs.description')}
+        className="px-4 pt-4 sm:px-8 sm:pt-7"
+      />
+      <div className="flex flex-wrap items-center gap-2 px-4 pt-6 sm:px-8">
         <Input
           className="max-w-xs"
           aria-label={t('common.search')}
@@ -67,16 +72,14 @@ export function LogsView() {
           onChange={(e) => setQuery(e.target.value)}
         />
         <Button
-          size="sm"
-          variant={savedOnly ? 'primary' : 'ghost'}
+          variant={savedOnly ? 'accent' : 'secondary'}
           onClick={() => setSavedOnly(!savedOnly)}
         >
           <Bookmark className="size-4" />
           {t('logs.savedOnly')}
         </Button>
       </div>
-      <p className="text-muted px-4 pt-3 text-[13px] sm:px-6">{t('logs.description')}</p>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-8 sm:px-8">
         {filtered.length === 0 ? (
           <EmptyState
             icon={<History />}

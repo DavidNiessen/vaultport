@@ -20,7 +20,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge, Segmented, Select, Switch } from '@/components/ui/controls';
 import { Field, Input, PasswordInput, Textarea } from '@/components/ui/input';
-import { EmptyState } from '@/components/ui/misc';
+import { EmptyState, PageHeader } from '@/components/ui/misc';
 import { ContextMenu, Dialog, DropdownMenu } from '@/components/ui/overlay';
 import { commands, errorMessage, newId, type Identity, type KeyMeta } from '@/lib/ipc';
 import { EMPTY } from '@/lib/empty';
@@ -436,7 +436,12 @@ export function KeychainView() {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center gap-2 px-4 pt-5 sm:px-6">
+      <PageHeader
+        title={t('nav.keychain')}
+        description={t('keychain.intro')}
+        className="px-4 pt-4 sm:px-8 sm:pt-7"
+      />
+      <div className="flex flex-wrap items-center gap-2 px-4 pt-6 sm:px-8">
         <Segmented
           ariaLabel={t('nav.keychain')}
           value={tab}
@@ -454,11 +459,9 @@ export function KeychainView() {
           {tab === 'keys' ? (
             <DropdownMenu
               trigger={
-                <Button variant="primary" size="sm">
+                <Button variant="primary">
                   <Plus className="size-4" />
-                  <span className="font-semibold tracking-wide uppercase">
-                    {t('keychain.newKey')}
-                  </span>
+                  {t('keychain.newKey')}
                   <ChevronDown className="size-4" />
                 </Button>
               }
@@ -495,17 +498,15 @@ export function KeychainView() {
               ]}
             />
           ) : (
-            <Button variant="primary" size="sm" onClick={() => setEditing(newIdentity())}>
+            <Button variant="primary" onClick={() => setEditing(newIdentity())}>
               <Plus className="size-4" />
-              <span className="font-semibold tracking-wide uppercase">
-                {t('keychain.newIdentity')}
-              </span>
+              {t('keychain.newIdentity')}
             </Button>
           )}
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 sm:px-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-5 pb-8 sm:px-8">
         {tab === 'keys' ? (
           keys.length === 0 ? (
             <EmptyState
