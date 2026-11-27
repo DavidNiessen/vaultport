@@ -3,6 +3,7 @@
 //!
 //! * [`shell`]: sans-IO parser for shell integration escape sequences (OSC 7, 133, 633, 1337,
 //!   9;4) and heuristic password prompt detection.
+//! * [`risk`]: deterministic [`assess_risk`] rating of command lines.
 //! * [`scripts`]: small opt-in bash / zsh / fish snippets that make a remote shell emit those
 //!   sequences.
 //! * [`history`]: bash / zsh / fish history import and a frecency-ranked [`HistoryIndex`].
@@ -15,11 +16,13 @@
 #![forbid(unsafe_code)]
 
 pub mod history;
+pub mod risk;
 pub mod scripts;
 pub mod shell;
 pub mod tokenize;
 pub mod vt;
 
 pub use history::{HistoryEntry, HistoryFormat, HistoryIndex, HistoryItem};
+pub use risk::{Risk, RiskLevel, assess_risk};
 pub use shell::{ProgressState, ShellEvent, ShellIntegrationParser, is_password_prompt};
 pub use vt::{AnsiStripper, VtEvent, VtScanner, strip_ansi};
