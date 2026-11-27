@@ -47,6 +47,7 @@ const kindToKey: Record<string, string[]> = {
   knownHost: ['knownHosts'],
   workspace: ['workspaces'],
   settings: ['settings'],
+  history: ['history'],
 };
 
 /** Keeps the query cache in sync with changes made anywhere (other windows, sync, imports). */

@@ -32,6 +32,7 @@ import { SHORTCUTS } from '../palette/shortcuts';
 import { SyncSettings } from '../sync/SyncSettings';
 import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from '../terminal/settings';
 import { TERMINAL_FONTS, TERMINAL_THEMES, findTheme } from '../terminal/themes';
+import { DEFAULT_LOGGING_SETTINGS, type LoggingSettings } from './logging';
 import { DEFAULT_SECURITY_SETTINGS, type SecuritySettings } from './security';
 
 type Section =
@@ -143,6 +144,7 @@ function Appearance() {
 
 function Terminal() {
   const { t } = useTranslation();
+  const platform = usePlatform();
   const { settings, update } = useSettings<TerminalSettings>('terminal', DEFAULT_TERMINAL_SETTINGS);
   const toggle = (key: keyof TerminalSettings, label: string, description?: string) => (
     <Row label={label} description={description}>
@@ -239,6 +241,24 @@ function Terminal() {
             <option value="deny">{t('settings.deny')}</option>
           </Select>
         </Row>
+        {!platform.mobile ? (
+          <Row label={t('settings.localShell')} description={t('settings.localShellHint')}>
+            <Input
+              key={settings.localShell}
+              aria-label={t('settings.localShell')}
+              className="w-48 font-mono"
+              spellCheck={false}
+              autoCapitalize="off"
+              autoCorrect="off"
+              placeholder={t('settings.systemDefault')}
+              defaultValue={settings.localShell}
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                if (value !== settings.localShell) update({ localShell: value });
+              }}
+            />
+          </Row>
+        ) : null}
         <Row label={t('settings.termType')}>
           <Select
             aria-label={t('settings.termType')}
@@ -278,7 +298,9 @@ function Security({
   onStatus: (s: VaultStatus) => void;
 }) {
   const { t } = useTranslation();
+  const platform = usePlatform();
   const { settings, update } = useSettings<SecuritySettings>('security', DEFAULT_SECURITY_SETTINGS);
+  const logging = useSettings<LoggingSettings>('logging', DEFAULT_LOGGING_SETTINGS);
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
   const run = async (fn: () => Promise<VaultStatus>, ok: string) => {
@@ -306,13 +328,15 @@ function Security({
             ))}
           </Select>
         </Row>
-        <Row label={t('settings.lockOnSleep')}>
-          <Switch
-            label={t('settings.lockOnSleep')}
-            checked={settings.lockOnSleep}
-            onCheckedChange={(v) => update({ lockOnSleep: v })}
-          />
-        </Row>
+        {!platform.mobile ? (
+          <Row label={t('settings.lockOnSleep')} description={t('settings.lockOnSleepHint')}>
+            <Switch
+              label={t('settings.lockOnSleep')}
+              checked={settings.lockOnSleep}
+              onCheckedChange={(v) => update({ lockOnSleep: v })}
+            />
+          </Row>
+        ) : null}
         <Row
           label={t('settings.lockOnBackground')}
           description={t('settings.lockOnBackgroundHint')}
@@ -332,11 +356,13 @@ function Security({
             }
           />
         </Row>
-        <Row label={t('settings.clearClipboard')} description={t('settings.clearClipboardHint')}>
+      </Card>
+      <Card title={t('settings.sessionLogs')}>
+        <Row label={t('settings.recordSessions')} description={t('settings.recordSessionsHint')}>
           <Switch
-            label={t('settings.clearClipboard')}
-            checked={settings.clearClipboard}
-            onCheckedChange={(v) => update({ clearClipboard: v })}
+            label={t('settings.recordSessions')}
+            checked={logging.settings.enabled}
+            onCheckedChange={(v) => logging.update({ enabled: v })}
           />
         </Row>
       </Card>

@@ -2,7 +2,8 @@
 //! Per-session side channels: encrypted session logs, shell-integration tracking and command
 //! history. Failures here never interrupt the terminal session.
 
-use crate::commands::logs::{HISTORY, LOG_KEY_PURPOSE, load_index, logs_dir, save_index};
+use crate::commands::logs::{LOG_KEY_PURPOSE, load_index, logs_dir, save_index, update_history};
+use crate::prefs::LoggingPrefs;
 use crate::state::AppState;
 use core_model::HostId;
 use session_log::{CastHeader, LogId, LogMetadata, LogWriter, RetentionPolicy, WriterOptions};
@@ -37,7 +38,7 @@ pub struct Recorder {
 }
 
 impl Recorder {
-    /// Starts recording if session logging is enabled (Settings → Security → logs).
+    /// Starts recording if session logging is enabled (Settings → Security → Session logs).
     pub fn start(
         app: &AppHandle,
         host_id: Option<HostId>,
@@ -49,13 +50,8 @@ impl Recorder {
         let started_at = now_ms();
         let writer = (|| -> Option<LogWriter<BufWriter<File>>> {
             let state = app.state::<AppState>();
-            let enabled = state
-                .with_vault(|v| Ok(v.get_settings("logging")?))
-                .ok()
-                .flatten()
-                .and_then(|j| j.get("enabled").and_then(serde_json::Value::as_bool))
-                .unwrap_or(true);
-            if !enabled {
+            let prefs: LoggingPrefs = crate::prefs::load(app, crate::prefs::LOGGING);
+            if !prefs.enabled {
                 return None;
             }
             let key = state
@@ -161,18 +157,12 @@ impl Recorder {
                 save_index(v, &idx)?;
             }
             if !history.is_empty() {
-                let name = host_id.map_or_else(|| HISTORY.to_owned(), |h| format!("{HISTORY}-{h}"));
-                let mut index: term_intel::history::HistoryIndex = v
-                    .get_settings(&name)?
-                    .and_then(|j| serde_json::from_value(j).ok())
-                    .unwrap_or_default();
                 let ts = now_ms() / 1000;
-                for cmd in &history {
-                    index.record(cmd, Some(ts));
-                }
-                if let Ok(value) = serde_json::to_value(&index) {
-                    v.put_settings(&name, &value, true)?;
-                }
+                update_history(v, host_id, |index| {
+                    for cmd in &history {
+                        index.record(cmd, Some(ts));
+                    }
+                })?;
             }
             Ok(())
         });

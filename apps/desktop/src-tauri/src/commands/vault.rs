@@ -180,14 +180,13 @@ pub async fn vault_unlock(
     status(&state)
 }
 
-/// Locks the open vault and wipes decrypted data from memory.
-#[tauri::command]
-#[specta::specta]
-pub async fn vault_lock(
-    app: tauri::AppHandle,
-    state: State<'_, AppState>,
-) -> CmdResult<VaultStatus> {
-    use tauri::Manager;
+/// Emitted after the core locks the vault on its own (e.g. when the computer sleeps).
+pub const VAULT_LOCKED: &str = "vault://locked";
+
+/// Closes sessions, forwards and connections, then locks the open vault and wipes decrypted
+/// data from memory.
+pub async fn lock_vault(app: &tauri::AppHandle) {
+    use tauri::{Emitter as _, Manager};
     app.state::<crate::sessions::SessionManager>().close_all();
     app.state::<crate::commands::forwarding::ForwardManager>()
         .stop_all()
@@ -198,9 +197,20 @@ pub async fn vault_lock(
     app.state::<crate::commands::files::FilesState>()
         .reset()
         .await;
-    if let Some(open) = state.vault.lock().as_mut() {
+    if let Some(open) = app.state::<AppState>().vault.lock().as_mut() {
         open.vault.lock();
     }
+    let _ = app.emit(VAULT_LOCKED, ());
+}
+
+/// Locks the open vault and wipes decrypted data from memory.
+#[tauri::command]
+#[specta::specta]
+pub async fn vault_lock(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+) -> CmdResult<VaultStatus> {
+    lock_vault(&app).await;
     status(&state)
 }
 

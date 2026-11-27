@@ -20,7 +20,10 @@ mod error;
 mod keystore;
 mod mobile;
 mod net;
+mod prefs;
 mod sessions;
+#[cfg(desktop)]
+mod sleep;
 mod state;
 
 use commands::{
@@ -241,7 +244,10 @@ pub fn run() {
         app.manage(std::sync::Arc::new(agent::AgentState::new(&data_dir)));
         agent::start(app.handle());
         #[cfg(desktop)]
-        configure_window(app);
+        {
+            configure_window(app);
+            sleep::start(app.handle());
+        }
         Ok(())
     })
     .run(tauri::generate_context!())

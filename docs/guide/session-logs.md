@@ -7,7 +7,7 @@ description: Encrypted, tamper-evident recordings of SSH, Telnet, serial and loc
 
 Vaultport records the output of your terminal sessions — SSH, Telnet, serial and local — into **encrypted session logs**, so you can look up what a command printed yesterday or keep a record of maintenance work.
 
-Session logging is on by default. Open **Logs** in the vault to browse them.
+Session logging is on by default. Turn it off or on again with **Settings → Security → Record session logs**; the switch applies to sessions you open afterwards. Open **Logs** in the vault to browse them.
 
 ## What is recorded
 

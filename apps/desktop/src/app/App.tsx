@@ -5,7 +5,7 @@ import { Toaster } from 'sonner';
 
 import { TooltipProvider } from '@/components/ui/controls';
 import { Spinner } from '@/components/ui/controls';
-import { commands, type VaultStatus } from '@/lib/ipc';
+import { commands, onVaultLocked, type VaultStatus } from '@/lib/ipc';
 import { useColorScheme, usePlatform } from '@/lib/platform';
 import { queryClient, useSettings, useVaultEvents } from '@/lib/queries';
 import { useApp } from '@/stores/app';
@@ -31,7 +31,10 @@ function useDocumentTheme() {
   return scheme;
 }
 
-/** Locks the vault after inactivity and when the app goes to the background (mobile). */
+/**
+ * Locks the vault after inactivity and when the app goes to the background (mobile). Locking
+ * on sleep happens in the core (`sleep.rs`).
+ */
 function useAutoLock(enabled: boolean, lock: () => void) {
   const { settings } = useSettings<SecuritySettings>('security', DEFAULT_SECURITY_SETTINGS);
   const platform = usePlatform();
@@ -90,6 +93,23 @@ function Root() {
     void commands.vaultLock().then(onStatus);
   }, [onStatus]);
   useAutoLock(unlocked, lock);
+
+  // The core locks the vault by itself when the computer wakes from sleep.
+  useEffect(() => {
+    if (!unlocked) return;
+    let unlisten: (() => void) | undefined;
+    let cancelled = false;
+    void onVaultLocked(() => {
+      void commands.vaultStatus().then(onStatus);
+    }).then((u) => {
+      if (cancelled) u();
+      else unlisten = u;
+    });
+    return () => {
+      cancelled = true;
+      unlisten?.();
+    };
+  }, [unlocked, onStatus]);
 
   // Blur the window content when it loses focus on mobile (app switcher privacy).
   const [hidden, setHidden] = useState(false);
