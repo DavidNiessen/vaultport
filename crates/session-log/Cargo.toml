@@ -1,0 +1,26 @@
+[package]
+name = "session-log"
+description = "Encrypted, chunked asciicast v2 session recording with search, export and retention"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+core-model = { path = "../core-model" }
+vault = { path = "../vault" }
+term-intel = { path = "../term-intel" }
+miniz_oxide = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+uuid = { version = "1", features = ["v7", "serde"] }
+
+[dev-dependencies]
+proptest = "1"
+
+[lints]
+workspace = true
