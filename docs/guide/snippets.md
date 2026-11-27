@@ -58,13 +58,24 @@ Vaultport's completion engine is deliberately **not** AI. It is a small, offline
 - your command **history** for the host,
 - your **snippets**,
 - **command specs** for about 60 common tools (subcommands and flags of `git`, `docker`, `kubectl`, `systemctl`, `apt`, `terraform` and friends),
-- **remote paths** in the current working directory.
+- **paths**: on this computer in local terminals, and on the server through an SFTP session that is already open (for example in the SFTP browser). Completion never opens a connection of its own.
 
 It uses a quote-aware shell tokenizer, never runs anything, and works the same on every platform. You can switch it off in **Settings → Terminal → Autocomplete**.
 
-::: info Status
-The completion engine and its command specs ship in the core today; inline suggestions inside the terminal are still being integrated into the UI.
-:::
+### Using it
+
+Suggestions appear below the cursor as you type at the prompt:
+
+| Key                         | Action                                          |
+| --------------------------- | ----------------------------------------------- |
+| <kbd>↑</kbd> / <kbd>↓</kbd> | Choose a suggestion                             |
+| <kbd>Tab</kbd>              | Insert it                                       |
+| <kbd>Esc</kbd>              | Close the list                                  |
+| <kbd>Enter</kbd>            | Close the list and run the line as you typed it |
+
+While the list is closed, <kbd>Tab</kbd> and the arrow keys go to the shell as usual. Inserting a directory keeps the list open for the next level.
+
+Suggestions work best with [shell integration](/guide/hosts-and-groups#terminal-features) turned on: Vaultport then knows exactly where your input starts, which directory you are in, and when a command is running. Without it, the prompt is recognized by its usual ending (`$`, `#`, `%`, `>` or `❯`), and paths only complete from absolute or `~/` paths. Nothing is suggested while a command runs, in full-screen programs such as `vim` or `htop`, or while a workspace broadcasts input to several terminals.
 
 ## Risk hints
 
