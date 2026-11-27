@@ -479,7 +479,10 @@
     "updateAvailable": "Version {{version}} ist verfügbar",
     "vaultSecurity": "Tresor",
     "version": "Version {{version}}",
-    "agents": "KI-Agenten"
+    "agents": "KI-Agenten",
+    "sessionLogs": "Sitzungsprotokolle",
+    "recordSessions": "Sitzungen aufzeichnen",
+    "recordSessionsHint": "Verschlüsselte Aufzeichnung der Terminalausgabe. Tastatureingaben werden nicht aufgezeichnet."
   },
   "sftp": {
     "actions": "Aktionen",

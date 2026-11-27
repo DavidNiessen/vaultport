@@ -32,6 +32,7 @@ import { SHORTCUTS } from '../palette/shortcuts';
 import { SyncSettings } from '../sync/SyncSettings';
 import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from '../terminal/settings';
 import { TERMINAL_FONTS, TERMINAL_THEMES, findTheme } from '../terminal/themes';
+import { DEFAULT_LOGGING_SETTINGS, type LoggingSettings } from './logging';
 import { DEFAULT_SECURITY_SETTINGS, type SecuritySettings } from './security';
 
 type Section =
@@ -280,6 +281,7 @@ function Security({
   const { t } = useTranslation();
   const platform = usePlatform();
   const { settings, update } = useSettings<SecuritySettings>('security', DEFAULT_SECURITY_SETTINGS);
+  const logging = useSettings<LoggingSettings>('logging', DEFAULT_LOGGING_SETTINGS);
   const [pw, setPw] = useState('');
   const [pw2, setPw2] = useState('');
   const run = async (fn: () => Promise<VaultStatus>, ok: string) => {
@@ -333,6 +335,15 @@ function Security({
             onCheckedChange={(v) =>
               void run(() => commands.vaultSetDeviceUnlock(v), t('settings.saved'))
             }
+          />
+        </Row>
+      </Card>
+      <Card title={t('settings.sessionLogs')}>
+        <Row label={t('settings.recordSessions')} description={t('settings.recordSessionsHint')}>
+          <Switch
+            label={t('settings.recordSessions')}
+            checked={logging.settings.enabled}
+            onCheckedChange={(v) => logging.update({ enabled: v })}
           />
         </Row>
       </Card>
