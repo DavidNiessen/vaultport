@@ -1,0 +1,32 @@
+[package]
+name = "cloud-inventory"
+description = "Read-only cloud inventory clients (AWS EC2/Lightsail, DigitalOcean, Azure) and host reconciliation"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+core-model = { path = "../core-model" }
+hex = "0.4"
+hmac = "0.12"
+percent-encoding = "2"
+quick-xml = { version = "0.38", features = ["serialize"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+thiserror = "2"
+tracing = "0.1"
+url = "2"
+zeroize = { version = "1", features = ["derive", "serde"] }
+
+[dev-dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+wiremock = "0.6"
+
+[lints]
+workspace = true
