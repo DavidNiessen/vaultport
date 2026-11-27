@@ -69,6 +69,36 @@ fn system_shell_env() -> Option<String> {
     }
 }
 
+/// Loads the shell integration script into bash, zsh or fish (Settings → Terminal → Shell
+/// integration) by rewriting the arguments and returning extra environment variables. Other
+/// shells, and failures to write the startup files, leave the command unchanged.
+fn with_integration(app: &tauri::AppHandle, shell: &mut ShellCmd) -> Vec<(String, String)> {
+    use tauri::Manager;
+    let Some(kind) = term_intel::scripts::Shell::from_path(&shell.program) else {
+        return Vec::new();
+    };
+    let dir = app
+        .state::<crate::state::AppState>()
+        .data_dir
+        .join("shell-integration");
+    let zdotdir = std::env::var("ZDOTDIR").ok();
+    let launch = term_intel::scripts::local_launch(kind, &dir, zdotdir.as_deref());
+    let written = std::fs::create_dir_all(&dir).is_ok()
+        && launch
+            .files
+            .iter()
+            .all(|(path, body)| std::fs::write(path, body).is_ok());
+    if !written {
+        log::warn!(
+            "could not write the shell integration files to {}",
+            dir.display()
+        );
+        return Vec::new();
+    }
+    shell.args = launch.args;
+    launch.env
+}
+
 pub fn spawn(
     app: &tauri::AppHandle,
     id: String,
@@ -87,9 +117,16 @@ pub fn spawn(
         })
         .map_err(|e| CmdError::internal(format!("could not open a pseudo terminal: {e}")))?;
     let prefs: TerminalPrefs = crate::prefs::load(app, crate::prefs::TERMINAL);
-    let shell = shell_cmd(&prefs.local_shell, system_shell_env());
+    let mut shell = shell_cmd(&prefs.local_shell, system_shell_env());
+    let mut extra_env = Vec::new();
+    if prefs.shell_integration {
+        extra_env = with_integration(app, &mut shell);
+    }
     let mut cmd = CommandBuilder::new(&shell.program);
     cmd.args(&shell.args);
+    for (k, v) in extra_env {
+        cmd.env(k, v);
+    }
     cmd.env("TERM", "xterm-256color");
     cmd.env("COLORTERM", "truecolor");
     cmd.env("TERM_PROGRAM", "ssh-client");
