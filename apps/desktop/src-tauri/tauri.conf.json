@@ -1,0 +1,132 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ssh-client",
+  "mainBinaryName": "ssh-client",
+  "version": "../package.json",
+  "identifier": "dev.niessen.sshclient",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "withGlobalTauri": false,
+    "windows": [
+      {
+        "label": "main",
+        "title": "ssh-client",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 360,
+        "minHeight": 480,
+        "decorations": true,
+        "transparent": false,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "trafficLightPosition": {
+          "x": 16,
+          "y": 20
+        },
+        "dragDropEnabled": true,
+        "visible": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": {
+        "default-src": "'self'",
+        "script-src": "'self'",
+        "style-src": "'self' 'unsafe-inline'",
+        "img-src": "'self' data: blob: asset: http://asset.localhost",
+        "font-src": "'self' data:",
+        "connect-src": "ipc: http://ipc.localhost",
+        "object-src": "'none'",
+        "base-uri": "'none'",
+        "form-action": "'none'",
+        "frame-ancestors": "'none'",
+        "worker-src": "'self' blob:"
+      },
+      "devCsp": {
+        "default-src": "'self'",
+        "script-src": "'self'",
+        "style-src": "'self' 'unsafe-inline'",
+        "img-src": "'self' data: blob:",
+        "font-src": "'self' data:",
+        "connect-src": "ipc: http://ipc.localhost ws://localhost:1420 ws://localhost:1421",
+        "object-src": "'none'",
+        "worker-src": "'self' blob:"
+      },
+      "freezePrototype": true,
+      "dangerousDisableAssetCspModification": false,
+      "pattern": {
+        "use": "isolation",
+        "options": {
+          "dir": "../isolation"
+        }
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "DeveloperTool",
+    "shortDescription": "Secure, serverless SSH client",
+    "longDescription": "A secure, serverless, cross-platform SSH, SFTP, Mosh and Telnet client with an end-to-end encrypted vault, port forwarding, workspaces and snippets.",
+    "copyright": "Copyright \u00a9 2026 David Niessen and contributors. GPL-3.0-or-later.",
+    "license": "GPL-3.0-or-later",
+    "licenseFile": "../../../LICENSE",
+    "homepage": "https://github.com/davidniessen/ssh-client",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "createUpdaterArtifacts": false,
+    "linux": {
+      "deb": {
+        "section": "net",
+        "depends": []
+      },
+      "rpm": {
+        "release": "1"
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    },
+    "macOS": {
+      "minimumSystemVersion": "13.0",
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.plist"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper",
+        "silent": true
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "English",
+          "German"
+        ]
+      },
+      "wix": {
+        "language": [
+          "en-US",
+          "de-DE"
+        ]
+      }
+    },
+    "iOS": {
+      "minimumSystemVersion": "16.0"
+    },
+    "android": {
+      "minSdkVersion": 26
+    }
+  },
+  "plugins": {}
+}
