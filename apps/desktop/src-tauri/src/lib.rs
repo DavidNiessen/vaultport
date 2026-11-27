@@ -27,7 +27,7 @@ mod sleep;
 mod state;
 
 use commands::{
-    agent as agent_cmd, ai, data, entities, files, forwarding, keys, logs, platform,
+    agent as agent_cmd, ai, complete, data, entities, files, forwarding, keys, logs, platform,
     sessions as session_cmd, sync as sync_cmd, update, vault as vault_cmd,
 };
 use state::AppState;
@@ -106,6 +106,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             logs::log_read,
             logs::log_export,
             logs::history_list,
+            complete::term_complete,
             files::fs_list,
             files::fs_mkdir,
             files::fs_rename,
@@ -242,6 +243,8 @@ pub fn run() {
         app.manage(net::ConnectionPool::default());
         app.manage(forwarding::ForwardManager::default());
         app.manage(files::FilesState::new());
+        app.manage(complete::CompletionState::default());
+        complete::watch_vault(app.handle());
         app.manage(ai::AiManager::new(&app.path().app_data_dir()?));
         mobile::init(app.handle());
         app.manage(std::sync::Arc::new(agent::AgentState::new(&data_dir)));

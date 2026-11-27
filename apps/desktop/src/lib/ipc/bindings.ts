@@ -133,6 +133,8 @@ export const commands = {
 	logExport: (id: string, options?: InvokeOptions) => __TAURI_INVOKE<string>("log_export", { id }, options),
 	/**  Recently used commands for a host (from shell integration), most frequent first. */
 	historyList: (hostId: string | null, limit: number, options?: InvokeOptions) => __TAURI_INVOKE<HistoryItem[]>("history_list", { hostId, limit }, options),
+	/**  Suggestions for the input line at the prompt. */
+	termComplete: (req: CompleteRequest_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<CompletionList_Serialize>("term_complete", { req }, options),
 	/**  Lists a directory (`None` = home directory). */
 	fsList: (source: FsSource, path: string | null, options?: InvokeOptions) => __TAURI_INVOKE<FsListing_Serialize>("fs_list", { source, path }, options),
 	/**  Creates a directory. */
@@ -395,6 +397,70 @@ export type Backspace =
 export type CmdError = {
 	code: ErrorCode,
 	message: string,
+};
+
+export type CompleteRequest = CompleteRequest_Serialize | CompleteRequest_Deserialize;
+
+export type CompleteRequest_Deserialize = {
+	hostId?: string | null,
+	/**  The input line at the prompt. */
+	line: string,
+	/**  Cursor position in UTF-16 code units, as JavaScript counts. */
+	cursor: number,
+	/**  The shell's working directory (from OSC 7), for relative paths. */
+	cwd?: string | null,
+	paths: PathSource,
+};
+
+export type CompleteRequest_Serialize = {
+	hostId: string | null,
+	/**  The input line at the prompt. */
+	line: string,
+	/**  Cursor position in UTF-16 code units, as JavaScript counts. */
+	cursor: number,
+	/**  The shell's working directory (from OSC 7), for relative paths. */
+	cwd: string | null,
+	paths: PathSource,
+};
+
+export type CompletionItem = CompletionItem_Serialize | CompletionItem_Deserialize;
+
+export type CompletionItem_Deserialize = {
+	/**  Text to type after deleting (already shell-quoted). */
+	text: string,
+	label: string,
+	description?: string | null,
+	kind: CompletionKind,
+	/**  Characters to delete before the cursor (Backspace presses). */
+	deleteBefore: number,
+	/**  Characters to delete after the cursor (Delete presses). */
+	deleteAfter: number,
+};
+
+export type CompletionItem_Serialize = {
+	/**  Text to type after deleting (already shell-quoted). */
+	text: string,
+	label: string,
+	description: string | null,
+	kind: CompletionKind,
+	/**  Characters to delete before the cursor (Backspace presses). */
+	deleteBefore: number,
+	/**  Characters to delete after the cursor (Delete presses). */
+	deleteAfter: number,
+};
+
+export type CompletionKind = "path" | "value" | "subcommand" | "option" | "command" | "snippet" | "history";
+
+export type CompletionList = CompletionList_Serialize | CompletionList_Deserialize;
+
+export type CompletionList_Deserialize = {
+	/**  Best first. */
+	items: CompletionItem_Deserialize[],
+};
+
+export type CompletionList_Serialize = {
+	/**  Best first. */
+	items: CompletionItem_Serialize[],
 };
 
 export type CreateVaultRequest = CreateVaultRequest_Serialize | CreateVaultRequest_Deserialize;
@@ -891,6 +957,15 @@ export type PairingInfo = {
 	payload: string,
 	code: string,
 };
+
+/**  Where path suggestions come from. */
+export type PathSource = 
+/**  No listings (e.g. telnet or an unsaved host). */
+"none" | 
+/**  This computer (local terminals). */
+"local" | 
+/**  The saved host, through an SFTP session that is already open. */
+"remote";
 
 export type PlatformInfo = PlatformInfo_Serialize | PlatformInfo_Deserialize;
 

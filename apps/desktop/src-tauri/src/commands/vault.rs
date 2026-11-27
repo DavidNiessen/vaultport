@@ -197,6 +197,8 @@ pub async fn lock_vault(app: &tauri::AppHandle) {
     app.state::<crate::commands::files::FilesState>()
         .reset()
         .await;
+    app.state::<crate::commands::complete::CompletionState>()
+        .clear();
     if let Some(open) = app.state::<AppState>().vault.lock().as_mut() {
         open.vault.lock();
     }
