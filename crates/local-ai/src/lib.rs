@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Optional, fully local natural-language → shell command generation.
 //!
-//! This first part provides the pinned model [`catalog`] and the verifying, resumable
-//! [`download`]er.
+//! This part provides the pinned model [`catalog`], the verifying, resumable [`download`]er
+//! and the backend-independent [`prompt`] construction and output validation.
 //!
 //! # Privacy
 //!
@@ -15,8 +15,10 @@
 pub mod catalog;
 pub mod download;
 mod error;
+pub mod prompt;
 
 pub use catalog::{MODELS, ModelEntry, Tier, default_model};
 pub use download::{DownloadSpec, Downloader, Progress, UrlPolicy};
 pub use error::{Error, Result};
+pub use prompt::{CommandContext, GenerateRequest, Snippet, SnippetRequest, Suggestion};
 pub use tokio_util::sync::CancellationToken;
