@@ -218,6 +218,20 @@ mod tests {
             .is_ok_and(|s| s.success())
     }
 
+    /// Major and minor version of the `bash` on `PATH`, if it runs.
+    fn bash_version() -> Option<(u32, u32)> {
+        let out = std::process::Command::new("bash")
+            .args(["-c", r#"echo "${BASH_VERSINFO[0]} ${BASH_VERSINFO[1]}""#])
+            .stdin(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .output()
+            .ok()
+            .filter(|o| o.status.success())?;
+        let text = String::from_utf8_lossy(&out.stdout);
+        let mut parts = text.split_whitespace().map(str::parse::<u32>);
+        Some((parts.next()?.ok()?, parts.next()?.ok()?))
+    }
+
     /// `dir/name` the way [`local_launch`] spells it on this platform.
     fn joined(dir: &str, name: &str) -> String {
         Path::new(dir).join(name).to_string_lossy().into_owned()
@@ -380,7 +394,8 @@ mod tests {
         use crate::{ShellEvent, ShellIntegrationParser};
         use std::io::Write;
         use std::process::{Command, Stdio};
-        if !usable("bash") {
+        // PS0, which reports the command line, arrived in bash 4.4; macOS ships bash 3.2.
+        if bash_version().is_none_or(|v| v < (4, 4)) {
             return;
         }
         let tmp = std::env::temp_dir().join(format!("sshc-si-e-{}", std::process::id()));
