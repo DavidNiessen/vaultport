@@ -153,9 +153,8 @@ li a {
   padding: 5px 0;
   line-height: 1.45;
   color: var(--text-3);
-  transition:
-    color 0.2s,
-    transform 0.3s var(--ease-out);
+  overflow-wrap: anywhere;
+  transition: color 0.2s;
 }
 li.lvl-3 a {
   padding-left: 12px;
@@ -166,7 +165,6 @@ li a:hover {
 }
 li a.active {
   color: var(--text);
-  transform: translateX(2px);
 }
 .top {
   min-height: 28px;

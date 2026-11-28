@@ -39,7 +39,7 @@ function getRevealObserver(): IntersectionObserver {
     (entries) => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue;
-        entry.target.classList.add('is-visible');
+        (entry.target as HTMLElement).dataset.reveal = 'in';
         revealObserver?.unobserve(entry.target);
       }
     },
@@ -58,11 +58,13 @@ export const vReveal: Directive<HTMLElement, RevealValue> = {
     };
   },
   mounted(el, binding) {
-    el.setAttribute('data-reveal', '');
+    // A data attribute rather than a class: Vue rewrites `class` whenever a `:class` binding on
+    // the same element changes, which would hide an element that had already been revealed.
+    if (el.dataset.reveal !== 'in') el.dataset.reveal = '';
     const delay = typeof binding.value === 'number' ? binding.value : binding.value?.delay;
     if (delay) el.style.setProperty('--reveal-delay', `${delay}ms`);
     if (prefersReducedMotion() || !('IntersectionObserver' in window)) {
-      el.classList.add('is-visible');
+      el.dataset.reveal = 'in';
       return;
     }
     getRevealObserver().observe(el);

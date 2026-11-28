@@ -38,14 +38,11 @@ const ROWS = [
     <div class="container">
       <div class="head">
         <p class="eyebrow" v-reveal>Security model</p>
-        <h2 class="h-section" v-reveal="80">
-          Trust is earned <span class="serif grad-text">in the open.</span>
-        </h2>
+        <h2 class="h-section" v-reveal="80">Trust is earned in the open.</h2>
       </div>
       <ol class="rows">
         <li v-for="(r, i) in ROWS" :key="r.title" v-reveal="i * 60">
           <a :href="withBase(r.link)" class="row">
-            <span class="idx mono">0{{ i + 1 }}</span>
             <span class="title">{{ r.title }}</span>
             <span class="text">{{ r.text }}</span>
             <span class="go"><ArrowUpRight :size="22" /></span>
@@ -75,7 +72,7 @@ const ROWS = [
 .row {
   position: relative;
   display: grid;
-  grid-template-columns: 60px minmax(0, 1.1fr) minmax(0, 1fr) 40px;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) 40px;
   align-items: center;
   gap: 24px;
   padding: 30px 12px;
@@ -102,21 +99,14 @@ const ROWS = [
 .row:focus-visible::before {
   transform: scaleX(1);
 }
-.idx {
-  font-size: 13px;
-  color: var(--text-3);
-  transition: color 0.3s;
-}
 .title {
   font-size: clamp(22px, 2.6vw, 34px);
   font-weight: 600;
   letter-spacing: -0.035em;
   line-height: 1.1;
-  transition: transform 0.5s var(--ease-out);
 }
 .text {
   font-size: 15px;
-  color: var(--text-2);
   line-height: 1.55;
   color: var(--text-3);
   transition: color 0.3s;
@@ -135,13 +125,7 @@ const ROWS = [
     color 0.3s,
     border-color 0.3s;
 }
-.row:hover .idx {
-  color: var(--accent);
-}
-.row:hover .title {
-  transform: translateX(10px);
-}
-.row:hover .text {
+.row:hover .row:hover .text {
   color: var(--text-2);
 }
 .row:hover .go {
@@ -152,17 +136,16 @@ const ROWS = [
 }
 @media (max-width: 860px) {
   .row {
-    grid-template-columns: 40px 1fr 40px;
+    grid-template-columns: 1fr 40px;
     gap: 8px 16px;
     padding: 22px 4px;
   }
   .text {
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 2;
-    opacity: 1;
   }
   .go {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1 / span 2;
   }
 }

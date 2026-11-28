@@ -9,7 +9,6 @@ import FinalCta from './FinalCta.vue';
 import HeroSection from './HeroSection.vue';
 import SyncFlow from './SyncFlow.vue';
 import TrustList from './TrustList.vue';
-import ZeroStats from './ZeroStats.vue';
 </script>
 
 <template>
@@ -21,7 +20,6 @@ import ZeroStats from './ZeroStats.vue';
     <FeatureGrid />
     <SyncFlow />
     <CipherPlayground />
-    <ZeroStats />
     <TrustList />
     <FinalCta />
   </div>

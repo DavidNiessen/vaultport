@@ -1,11 +1,7 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <script setup lang="ts">
-/**
- * Footer for marketing pages: link columns and a giant outlined wordmark that fills with a
- * gradient where the pointer is.
- */
+/** Footer for marketing pages: a short line about the project and the link columns. */
 import { withBase } from 'vitepress';
-import { ref } from 'vue';
 
 import { LICENSE_URL, RELEASES_URL, REPO_URL, SECURITY_URL } from '../../../site';
 import LogoMark from './LogoMark.vue';
@@ -48,15 +44,6 @@ const COLUMNS = [
     ],
   },
 ];
-
-const mark = ref<HTMLElement | null>(null);
-function move(e: PointerEvent) {
-  const el = mark.value;
-  if (!el) return;
-  const r = el.getBoundingClientRect();
-  el.style.setProperty('--fx', `${((e.clientX - r.left) / r.width) * 100}%`);
-  el.style.setProperty('--fy', `${((e.clientY - r.top) / r.height) * 100}%`);
-}
 </script>
 
 <template>
@@ -68,7 +55,6 @@ function move(e: PointerEvent) {
           <p>
             Secure, serverless SSH for every device. No account, no telemetry, no servers of ours.
           </p>
-          <span class="status"><span class="dot" />All systems are yours</span>
         </div>
         <nav v-for="col in COLUMNS" :key="col.title" class="col" :aria-label="col.title">
           <p class="col-title">{{ col.title }}</p>
@@ -83,7 +69,6 @@ function move(e: PointerEvent) {
         </nav>
       </div>
     </div>
-    <div ref="mark" class="wordmark" aria-hidden="true" @pointermove="move">VAULTPORT</div>
     <div class="bottom container">
       <span>© {{ new Date().getFullYear() }} Vaultport contributors · GPL-3.0-or-later</span>
       <span>Built in the open. This site sets no cookies and runs no analytics.</span>
@@ -119,29 +104,6 @@ function move(e: PointerEvent) {
   font-size: 14.5px;
   color: var(--text-2);
 }
-.status {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-size: 12.5px;
-  color: var(--text-2);
-}
-.dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--ok);
-  box-shadow: 0 0 0 0 var(--ok);
-  animation: ping 2s infinite;
-}
-@keyframes ping {
-  70% {
-    box-shadow: 0 0 0 8px transparent;
-  }
-}
 .col {
   display: grid;
   align-content: start;
@@ -169,30 +131,9 @@ function move(e: PointerEvent) {
   color: var(--text);
   background-size: 100% 1px;
 }
-.wordmark {
-  --fx: 50%;
-  --fy: 50%;
-  margin-top: 64px;
-  font-size: clamp(72px, 19vw, 300px);
-  font-weight: 800;
-  letter-spacing: -0.06em;
-  line-height: 0.8;
-  text-align: center;
-  user-select: none;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--border-strong);
-  background: radial-gradient(
-    circle at var(--fx) var(--fy),
-    rgb(var(--glow-1)) 0%,
-    rgb(var(--glow-2) / 0.8) 12%,
-    transparent 30%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  transform: translateY(14%);
-}
 .bottom {
   position: relative;
+  margin-top: 56px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;

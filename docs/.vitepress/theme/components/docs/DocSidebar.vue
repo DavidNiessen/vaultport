@@ -201,13 +201,10 @@ watch(
   border-radius: 10px;
   font-size: 14px;
   color: var(--text-2);
-  transition:
-    color 0.2s,
-    transform 0.3s var(--ease-out);
+  transition: color 0.2s;
 }
 .item:hover {
   color: var(--text);
-  transform: translateX(2px);
 }
 .item.active {
   color: var(--text);
