@@ -14,7 +14,7 @@ Vaultport is a full terminal app, for SSH, Mosh, Telnet and serial sessions as w
 | New terminal tab         | <kbd>Ctrl</kbd>+<kbd>T</kbd>                                         | <kbd>⌘</kbd>+<kbd>T</kbd>                                                        |
 | Close tab                | <kbd>Ctrl</kbd>+<kbd>W</kbd>                                         | <kbd>⌘</kbd>+<kbd>W</kbd>                                                        |
 | Reopen closed tab        | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>                        | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>T</kbd>                                           |
-| Connect to a host…       | <kbd>Ctrl</kbd>+<kbd>O</kbd>                                         | <kbd>⌘</kbd>+<kbd>O</kbd>                                                        |
+| Connect to a host…       | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>                        | <kbd>⌘</kbd>+<kbd>O</kbd>                                                        |
 | Split pane               | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>                        | <kbd>⌘</kbd>+<kbd>D</kbd>                                                        |
 | Next / previous pane     | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>→</kbd> / <kbd>←</kbd>           | <kbd>⌘</kbd>+<kbd>]</kbd> / <kbd>[</kbd>                                         |
 | Rename tab               | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>                        | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd>                                           |
@@ -27,11 +27,12 @@ Vaultport is a full terminal app, for SSH, Mosh, Telnet and serial sessions as w
 - **Split** a tab to see two sessions side by side: the new pane is another connection to the same host (or a local shell in the same directory). In a split, <kbd>Mod</kbd>+<kbd>W</kbd> closes only the focused pane, and when one pane is left it becomes a normal tab again. Splits support up to 16 panes, [broadcast input](/guide/workspaces) and focus mode.
 - **Duplicate** (tab menu or command palette) opens another connection to the same host (or another local shell in the same directory) right next to the tab.
 - **Double-click** a tab (or press <kbd>F2</kbd> on it) to rename it; a renamed tab keeps its name even when a program sets the title. Clear the name to hand the title back.
+- Closing a tab or pane in which a command is still running (known with [shell integration](#shell-integration)) asks first, so a stray <kbd>Ctrl</kbd>+<kbd>W</kbd> does not end a long job.
 - **Right-click** a tab for duplicate, rename, close, close other tabs, close tabs to the right and reopen closed tab. Up to 20 closed terminal tabs are remembered until you quit.
 - **Reopen tabs on start** (Settings → Terminal) reopens your terminal tabs and splits after you unlock. Only host references and directories are saved, encrypted in this device's vault, and never synced.
 
 ::: tip Ctrl+W and Ctrl+T in the shell
-On Windows and Linux, <kbd>Ctrl</kbd>+<kbd>W</kbd> (delete word) and <kbd>Ctrl</kbd>+<kbd>T</kbd> (swap characters) no longer reach the shell, as in most terminal apps with tabs. If you need them there, remove or change the shortcuts in **Settings → Shortcuts** — every shortcut can be rebound, and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> closes tabs as well.
+On Windows and Linux, <kbd>Ctrl</kbd>+<kbd>W</kbd> (delete word) and <kbd>Ctrl</kbd>+<kbd>T</kbd> (swap characters) no longer reach the shell (closing a tab with a running command asks first), as in most terminal apps with tabs. If you need them there, remove or change the shortcuts in **Settings → Shortcuts** — every shortcut can be rebound, and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> closes tabs as well.
 :::
 
 ## Autocomplete

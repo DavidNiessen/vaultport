@@ -32,7 +32,7 @@ import { formatShortcut, usePlatform } from '@/lib/platform';
 import { SFTP_TAB, VAULT_TAB, useApp, type Tab, type TerminalTab } from '@/stores/app';
 
 import { primaryBinding, useKeymap, type ShortcutId } from '../features/palette/shortcuts';
-import { duplicate, splitPane } from '../features/terminal/tabActions';
+import { duplicate, requestClose, splitPane } from '../features/terminal/tabActions';
 
 import { LinuxControls, WindowsControls, useWindowControls } from './WindowControls';
 
@@ -135,7 +135,7 @@ function SessionTab({
   const { t } = useTranslation();
   const platform = usePlatform();
   const keymap = useKeymap((s) => s.keymap);
-  const { activate, closeTab, moveTab, renaming, setRenaming, renameTab } = useApp();
+  const { activate, moveTab, renaming, setRenaming, renameTab } = useApp();
   const [dragOver, setDragOver] = useState(false);
   const dot = statusColor(tab);
   const editing = renaming === tab.id;
@@ -147,7 +147,7 @@ function SessionTab({
   const onAuxClick = (e: MouseEvent) => {
     if (e.button === 1) {
       e.preventDefault();
-      closeTab(tab.id);
+      requestClose(tab.id);
     }
   };
   const onDragStart = (e: DragEvent) => {
@@ -193,7 +193,7 @@ function SessionTab({
       label: t('tabs.closeTab'),
       icon: <X className="size-4" />,
       shortcut: hint('closeTab'),
-      onSelect: () => closeTab(tab.id),
+      onSelect: () => requestClose(tab.id),
     },
     { label: t('tabs.closeOthers'), onSelect: () => s().closeOthers(tab.id) },
     { label: t('tabs.closeRight'), onSelect: () => s().closeToRight(tab.id) },
@@ -263,7 +263,7 @@ function SessionTab({
           aria-label={t('tabs.close', { title: tab.title })}
           onClick={(e) => {
             e.stopPropagation();
-            closeTab(tab.id);
+            requestClose(tab.id);
           }}
           className={cn(
             'text-subtle hover:bg-text/[0.12] hover:text-text flex size-5 shrink-0 items-center justify-center rounded-full transition-opacity focus:opacity-100',

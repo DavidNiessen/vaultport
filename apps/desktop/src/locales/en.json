@@ -761,7 +761,8 @@
       "done": "A command finished",
       "failed": "A command failed",
       "bell": "The bell rang"
-    }
+    },
+    "confirmClose": "A command is still running here. Close it anyway? The command will be stopped."
   },
   "terminal": {
     "autocomplete": {

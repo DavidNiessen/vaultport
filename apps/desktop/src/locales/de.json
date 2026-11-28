@@ -761,7 +761,8 @@
       "done": "Ein Befehl ist fertig",
       "failed": "Ein Befehl ist fehlgeschlagen",
       "bell": "Die Glocke hat geläutet"
-    }
+    },
+    "confirmClose": "Hier läuft noch ein Befehl. Trotzdem schließen? Der Befehl wird beendet."
   },
   "terminal": {
     "autocomplete": {

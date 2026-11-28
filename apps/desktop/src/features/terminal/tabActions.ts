@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /** Tab actions shared by keyboard shortcuts, the tab context menu and the command palette. */
-import { newId } from '@/lib/ipc';
+import { isTauri, newId } from '@/lib/ipc';
+import i18n from '@/lib/i18n';
 import { SFTP_TAB, VAULT_TAB, useApp, type Tab, type TerminalTab } from '@/stores/app';
 
 import { terminalRegistry } from './registry';
@@ -69,6 +70,45 @@ export function splitPane(id: string): void {
     tab?.kind === 'workspace' ? s.tabs.find((t) => t.id === (tab.focused ?? tab.panes[0])) : tab;
   if (source?.kind !== 'terminal') return;
   s.splitPane(id, newId(), newId(), localCwd(source));
+}
+
+/** Whether a command is running in tab `id` (or in one of its panes). */
+export function isBusy(id: string): boolean {
+  const { tabs } = useApp.getState();
+  const tab = tabs.find((t) => t.id === id);
+  const ids = tab?.kind === 'workspace' ? tab.panes : [id];
+  return ids.some((p) => {
+    const t = tabs.find((x) => x.id === p);
+    return t?.kind === 'terminal' && t.activity === 'running';
+  });
+}
+
+async function confirmClose(message: string): Promise<boolean> {
+  if (isTauri()) {
+    const { ask } = await import('@tauri-apps/plugin-dialog');
+    return ask(message, { kind: 'warning' });
+  }
+  return window.confirm(message);
+}
+
+/**
+ * Closes tab `id`, or only pane `paneId` of a workspace. Asks first when a command is
+ * running there, so a stray Ctrl+W does not end a long job.
+ */
+export function requestClose(id: string, paneId?: string): void {
+  const target = paneId ?? id;
+  const close = () => {
+    const s = useApp.getState();
+    if (paneId) s.closePane(id, paneId);
+    else s.closeTab(id);
+  };
+  if (!isBusy(target)) {
+    close();
+    return;
+  }
+  void confirmClose(i18n.t('tabs.confirmClose')).then((ok) => {
+    if (ok) close();
+  });
 }
 
 /** The tab that tab-level actions (close, rename, duplicate) apply to. */

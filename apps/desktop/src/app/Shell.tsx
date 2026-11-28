@@ -50,6 +50,7 @@ import {
   goToTab,
   moveActive,
   newTab,
+  requestClose,
   splitPane,
 } from '../features/terminal/tabActions';
 import { useTabRestore } from '../features/terminal/restore';
@@ -104,8 +105,8 @@ function useShortcuts(onLock: () => void) {
           const tab = s.tabs.find((x) => x.id === id);
           // In a split, Mod+W closes the focused pane, as in other terminal apps.
           if (tab?.kind === 'workspace' && tab.focused && tab.panes.length > 1) {
-            s.closePane(tab.id, tab.focused);
-          } else if (id) s.closeTab(id);
+            requestClose(tab.id, tab.focused);
+          } else if (id) requestClose(id);
           break;
         }
         case 'splitPane': {

@@ -74,12 +74,14 @@ const both = (...keys: string[]) => ({ apple: keys, other: keys });
 export const SHORTCUTS: Shortcut[] = [
   // Tabs
   { id: 'newTab', label: 'shortcuts.newTab', group: 'tabs', scope: 'global', ...both('Mod+T') },
+  // Ctrl+O is "operate and get next" in bash and "save" in nano, so only ⌘O on Apple.
   {
     id: 'connect',
     label: 'shortcuts.connect',
     group: 'tabs',
     scope: 'global',
-    ...both('Mod+O', 'Mod+Shift+N'),
+    apple: ['Mod+O', 'Mod+Shift+N'],
+    other: ['Ctrl+Shift+N'],
   },
   {
     id: 'closeTab',

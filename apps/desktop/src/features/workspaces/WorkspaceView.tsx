@@ -13,7 +13,7 @@ import { useSaveWorkspace } from '@/lib/queries';
 import { useApp, type TerminalTab, type WorkspaceTab } from '@/stores/app';
 
 import { terminalRegistry } from '../terminal/registry';
-import { splitPane } from '../terminal/tabActions';
+import { requestClose, splitPane } from '../terminal/tabActions';
 import { TerminalSlot } from '../terminal/TerminalLayer';
 
 /** Grid dimensions for `n` panes (max 16), preferring wide layouts. */
@@ -191,7 +191,7 @@ export function WorkspaceView({ ws, active }: { ws: WorkspaceTab; active: boolea
                     <button
                       type="button"
                       aria-label={t('tabs.closePane', { title: p.title })}
-                      onClick={() => useApp.getState().closePane(ws.id, p.id)}
+                      onClick={() => requestClose(ws.id, p.id)}
                       className="text-subtle hover:text-text hover:bg-text/[0.1] flex size-5 items-center justify-center rounded"
                     >
                       <X className="size-3.5" />

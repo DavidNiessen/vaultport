@@ -109,9 +109,14 @@ export function highlightKeywords(term: Terminal, extra: Rule[] = []): void {
           foregroundColor: rule.color,
         });
         if (deco) decorations.push(deco);
+        else marker.dispose();
       }
     }
   }
-  while (decorations.length > MAX_DECORATIONS) decorations.shift()?.dispose();
+  while (decorations.length > MAX_DECORATIONS) {
+    const d = decorations.shift();
+    d?.dispose();
+    d?.marker.dispose();
+  }
   live.set(term, decorations);
 }

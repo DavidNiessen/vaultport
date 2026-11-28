@@ -19,6 +19,12 @@ const MAX_FROZEN = 3000;
 /** Without shell integration, colour only this long after a key press. */
 const TYPED_WINDOW_MS = 1500;
 
+/** Disposes a decoration and its marker (xterm keeps a marker alive on its own). */
+export function disposeDecoration(d: IDecoration): void {
+  d.dispose();
+  d.marker.dispose();
+}
+
 export interface InputHighlighter {
   /** Call after the user typed something. */
   noteTyping: () => void;
@@ -102,7 +108,7 @@ export function attachInputHighlight(
   let frame = 0;
 
   const clear = () => {
-    for (const d of live) d.dispose();
+    for (const d of live) disposeDecoration(d);
     live = [];
     lastKey = '';
   };
@@ -180,7 +186,7 @@ export function attachInputHighlight(
       live = [];
       lastKey = '';
       if (frozen.length > MAX_FROZEN) {
-        for (const d of frozen.splice(0, frozen.length - MAX_FROZEN)) d.dispose();
+        for (const d of frozen.splice(0, frozen.length - MAX_FROZEN)) disposeDecoration(d);
       }
     },
     clear,
@@ -188,7 +194,7 @@ export function attachInputHighlight(
       if (frame) cancelAnimationFrame(frame);
       sub.dispose();
       clear();
-      for (const d of frozen) d.dispose();
+      for (const d of frozen) disposeDecoration(d);
       frozen = [];
     },
   };
