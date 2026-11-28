@@ -310,6 +310,12 @@ impl BlockRecorder {
         self.integration
     }
 
+    /// The id the next command block will get.
+    #[must_use]
+    pub fn next_id(&self) -> u64 {
+        self.next_id
+    }
+
     /// Whether a command is running right now.
     #[must_use]
     pub fn is_running(&self) -> bool {

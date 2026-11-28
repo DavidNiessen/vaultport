@@ -124,6 +124,8 @@ Agents can see what happens in the terminals you have open — for example to ex
 - `read_terminal` returns the last commands of a terminal with their output (shortened in the middle when long), exit status and working directory. With [shell integration](/guide/terminal#shell-integration) Vaultport knows where each command starts and ends; without it, the agent gets the last lines of output.
 - `type_in_terminal` always asks you first and shows exactly what will be typed. Vaultport switches to the terminal so you can watch. Without `run`, the command waits on the prompt for you to review and press Enter.
 - Terminals are covered by the host scope: with **Hosts → Selected**, only terminals of the selected hosts are visible, and local shells, ad-hoc connections and serial consoles are hidden.
+- Reading or typing into a local shell, an ad-hoc connection or a serial console **always asks**, whatever **Ask before** says, because they are not saved hosts you scoped agents to. **Allow for this session** covers only the one terminal you approved.
+- `type_in_terminal` refuses while a command is running in that terminal (when Vaultport can tell, with shell integration), so the text cannot end up in a password prompt, an editor or a REPL. It clears whatever is on the prompt before typing.
 - Output is recorded in memory only while the terminal is open (the last 30 commands), and never stored.
 
 ## Approvals

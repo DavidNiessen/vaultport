@@ -768,8 +768,9 @@ impl AgentHandler {
                 if a.text.contains(['\n', '\r']) {
                     return Err("text must be a single line; use run to press Enter".into());
                 }
-                if a.text.chars().any(|c| c.is_control() && c != '\t') {
-                    return Err("text must not contain control characters".into());
+                // Tab would trigger the shell's own completion and change the line.
+                if a.text.chars().any(char::is_control) {
+                    return Err("text must not contain control characters or tabs".into());
                 }
                 if a.text.trim().is_empty() {
                     return Err("text is empty".into());
@@ -1157,9 +1158,21 @@ impl AgentHandler {
                 wait,
             } => {
                 let manager = self.app.state::<crate::sessions::SessionManager>();
-                let before = terminal.blocks.lock().blocks().back().map_or(0, |b| b.id);
+                let next = {
+                    let b = terminal.blocks.lock();
+                    // Typing into a running program (a password prompt, an editor, a REPL)
+                    // would hand it the agent's text.
+                    if b.is_running() {
+                        return Err("A command is running in this terminal. Wait for it to \
+                                    finish (see read_terminal) or ask the user."
+                            .into());
+                    }
+                    b.next_id()
+                };
                 let _ = self.app.emit(SHOW_SESSION_EVENT, terminal.id.clone());
-                let mut data = text.into_bytes();
+                // Start from an empty line: Ctrl+E (end of line), Ctrl+U (delete to its start).
+                let mut data = b"\x05\x15".to_vec();
+                data.extend_from_slice(text.as_bytes());
                 if run {
                     data.push(b'\r');
                 }
@@ -1188,7 +1201,7 @@ impl AgentHandler {
                         .blocks()
                         .iter()
                         .rev()
-                        .find(|b| b.id > before)
+                        .find(|b| b.id >= next)
                         .cloned();
                     if let Some(b) = done {
                         let (output, cut) = shorten(&b.output, MAX_TERMINAL_OUTPUT);
@@ -1314,9 +1327,21 @@ impl mcp_server::Handler for AgentHandler {
             }
         };
         let (host, summary, details) = Self::describe(&plan);
-        entry.host = host.map(label);
+        let terminal = match &plan {
+            Plan::ReadTerminal { terminal, .. } | Plan::TypeInTerminal { terminal, .. } => {
+                Some(terminal.clone())
+            }
+            _ => None,
+        };
+        entry.host = host
+            .map(label)
+            .or_else(|| terminal.as_ref().map(|t| t.info.label.clone()));
         entry.summary.clone_from(&summary);
-        let needs_approval = def.changes || settings.approval == ApprovalPolicy::Always;
+        // Local shells, ad-hoc connections and serial consoles are not saved hosts the user
+        // scoped agents to, so reading or typing into them always asks.
+        let unscoped_terminal = terminal.as_ref().is_some_and(|t| t.info.host_id.is_none());
+        let needs_approval =
+            def.changes || settings.approval == ApprovalPolicy::Always || unscoped_terminal;
         if needs_approval {
             let request = AgentApprovalRequest {
                 id: String::new(),
@@ -1327,7 +1352,10 @@ impl mcp_server::Handler for AgentHandler {
                 details,
                 destructive: def.destructive,
             };
-            let host_id = host.map(|h| h.id.to_string());
+            // "Allow for this session" covers this host, or this one terminal.
+            let host_id = host
+                .map(|h| h.id.to_string())
+                .or_else(|| terminal.as_ref().map(|t| format!("terminal:{}", t.id)));
             if !self
                 .state
                 .approve(&self.app, ctx.connection_id, request, host_id.as_deref())
