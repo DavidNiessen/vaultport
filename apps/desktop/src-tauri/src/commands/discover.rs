@@ -197,8 +197,10 @@ fn join(dir: &str, name: &str) -> String {
     format!("{}/{name}", dir.trim_end_matches('/'))
 }
 
-/// `dir` and its ancestors, closest first.
+/// `dir` and its ancestors, closest first. Windows paths (`C:\\Users\\me`) are walked with
+/// forward slashes, which the Windows file APIs accept too.
 fn ancestors(dir: &str) -> Vec<String> {
+    let dir = dir.replace('\\', "/");
     let mut out = vec![dir.trim_end_matches('/').to_owned()];
     if out[0].is_empty() {
         out[0] = "/".into();
@@ -459,6 +461,10 @@ mod tests {
         assert_eq!(ancestors("/a/b/"), ["/a/b", "/a", "/"]);
         assert_eq!(ancestors("/"), ["/"]);
         assert_eq!(parent("/a"), Some("/".into()));
+        assert_eq!(
+            ancestors("C:\\Users\\me"),
+            ["C:/Users/me", "C:/Users", "C:"]
+        );
         assert_eq!(join("/a/", "b"), "/a/b");
     }
 

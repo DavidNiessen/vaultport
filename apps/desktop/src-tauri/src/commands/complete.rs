@@ -658,7 +658,9 @@ pub async fn term_context(
     ) else {
         return Ok(TermContext::default());
     };
-    if !req.cwd.starts_with('/') || req.cwd.len() > 4096 {
+    let absolute = req.cwd.starts_with('/')
+        || (req.cwd.as_bytes().get(1) == Some(&b':') && req.cwd.as_bytes().get(2).is_some());
+    if !absolute || req.cwd.len() > 4096 {
         return Ok(TermContext::default());
     }
     let git_head = tokio::time::timeout(
