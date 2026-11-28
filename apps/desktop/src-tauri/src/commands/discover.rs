@@ -248,21 +248,40 @@ async fn names_under(fs: &dyn FileSystem, dir: &str, depth: usize) -> Vec<String
     out
 }
 
+/// The git directory of the repository containing `cwd` (following a `.git` file of a
+/// worktree or submodule).
+async fn git_dir(fs: &dyn FileSystem, cwd: &str) -> Option<String> {
+    let (path, kind) = find_up(fs, cwd, ".git").await?;
+    if kind == EntryKind::Dir {
+        return Some(path);
+    }
+    let text = read_text(fs, &path).await?;
+    let target = text.trim().strip_prefix("gitdir:")?.trim().to_owned();
+    Some(if target.starts_with('/') {
+        target
+    } else {
+        join(&parent(&path)?, &target)
+    })
+}
+
+/// The checked-out branch of the repository containing `cwd`, or the short commit id when
+/// HEAD is detached. `None` outside a repository.
+pub async fn git_head(fs: &dyn FileSystem, cwd: &str) -> Option<String> {
+    let dir = git_dir(fs, cwd).await?;
+    let head = read_text(fs, &join(&dir, "HEAD")).await?;
+    let head = head.trim();
+    match head.strip_prefix("ref: refs/heads/") {
+        Some(branch) => Some(branch.to_owned()),
+        None if head.len() >= 7 && head.chars().all(|c| c.is_ascii_hexdigit()) => {
+            Some(head[..7].to_owned())
+        }
+        None => None,
+    }
+}
+
 /// Reads the git directory of the repository containing `cwd`.
 async fn git_files(fs: &dyn FileSystem, cwd: &str) -> Option<GitFiles> {
-    let (path, kind) = find_up(fs, cwd, ".git").await?;
-    let git_dir = if kind == EntryKind::Dir {
-        path
-    } else {
-        // A worktree or submodule: `.git` is a file with `gitdir: <path>`.
-        let text = read_text(fs, &path).await?;
-        let target = text.trim().strip_prefix("gitdir:")?.trim().to_owned();
-        if target.starts_with('/') {
-            target
-        } else {
-            join(&parent(&path)?, &target)
-        }
-    };
+    let git_dir = git_dir(fs, cwd).await?;
     // Worktrees keep refs in the common directory.
     let common = match read_text(fs, &join(&git_dir, "commondir")).await {
         Some(c) if c.trim().starts_with('/') => c.trim().to_owned(),
@@ -482,6 +501,9 @@ mod tests {
                 .await
                 .is_empty()
         );
+        assert_eq!(git_head(&fs, &cwd).await.as_deref(), Some("main"));
+        std::fs::write(git.join("HEAD"), "0123456789abcdef\n").unwrap_or_default();
+        assert_eq!(git_head(&fs, &cwd).await.as_deref(), Some("0123456"));
         let _ = std::fs::remove_dir_all(&dir);
     }
 }

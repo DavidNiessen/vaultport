@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 import { describe, expect, it } from 'vitest';
 
+import { shortenHome } from './ContextBar';
 import { closestCommand, editDistance, fixCommandLine, isNotFound } from './didYouMean';
 
 const KNOWN = ['git', 'grep', 'docker', 'kubectl', 'python3', 'ls', 'sl', 'systemctl', 'gzip'];
@@ -29,5 +30,12 @@ describe('did you mean', () => {
     expect(isNotFound(127, '')).toBe(true);
     expect(isNotFound(1, 'bash: gti: command not found')).toBe(true);
     expect(isNotFound(1, 'error')).toBe(false);
+  });
+
+  it('shortens home directories', () => {
+    expect(shortenHome('/home/dana/src')).toBe('~/src');
+    expect(shortenHome('/Users/dana')).toBe('~');
+    expect(shortenHome('/root/x')).toBe('~/x');
+    expect(shortenHome('/homework')).toBe('/homework');
   });
 });

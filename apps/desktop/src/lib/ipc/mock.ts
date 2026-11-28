@@ -374,6 +374,7 @@ const handlers: Record<string, Handler> = {
   sync_list_targets: () => [],
   history_list: () => MOCK_HISTORY.map((command, i) => ({ command, count: 12 - i * 3 })),
   term_complete: mockTermComplete,
+  term_context: () => ({ gitHead: 'main' }),
   term_commands: () => ({ names: MOCK_COMMAND_NAMES, complete: true }),
   term_integration_bootstrap: () => ({
     start: ' true\r',

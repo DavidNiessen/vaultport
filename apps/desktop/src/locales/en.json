@@ -562,7 +562,9 @@
     "ruleColor": "Colour",
     "ruleCase": "Match case",
     "removeRule": "Remove rule",
-    "invalidPattern": "Invalid regular expression"
+    "invalidPattern": "Invalid regular expression",
+    "contextBar": "Context bar",
+    "contextBarHint": "Shows the working directory, git branch and the last command's status under the terminal."
   },
   "sftp": {
     "actions": "Actions",
@@ -836,7 +838,11 @@
       "enabled": "Command blocks are on for this {{shell}} session"
     },
     "didYouMean": "Did you mean",
-    "edit": "Edit"
+    "edit": "Edit",
+    "context": {
+      "copyPath": "Copy the path",
+      "ok": "OK"
+    }
   },
   "window": {
     "close": "Close",

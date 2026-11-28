@@ -623,6 +623,54 @@ pub fn term_commands(
     }
 }
 
+#[derive(Debug, Clone, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct TermContextRequest {
+    pub host_id: Option<String>,
+    pub session_id: Option<String>,
+    pub paths: PathSource,
+    /// The shell's working directory (from OSC 7).
+    pub cwd: String,
+}
+
+/// What the terminal's context bar shows besides the directory.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct TermContext {
+    /// The git branch (or short commit id when detached) of the working directory.
+    pub git_head: Option<String>,
+}
+
+/// Context for the terminal's status bar, read from the machine the shell runs on.
+#[tauri::command]
+#[specta::specta]
+pub async fn term_context(
+    completions: State<'_, CompletionState>,
+    files: State<'_, FilesState>,
+    req: TermContextRequest,
+) -> CmdResult<TermContext> {
+    let Some(m) = machine(
+        &completions,
+        &files,
+        req.paths,
+        req.session_id.as_deref(),
+        req.host_id.as_deref(),
+    ) else {
+        return Ok(TermContext::default());
+    };
+    if !req.cwd.starts_with('/') || req.cwd.len() > 4096 {
+        return Ok(TermContext::default());
+    }
+    let git_head = tokio::time::timeout(
+        discover::VALUES_TIMEOUT,
+        discover::git_head(m.fs.as_ref(), &req.cwd),
+    )
+    .await
+    .ok()
+    .flatten();
+    Ok(TermContext { git_head })
+}
+
 /// Marker the bootstrap line prints (as `OSC 633 ; P ; VaultportReady=<shell>`) once the
 /// remote shell is ready to read the script without echoing it.
 pub const INTEGRATION_READY: &str = "VaultportReady";

@@ -108,6 +108,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             logs::history_list,
             complete::term_complete,
             complete::term_commands,
+            complete::term_context,
             complete::term_integration_bootstrap,
             files::fs_list,
             files::fs_mkdir,

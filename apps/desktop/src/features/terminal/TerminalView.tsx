@@ -47,6 +47,7 @@ import {
 import { BlockMenu, type BlockMenuView } from './BlockMenu';
 import { attachBlocks, blockText, formatDuration, type Block, type BlockTracker } from './blocks';
 import { Composer } from './Composer';
+import { ContextBar, type TermContextView } from './ContextBar';
 import { closestCommand, fixCommandLine, isNotFound } from './didYouMean';
 import { HistorySearch } from './HistorySearch';
 import { attachInputHighlight, solidColor, type InputHighlighter } from './inputHighlight';
@@ -101,6 +102,9 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [blockMenu, setBlockMenu] = useState<BlockMenuView | null>(null);
   const [sticky, setSticky] = useState<{ id: number; command: string } | null>(null);
+  const [context, setContext] = useState<TermContextView | null>(null);
+  /** Refreshes the context bar (directory changed, a command finished). */
+  const contextRef = useRef<() => void>(() => undefined);
   /** A corrected command line after "command not found". */
   const [didYouMean, setDidYouMean] = useState<string | null>(null);
   const blocksRef = useRef<BlockTracker | null>(null);
@@ -311,6 +315,20 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       if (data.startsWith('C') || data.startsWith('A')) highlighter.freeze();
       return false;
     });
+    // Directory changes (OSC 7 / 633 P) refresh the context bar once the handlers above ran.
+    let contextTimer: ReturnType<typeof setTimeout> | null = null;
+    const scheduleContext = () => {
+      if (contextTimer) clearTimeout(contextTimer);
+      contextTimer = setTimeout(() => contextRef.current(), 120);
+    };
+    term.parser.registerOscHandler(7, () => {
+      scheduleContext();
+      return false;
+    });
+    term.parser.registerOscHandler(633, (data) => {
+      if (data.startsWith('P;Cwd=')) scheduleContext();
+      return false;
+    });
     const updateSticky = () => {
       const b = settingsRef.current.commandBlocks ? blocks.stickyAt() : null;
       setSticky((cur) =>
@@ -517,7 +535,32 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     }
   }, [tab]);
 
+  const refreshContext = async (last?: TermContextView['last']) => {
+    const cwd = acRef.current?.cwd() ?? null;
+    if (!cwd || !settingsRef.current.contextBar) {
+      setContext(null);
+      return;
+    }
+    const res = await commands
+      .termContext({
+        hostId: tab.hostId ?? null,
+        sessionId: sessionRef.current,
+        paths: pathSource(tab),
+        cwd,
+      })
+      .catch(() => null);
+    setContext((cur) => ({
+      cwd,
+      gitHead: res?.gitHead ?? null,
+      last: last === undefined ? (cur?.last ?? null) : last,
+    }));
+  };
+
   const onBlockFinished = (b: Block) => {
+    void refreshContext({
+      exit: b.exit,
+      ms: b.startedAt !== null && b.finishedAt !== null ? b.finishedAt - b.startedAt : null,
+    });
     const first = b.command.trim().split(/\s+/)[0];
     if (first && b.exit === 0) knownRef.current?.add(first);
     const known = knownRef.current;
@@ -632,6 +675,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   useEffect(() => {
     runActionRef.current = runAction;
     blockFinishedRef.current = onBlockFinished;
+    contextRef.current = () => void refreshContext();
   });
 
   // Live theme / font updates.
@@ -1012,6 +1056,14 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
             {t('terminal.connecting', { target: tab.title })}
           </div>
         </div>
+      ) : null}
+
+      {/* Space is kept from the start so the terminal does not resize when the bar fills in. */}
+      {settings.contextBar &&
+      bp !== 'phone' &&
+      tab.protocol !== 'serial' &&
+      tab.protocol !== 'telnet' ? (
+        <ContextBar view={context} />
       ) : null}
 
       {(tab.status === 'disconnected' || tab.status === 'error') && (

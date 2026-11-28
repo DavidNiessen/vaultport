@@ -311,6 +311,7 @@ function Terminal() {
           </Select>
         </Row>
         {toggle('commandBlocks', t('settings.commandBlocks'), t('settings.commandBlocksHint'))}
+        {toggle('contextBar', t('settings.contextBar'), t('settings.contextBarHint'))}
         <Row label={t('settings.notifyAfter')} description={t('settings.notifyAfterHint')}>
           <span className="flex items-center gap-2">
             <Input

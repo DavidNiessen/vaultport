@@ -36,6 +36,8 @@ export interface TerminalSettings {
   sshIntegration: 'off' | 'auto';
   /** `# what you want` at the prompt asks the local AI (when it is on). */
   aiHashPrompt: boolean;
+  /** Working directory, git branch and last exit status under the terminal. */
+  contextBar: boolean;
   /** Extra output highlighting rules. */
   highlightRules: HighlightRule[];
 }
@@ -78,5 +80,6 @@ export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
   notifyAfterSeconds: 10,
   sshIntegration: 'off',
   aiHashPrompt: true,
+  contextBar: true,
   highlightRules: [],
 };

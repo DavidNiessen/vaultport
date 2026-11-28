@@ -94,6 +94,11 @@ test('shows commands as blocks, searches history and suggests inline', async ({
   await page.keyboard.type('false\r');
   const badge = page.locator('.vp-block-badge.vp-fail').first();
   await expect(badge).toContainText('✗ 1');
+  // The context bar shows the directory, the git branch and the last exit status.
+  const bar = page.getByTestId('context-bar');
+  await expect(bar).toContainText('~');
+  await expect(bar).toContainText('main');
+  await expect(bar).toContainText('Exit status 1');
   await badge.click();
   const menu = page.getByTestId('block-menu');
   await expect(menu.getByRole('menuitem', { name: 'Run again' })).toBeVisible();

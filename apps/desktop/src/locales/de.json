@@ -562,7 +562,9 @@
     "ruleColor": "Farbe",
     "ruleCase": "Groß-/Kleinschreibung beachten",
     "removeRule": "Regel entfernen",
-    "invalidPattern": "Ungültiger regulärer Ausdruck"
+    "invalidPattern": "Ungültiger regulärer Ausdruck",
+    "contextBar": "Kontextleiste",
+    "contextBarHint": "Zeigt Arbeitsverzeichnis, Git-Branch und den Status des letzten Befehls unter dem Terminal."
   },
   "sftp": {
     "actions": "Aktionen",
@@ -836,7 +838,11 @@
       "enabled": "Befehlsblöcke sind für diese {{shell}}-Sitzung aktiv"
     },
     "didYouMean": "Meintest du",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "context": {
+      "copyPath": "Pfad kopieren",
+      "ok": "OK"
+    }
   },
   "window": {
     "close": "Schließen",

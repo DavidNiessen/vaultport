@@ -137,6 +137,8 @@ export const commands = {
 	termComplete: (req: CompleteRequest_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<CompletionList_Serialize>("term_complete", { req }, options),
 	/**  The commands found on the machine of a terminal. */
 	termCommands: (req: KnownCommandsRequest_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<KnownCommands>("term_commands", { req }, options),
+	/**  Context for the terminal's status bar, read from the machine the shell runs on. */
+	termContext: (req: TermContextRequest_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<TermContext_Serialize>("term_context", { req }, options),
 	/**  The bootstrap for loading shell integration into a running bash or zsh. */
 	termIntegrationBootstrap: (options?: InvokeOptions) => __TAURI_INVOKE<IntegrationBootstrap>("term_integration_bootstrap", undefined, options),
 	/**  Lists a directory (`None` = home directory). */
@@ -1401,6 +1403,39 @@ export type TelnetConfig_Serialize = {
 	port: number | null,
 	username: string | null,
 	password: SecretRef | null,
+};
+
+/**  What the terminal's context bar shows besides the directory. */
+export type TermContext = TermContext_Serialize | TermContext_Deserialize;
+
+export type TermContextRequest = TermContextRequest_Serialize | TermContextRequest_Deserialize;
+
+export type TermContextRequest_Deserialize = {
+	hostId?: string | null,
+	sessionId?: string | null,
+	paths: PathSource,
+	/**  The shell's working directory (from OSC 7). */
+	cwd: string,
+};
+
+export type TermContextRequest_Serialize = {
+	hostId: string | null,
+	sessionId: string | null,
+	paths: PathSource,
+	/**  The shell's working directory (from OSC 7). */
+	cwd: string,
+};
+
+/**  What the terminal's context bar shows besides the directory. */
+export type TermContext_Deserialize = {
+	/**  The git branch (or short commit id when detached) of the working directory. */
+	gitHead?: string | null,
+};
+
+/**  What the terminal's context bar shows besides the directory. */
+export type TermContext_Serialize = {
+	/**  The git branch (or short commit id when detached) of the working directory. */
+	gitHead: string | null,
 };
 
 /**  Terminal appearance and behaviour. */
