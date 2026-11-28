@@ -41,6 +41,55 @@ type PromptMap = Arc<Mutex<HashMap<String, oneshot::Sender<PromptResponse>>>>;
 struct Handle {
     input: mpsc::UnboundedSender<Input>,
     prompts: PromptMap,
+    info: SessionInfo,
+    blocks: Blocks,
+}
+
+/// Command blocks of a session, recorded from its output (see [`term_intel::BlockRecorder`]).
+pub type Blocks = Arc<Mutex<term_intel::BlockRecorder>>;
+
+/// What a session is connected to, for AI agents and the local AI.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct SessionInfo {
+    /// Tab-like label: the host's label, `user@host`, "Local" or the serial port.
+    pub label: String,
+    /// The saved host, if any.
+    pub host_id: Option<String>,
+    /// `ssh`, `local`, `quick`, `serial`.
+    pub kind: &'static str,
+    /// Unix milliseconds.
+    pub opened_at: i64,
+}
+
+impl SessionInfo {
+    /// Describes `target` (the label of a saved host is looked up by the caller).
+    pub fn for_target(target: &SessionTarget, host_label: Option<String>) -> Self {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| i64::try_from(d.as_millis()).unwrap_or(i64::MAX));
+        let (label, host_id, kind) = match target {
+            SessionTarget::Host { host_id } => (
+                host_label.unwrap_or_else(|| host_id.clone()),
+                Some(host_id.clone()),
+                "ssh",
+            ),
+            SessionTarget::Quick { host, username, .. } => (
+                username
+                    .as_ref()
+                    .map_or_else(|| host.clone(), |u| format!("{u}@{host}")),
+                None,
+                "quick",
+            ),
+            SessionTarget::Local { .. } => ("Local".to_owned(), None, "local"),
+            SessionTarget::Serial { path, .. } => (path.clone(), None, "serial"),
+        };
+        Self {
+            label,
+            host_id,
+            kind,
+            opened_at: now,
+        }
+    }
 }
 
 /// Registry of live sessions.
@@ -59,10 +108,11 @@ pub struct EventSink {
     channel: Channel<SessionEvent>,
     output: mpsc::UnboundedSender<Vec<u8>>,
     prompts: PromptMap,
+    blocks: Blocks,
 }
 
 impl EventSink {
-    fn new(channel: Channel<SessionEvent>, prompts: PromptMap) -> Self {
+    fn new(channel: Channel<SessionEvent>, prompts: PromptMap, blocks: Blocks) -> Self {
         let (tx, mut rx) = mpsc::unbounded_channel::<Vec<u8>>();
         let out_channel = channel.clone();
         tauri::async_runtime::spawn(async move {
@@ -88,12 +138,14 @@ impl EventSink {
             channel,
             output: tx,
             prompts,
+            blocks,
         }
     }
 
     /// Queues terminal output.
     pub fn output(&self, data: &[u8]) {
         if !data.is_empty() {
+            self.blocks.lock().feed(data, now_ms());
             let _ = self.output.send(data.to_vec());
         }
     }
@@ -128,15 +180,43 @@ impl SessionManager {
     pub fn register(
         &self,
         channel: Channel<SessionEvent>,
+        info: SessionInfo,
     ) -> (String, mpsc::UnboundedReceiver<Input>, EventSink) {
         let id = uuid::Uuid::now_v7().to_string();
         let (tx, rx) = mpsc::unbounded_channel();
         let prompts: PromptMap = Arc::default();
-        let sink = EventSink::new(channel, prompts.clone());
+        let blocks: Blocks = Arc::default();
+        let sink = EventSink::new(channel, prompts.clone(), blocks.clone());
+        self.sessions.lock().insert(
+            id.clone(),
+            Handle {
+                input: tx,
+                prompts,
+                info,
+                blocks,
+            },
+        );
+        (id, rx, sink)
+    }
+
+    /// Open sessions with what they are connected to, oldest first.
+    pub fn list(&self) -> Vec<(String, SessionInfo, Blocks)> {
+        let mut v: Vec<_> = self
+            .sessions
+            .lock()
+            .iter()
+            .map(|(id, h)| (id.clone(), h.info.clone(), h.blocks.clone()))
+            .collect();
+        v.sort_by_key(|(_, i, _)| i.opened_at);
+        v
+    }
+
+    /// The session `id` with its info and blocks.
+    pub fn get(&self, id: &str) -> Option<(SessionInfo, Blocks)> {
         self.sessions
             .lock()
-            .insert(id.clone(), Handle { input: tx, prompts });
-        (id, rx, sink)
+            .get(id)
+            .map(|h| (h.info.clone(), h.blocks.clone()))
     }
 
     pub fn remove(&self, id: &str) {
@@ -230,11 +310,20 @@ fn launch(
     }
 }
 
+fn now_ms() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| i64::try_from(d.as_millis()).unwrap_or(i64::MAX))
+}
+
 /// Removes a finished session from the manager.
 pub fn finish(app: &tauri::AppHandle, id: &str) {
     use tauri::Manager;
     if let Some(m) = app.try_state::<SessionManager>() {
         m.remove(id);
+    }
+    if let Some(c) = app.try_state::<crate::commands::complete::CompletionState>() {
+        c.detach(id);
     }
     crate::mobile::update_keep_alive(app);
 }

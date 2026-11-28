@@ -247,8 +247,11 @@ function AiPrompt({ tabId }: { tabId: string }) {
   const generate = async () => {
     setBusy(true);
     try {
-      const selection = terminalRegistry.get(tabId)?.term.getSelection() ?? '';
-      setResult(await commands.aiGenerateCommand(prompt, tabId, selection || null));
+      const handle = terminalRegistry.get(tabId);
+      const selection = handle?.term.getSelection() ?? '';
+      setResult(
+        await commands.aiGenerateCommand(prompt, handle?.sessionId() ?? null, selection || null),
+      );
     } catch (e) {
       toast.error(errorMessage(e));
     } finally {

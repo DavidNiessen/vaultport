@@ -42,7 +42,7 @@ export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
   osc52: 'ask',
   termType: 'xterm-256color',
   localShell: '',
-  shellIntegration: false,
+  shellIntegration: true,
   autocomplete: true,
   importHistory: false,
   detectOs: true,

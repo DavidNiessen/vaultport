@@ -15,6 +15,7 @@ use specta::Type;
 use tauri::{AppHandle, Manager, State};
 use term_intel::{Completer, Completion, PathEntry, SuggestionKind};
 
+use crate::commands::discover;
 use crate::commands::files::FilesState;
 use crate::commands::logs::history_doc;
 use crate::error::CmdResult;
@@ -30,6 +31,19 @@ const MAX_ENTRIES: usize = 2000;
 const MAX_RECENT: usize = 500;
 /// Longest input line that is completed.
 const MAX_LINE: usize = 4096;
+/// How long the commands found on a machine are trusted.
+const COMMANDS_MAX_AGE: Duration = Duration::from_secs(300);
+/// How long generated values (branches, scripts, …) are reused.
+const VALUES_MAX_AGE: Duration = Duration::from_secs(8);
+
+type Values = Arc<Vec<term_intel::generators::Value>>;
+
+/// Commands found on one machine.
+struct Discovered {
+    at: Instant,
+    /// `None` while the listing is still running.
+    commands: Option<Arc<Vec<term_intel::KnownCommand>>>,
+}
 
 struct Entry {
     completer: Completer,
@@ -42,6 +56,12 @@ pub struct CompletionState {
     cache: Mutex<HashMap<String, Entry>>,
     /// Commands run in this app session that the vault history may not have yet.
     recent: Mutex<HashMap<String, Vec<(String, i64)>>>,
+    /// SFTP channels on the SSH connection of a terminal session, by session id.
+    session_fs: Mutex<HashMap<String, Arc<dyn sftp_engine::FileSystem>>>,
+    /// Commands found per machine (see [`machine_key`]).
+    discovered: Mutex<HashMap<String, Discovered>>,
+    /// Recently generated argument values, by machine, directory and kind.
+    values: Mutex<HashMap<String, (Instant, Values)>>,
 }
 
 fn key(host_id: Option<core_model::HostId>) -> String {
@@ -58,6 +78,97 @@ impl CompletionState {
     pub fn clear(&self) {
         self.cache.lock().clear();
         self.recent.lock().clear();
+        self.session_fs.lock().clear();
+        self.discovered.lock().clear();
+        self.values.lock().clear();
+    }
+
+    /// Makes the files of a remote terminal session available to completion (an SFTP channel
+    /// on the session's own connection, so no second login is needed).
+    pub fn attach(&self, session_id: &str, fs: Arc<dyn sftp_engine::FileSystem>) {
+        self.session_fs.lock().insert(session_id.to_owned(), fs);
+    }
+
+    /// Forgets a session that ended.
+    pub fn detach(&self, session_id: &str) {
+        if self.session_fs.lock().remove(session_id).is_some() {
+            let key = format!("session:{session_id}");
+            self.discovered.lock().remove(&key);
+            self.values
+                .lock()
+                .retain(|k, _| !k.starts_with(&format!("{key}\0")));
+        }
+    }
+
+    /// The commands found on the machine `key`, starting a listing in the background when
+    /// there is none yet (the first requests then go without).
+    fn commands(
+        &self,
+        key: &str,
+        fs: &Arc<dyn sftp_engine::FileSystem>,
+        local: bool,
+        app: &AppHandle,
+    ) -> Option<Arc<Vec<term_intel::KnownCommand>>> {
+        let mut map = self.discovered.lock();
+        if let Some(d) = map.get(key)
+            && (d.at.elapsed() < COMMANDS_MAX_AGE || d.commands.is_none())
+        {
+            return d.commands.clone();
+        }
+        let stale = map.get(key).and_then(|d| d.commands.clone());
+        map.insert(
+            key.to_owned(),
+            Discovered {
+                at: Instant::now(),
+                commands: stale.clone(),
+            },
+        );
+        drop(map);
+        let (fs, key, app) = (fs.clone(), key.to_owned(), app.clone());
+        tauri::async_runtime::spawn(async move {
+            let found = discover::commands(fs, local).await;
+            app.state::<CompletionState>().discovered.lock().insert(
+                key,
+                Discovered {
+                    at: Instant::now(),
+                    commands: Some(Arc::new(found)),
+                },
+            );
+        });
+        stale
+    }
+
+    async fn values(
+        &self,
+        key: &str,
+        fs: &dyn sftp_engine::FileSystem,
+        cwd: Option<&str>,
+        kind: term_intel::ArgKind,
+        path: &[String],
+    ) -> Arc<Vec<term_intel::generators::Value>> {
+        let cache_key = format!(
+            "{key}\0{}\0{kind:?}\0{}",
+            cwd.unwrap_or_default(),
+            path.first().map(String::as_str).unwrap_or_default()
+        );
+        if let Some((at, v)) = self.values.lock().get(&cache_key)
+            && at.elapsed() < VALUES_MAX_AGE
+        {
+            return v.clone();
+        }
+        let found = tokio::time::timeout(
+            discover::VALUES_TIMEOUT,
+            discover::values(fs, cwd, kind, path),
+        )
+        .await
+        .unwrap_or_default();
+        let found = Arc::new(found);
+        let mut map = self.values.lock();
+        if map.len() > 256 {
+            map.clear();
+        }
+        map.insert(cache_key, (Instant::now(), found.clone()));
+        found
     }
 
     /// Records a command that just ran so it is suggested right away.
@@ -151,6 +262,9 @@ pub struct CompleteRequest {
     /// The shell's working directory (from OSC 7), for relative paths.
     pub cwd: Option<String>,
     pub paths: PathSource,
+    /// The terminal session, so remote files are read on its own connection.
+    #[serde(default)]
+    pub session_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
@@ -262,10 +376,77 @@ fn resolve_dir(dir: &str, cwd: Option<&str>, home: Option<&str>) -> Option<Strin
     cwd.filter(|c| c.starts_with('/')).map(|c| join(c, dir))
 }
 
+/// The machine a request is about and how to read its files.
+struct Machine {
+    key: String,
+    fs: Arc<dyn sftp_engine::FileSystem>,
+    local: bool,
+}
+
+fn machine(
+    completions: &CompletionState,
+    files: &FilesState,
+    paths: PathSource,
+    session_id: Option<&str>,
+    host_id: Option<&str>,
+) -> Option<Machine> {
+    match paths {
+        PathSource::None => None,
+        PathSource::Local => Some(Machine {
+            key: "local".into(),
+            fs: Arc::new(sftp_engine::Local),
+            local: true,
+        }),
+        PathSource::Remote => {
+            if let Some(sid) = session_id
+                && let Some(fs) = completions.session_fs.lock().get(sid).cloned()
+            {
+                return Some(Machine {
+                    key: format!("session:{sid}"),
+                    fs,
+                    local: false,
+                });
+            }
+            let h = host_id?;
+            files.cached(h).map(|fs| Machine {
+                key: format!("host:{h}"),
+                fs,
+                local: false,
+            })
+        }
+    }
+}
+
+/// Environment variable names of this app's process (values are left out: they may hold
+/// secrets and are not needed to complete a name).
+fn local_env_names() -> Vec<String> {
+    std::env::vars_os()
+        .filter_map(|(k, _)| k.into_string().ok())
+        .collect()
+}
+
+/// Saved hosts as values for `ssh <host>` and similar.
+fn vault_hosts(state: &AppState) -> Vec<term_intel::generators::Value> {
+    state
+        .with_vault(|v| Ok(v.list::<core_model::Host>()?))
+        .unwrap_or_default()
+        .into_iter()
+        .map(|h| term_intel::generators::Value {
+            value: h.address.clone(),
+            description: Some(if h.label.is_empty() {
+                "saved host".to_owned()
+            } else {
+                format!("saved host · {}", h.label)
+            }),
+        })
+        .collect()
+}
+
 /// Suggestions for the input line at the prompt.
 #[tauri::command]
 #[specta::specta]
 pub async fn term_complete(
+    app: AppHandle,
     state: State<'_, AppState>,
     completions: State<'_, CompletionState>,
     files: State<'_, FilesState>,
@@ -279,49 +460,204 @@ pub async fn term_complete(
         .as_deref()
         .and_then(|h| uuid::Uuid::parse_str(h).ok())
         .map(core_model::HostId);
-    let completer = completions.completer(&state, host_id)?;
+    let mut completer = completions.completer(&state, host_id)?;
+    let machine = machine(
+        &completions,
+        &files,
+        req.paths,
+        req.session_id.as_deref(),
+        req.host_id.as_deref(),
+    );
+    if let Some(m) = &machine {
+        if let Some(found) = completions.commands(&m.key, &m.fs, m.local, &app) {
+            completer.set_commands(found.iter().cloned());
+        }
+        if m.local {
+            let names = local_env_names();
+            completer.set_environment(names.iter().map(|n| (n.as_str(), None)));
+        }
+    }
     let line = req.line;
     let cursor = byte_offset(&line, req.cursor);
     let now = now_secs();
     let mut completion = completer.complete(&line, cursor, now);
 
-    if let Some(needs) = completion.needs_paths.clone() {
-        let fs: Option<Arc<dyn sftp_engine::FileSystem>> = match req.paths {
-            PathSource::None => None,
-            PathSource::Local => Some(Arc::new(sftp_engine::Local)),
-            PathSource::Remote => req.host_id.as_deref().and_then(|h| files.cached(h)),
-        };
-        if let Some(fs) = fs {
-            let listed = tokio::time::timeout(LIST_TIMEOUT, async {
-                let home = if needs.dir.starts_with('~') {
-                    fs.home().await.ok()
-                } else {
-                    None
-                };
-                let dir = resolve_dir(&needs.dir, req.cwd.as_deref(), home.as_deref())?;
-                fs.list(&dir).await.ok()
-            })
-            .await
-            .ok()
-            .flatten();
-            if let Some(entries) = listed {
-                let entries: Vec<PathEntry> = entries
-                    .into_iter()
-                    .filter(|e| {
-                        !needs.directories_only || matches!(e.kind, sftp_engine::EntryKind::Dir)
-                    })
-                    .take(MAX_ENTRIES)
-                    .map(|e| PathEntry {
-                        is_dir: matches!(e.kind, sftp_engine::EntryKind::Dir),
-                        name: e.name,
-                    })
-                    .collect();
-                completion =
-                    completer.complete_with_entries(&line, cursor, now, &needs.dir, &entries);
+    if let Some(needs) = completion.needs_paths.clone()
+        && let Some(m) = &machine
+    {
+        let fs = m.fs.clone();
+        let listed = tokio::time::timeout(LIST_TIMEOUT, async {
+            let home = if needs.dir.starts_with('~') {
+                fs.home().await.ok()
+            } else {
+                None
+            };
+            let dir = resolve_dir(&needs.dir, req.cwd.as_deref(), home.as_deref())?;
+            fs.list(&dir).await.ok()
+        })
+        .await
+        .ok()
+        .flatten();
+        if let Some(entries) = listed {
+            let entries: Vec<PathEntry> = entries
+                .into_iter()
+                .filter(|e| {
+                    !needs.directories_only || matches!(e.kind, sftp_engine::EntryKind::Dir)
+                })
+                .take(MAX_ENTRIES)
+                .map(|e| PathEntry {
+                    is_dir: matches!(e.kind, sftp_engine::EntryKind::Dir),
+                    name: e.name,
+                })
+                .collect();
+            let path = std::mem::take(&mut completion.command_path);
+            completion = completer.complete_with_entries(&line, cursor, now, &needs.dir, &entries);
+            if completion.command_path.is_empty() {
+                completion.command_path = path;
             }
         }
     }
+
+    if let Some(kind) = completion.expected {
+        let mut values: Vec<term_intel::generators::Value> = Vec::new();
+        if let Some(m) = &machine {
+            let generated = completions
+                .values(
+                    &m.key,
+                    m.fs.as_ref(),
+                    req.cwd.as_deref(),
+                    kind,
+                    &completion.command_path,
+                )
+                .await;
+            values.extend(generated.iter().cloned());
+        } else if kind == term_intel::ArgKind::Signal {
+            values.extend(term_intel::generators::signals());
+        }
+        if kind == term_intel::ArgKind::Host {
+            values.extend(vault_hosts(&state));
+        }
+        if !values.is_empty() {
+            completion.add_described(
+                values
+                    .iter()
+                    .map(|v| (v.value.as_str(), v.description.as_deref())),
+            );
+        }
+    }
     Ok(to_list(&line, cursor, completion))
+}
+
+/// Names of the commands that exist on the machine of a terminal (for syntax highlighting:
+/// a command that is neither here nor a function/alias is shown as unknown).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct KnownCommands {
+    /// Sorted. Empty while the machine is still being searched.
+    pub names: Vec<String>,
+    /// The search finished (an empty list then really means nothing was found).
+    pub complete: bool,
+}
+
+#[derive(Debug, Clone, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct KnownCommandsRequest {
+    pub host_id: Option<String>,
+    pub session_id: Option<String>,
+    pub paths: PathSource,
+}
+
+/// The commands found on the machine of a terminal.
+#[tauri::command]
+#[specta::specta]
+pub fn term_commands(
+    app: AppHandle,
+    completions: State<'_, CompletionState>,
+    files: State<'_, FilesState>,
+    req: KnownCommandsRequest,
+) -> KnownCommands {
+    let Some(m) = machine(
+        &completions,
+        &files,
+        req.paths,
+        req.session_id.as_deref(),
+        req.host_id.as_deref(),
+    ) else {
+        return KnownCommands::default();
+    };
+    match completions.commands(&m.key, &m.fs, m.local, &app) {
+        Some(found) => {
+            let mut names: Vec<String> = found.iter().map(|c| c.name.clone()).collect();
+            names.extend(
+                term_intel::SpecSet::builtin()
+                    .names()
+                    .into_iter()
+                    .filter(|(_, s)| s.wrapper)
+                    .map(|(n, _)| n.to_owned()),
+            );
+            names.sort();
+            names.dedup();
+            KnownCommands {
+                names,
+                complete: true,
+            }
+        }
+        None => KnownCommands::default(),
+    }
+}
+
+/// Marker the bootstrap line prints (as `OSC 633 ; P ; VaultportReady=<shell>`) once the
+/// remote shell is ready to read the script without echoing it.
+pub const INTEGRATION_READY: &str = "VaultportReady";
+/// Base64 characters per line sent to the remote shell (well below the 1024-byte line limit
+/// of a terminal in canonical mode on macOS).
+const BOOTSTRAP_CHUNK: usize = 512;
+
+/// How to load shell integration into a shell that is already running (e.g. over SSH),
+/// without editing its dotfiles: the UI types [`Self::start`]; the shell turns echo off,
+/// reports which shell it is and reads lines until a lone `.`; the UI then sends the chunks
+/// for that shell, which are decoded and evaluated.
+#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct IntegrationBootstrap {
+    /// The line to type first (starts with a space so most shells keep it out of history).
+    pub start: String,
+    /// The marker reported back, see [`INTEGRATION_READY`].
+    pub ready: String,
+    /// Base64 lines of the bash script.
+    pub bash: Vec<String>,
+    /// Base64 lines of the zsh script.
+    pub zsh: Vec<String>,
+}
+
+fn chunks(script: &str) -> Vec<String> {
+    use base64::Engine as _;
+    let b64 = base64::engine::general_purpose::STANDARD.encode(script);
+    b64.as_bytes()
+        .chunks(BOOTSTRAP_CHUNK)
+        .map(|c| String::from_utf8_lossy(c).into_owned())
+        .collect()
+}
+
+/// The bootstrap for loading shell integration into a running bash or zsh.
+#[tauri::command]
+#[specta::specta]
+pub fn term_integration_bootstrap() -> IntegrationBootstrap {
+    let start = format!(
+        " stty -echo 2>/dev/null; printf '\\033]633;P;{INTEGRATION_READY}=%s\\007' \
+         \"${{ZSH_VERSION:+zsh}}${{BASH_VERSION:+bash}}\"; __vp=; \
+         while IFS= read -r __vp_l && [ \"$__vp_l\" != . ]; do __vp=\"$__vp$__vp_l\"; done; \
+         stty echo 2>/dev/null; export {var}=1; \
+         eval \"$(printf %s \"$__vp\" | base64 -d 2>/dev/null || printf %s \"$__vp\" | base64 -D)\"; \
+         unset __vp __vp_l\r",
+        var = term_intel::scripts::ENABLE_VAR,
+    );
+    IntegrationBootstrap {
+        start,
+        ready: INTEGRATION_READY.to_owned(),
+        bash: chunks(term_intel::scripts::BASH),
+        zsh: chunks(term_intel::scripts::ZSH),
+    }
 }
 
 /// Rebuilds completers whenever the vault reports a change (history, snippets, sync).
@@ -409,6 +745,27 @@ mod tests {
         assert_eq!(resolve_dir("src/", None, None), None);
         assert_eq!(resolve_dir("~bob/", None, Some("/home/u")), None);
         assert_eq!(resolve_dir("src/", Some("relative"), None), None);
+    }
+
+    #[test]
+    fn bootstrap_round_trips_the_scripts() {
+        use base64::Engine as _;
+        let b = term_integration_bootstrap();
+        assert!(b.start.starts_with(' '));
+        assert!(b.start.ends_with('\r'));
+        assert_eq!(b.start.matches('\r').count(), 1);
+        assert!(!b.start.contains('\n'));
+        assert!(b.start.contains("VaultportReady=%s"));
+        for (lines, script) in [
+            (&b.bash, term_intel::scripts::BASH),
+            (&b.zsh, term_intel::scripts::ZSH),
+        ] {
+            assert!(lines.iter().all(|l| l.len() <= BOOTSTRAP_CHUNK && l != "."));
+            let decoded = base64::engine::general_purpose::STANDARD
+                .decode(lines.concat())
+                .unwrap_or_default();
+            assert_eq!(String::from_utf8_lossy(&decoded), script);
+        }
     }
 
     #[test]

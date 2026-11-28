@@ -189,24 +189,52 @@ fn risk(command: &str) -> String {
     .to_owned()
 }
 
-/// Generates one shell command for a natural-language request. Never executes anything.
-#[tauri::command]
-#[specta::specta]
-pub async fn ai_generate_command(
-    ai: State<'_, AiManager>,
-    prompt: String,
-    tab_id: String,
-    selection: Option<String>,
-) -> CmdResult<AiSuggestion> {
-    let _ = tab_id;
-    let engine = engine(&ai).await?;
-    let request = local_ai::GenerateRequest {
-        prompt,
-        context: CommandContext {
-            selection: selection.filter(|s| !s.trim().is_empty()),
-            ..CommandContext::default()
-        },
+/// Context about a terminal session for the model: its host's OS, the working directory and
+/// the most recent commands.
+fn session_context(app: &tauri::AppHandle, session_id: Option<&str>) -> CommandContext {
+    use tauri::Manager;
+    let mut ctx = CommandContext::default();
+    let Some((info, blocks)) =
+        session_id.and_then(|id| app.state::<crate::sessions::SessionManager>().get(id))
+    else {
+        return ctx;
     };
+    {
+        let b = blocks.lock();
+        ctx.cwd = b.cwd().map(str::to_owned);
+        ctx.recent_commands = b
+            .recent(8)
+            .into_iter()
+            .map(|x| x.command)
+            .filter(|c| !c.trim().is_empty())
+            .collect();
+    }
+    if info.kind == "local" {
+        ctx.os = Some(std::env::consts::OS.replace("macos", "macOS"));
+        ctx.shell = std::env::var("SHELL")
+            .ok()
+            .and_then(|s| s.rsplit('/').next().map(str::to_owned));
+    } else if let Some(host) = info.host_id.as_deref().and_then(|h| {
+        app.state::<crate::state::AppState>()
+            .with_vault(|v| Ok(v.get::<core_model::Host>(h)?))
+            .ok()
+            .flatten()
+    }) {
+        let os = format!("{:?}", host.os);
+        if os != "Unknown" {
+            ctx.os = Some(os);
+        }
+    }
+    ctx
+}
+
+async fn suggest(
+    ai: &AiManager,
+    prompt: String,
+    context: CommandContext,
+) -> CmdResult<AiSuggestion> {
+    let engine = engine(ai).await?;
+    let request = local_ai::GenerateRequest { prompt, context };
     let s = engine
         .generate(&request, &CancellationToken::new())
         .await
@@ -216,6 +244,60 @@ pub async fn ai_generate_command(
         command: s.command,
         explanation: s.explanation,
     })
+}
+
+/// Generates one shell command for a natural-language request. Never executes anything.
+/// With `session_id`, the terminal's OS, directory and recent commands are given as context.
+#[tauri::command]
+#[specta::specta]
+pub async fn ai_generate_command(
+    app: tauri::AppHandle,
+    ai: State<'_, AiManager>,
+    prompt: String,
+    session_id: Option<String>,
+    selection: Option<String>,
+) -> CmdResult<AiSuggestion> {
+    let mut context = session_context(&app, session_id.as_deref());
+    context.selection = selection.filter(|s| !s.trim().is_empty());
+    suggest(&ai, prompt, context).await
+}
+
+/// Lines of a failed command's output given to the model.
+const FIX_OUTPUT_LINES: usize = 40;
+
+/// Suggests a corrected command for the most recent command of a terminal that failed (by
+/// its exit status), from the command and the end of its output. Never executes anything.
+#[tauri::command]
+#[specta::specta]
+pub async fn ai_fix_command(
+    app: tauri::AppHandle,
+    ai: State<'_, AiManager>,
+    session_id: String,
+) -> CmdResult<AiSuggestion> {
+    use tauri::Manager;
+    let (_, blocks) = app
+        .state::<crate::sessions::SessionManager>()
+        .get(&session_id)
+        .ok_or_else(|| CmdError::new(ErrorCode::NotFound, "session not found"))?;
+    let failed = blocks
+        .lock()
+        .blocks()
+        .iter()
+        .rev()
+        .take(5)
+        .find(|b| b.exit.is_some_and(|e| e != 0))
+        .cloned()
+        .ok_or_else(|| CmdError::new(ErrorCode::NotFound, "no failed command to fix"))?;
+    let lines: Vec<&str> = failed.output.lines().collect();
+    let tail = lines[lines.len().saturating_sub(FIX_OUTPUT_LINES)..].join("\n");
+    let prompt = format!(
+        "This command failed with exit status {}: {}\nFix it: give the corrected command.",
+        failed.exit.unwrap_or(1),
+        failed.command
+    );
+    let mut context = session_context(&app, Some(&session_id));
+    context.selection = Some(tail).filter(|t| !t.trim().is_empty());
+    suggest(&ai, prompt, context).await
 }
 
 /// Generates a snippet script from a description.

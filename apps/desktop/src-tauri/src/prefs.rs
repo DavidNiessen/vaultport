@@ -34,15 +34,18 @@ pub struct TerminalPrefs {
     pub shell_integration: bool,
     pub import_history: bool,
     pub detect_os: bool,
+    /// Suggestions while typing (also opens an SFTP channel on SSH sessions for them).
+    pub autocomplete: bool,
 }
 
 impl Default for TerminalPrefs {
     fn default() -> Self {
         Self {
             local_shell: String::new(),
-            shell_integration: false,
+            shell_integration: true,
             import_history: false,
             detect_os: true,
+            autocomplete: true,
         }
     }
 }
@@ -94,7 +97,7 @@ mod tests {
         assert!(parse::<LoggingPrefs>(None).enabled);
         let t = parse::<TerminalPrefs>(None);
         assert_eq!(t, TerminalPrefs::default());
-        assert!(t.detect_os && !t.import_history && !t.shell_integration);
+        assert!(t.detect_os && !t.import_history && t.shell_integration && t.autocomplete);
         assert!(t.local_shell.is_empty());
     }
 
@@ -108,7 +111,7 @@ mod tests {
         assert_eq!(t.local_shell, "/usr/bin/fish");
         assert!(t.import_history);
         assert!(t.detect_os);
-        assert!(!t.shell_integration);
+        assert!(t.shell_integration);
         let s: SecurityPrefs = parse(Some(json!({ "lockOnSleep": false, "autoLockMinutes": 5 })));
         assert!(!s.lock_on_sleep);
         let l: LoggingPrefs = parse(Some(json!({ "enabled": false })));

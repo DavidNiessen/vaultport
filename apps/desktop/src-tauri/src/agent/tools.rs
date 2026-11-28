@@ -26,7 +26,9 @@ never leave Vaultport: connections are opened by the app with the user's saved k
 may require the user's approval in the app, so calls can take a while; if a call is denied, do \
 not retry it unchanged — ask the user. Commands run non-interactively (no TTY): avoid pagers and \
 prompts (use flags like -y, --no-pager), and prefer read-only inspection before changing \
-anything. Use open_terminal when the user should take over interactively.";
+anything. Use open_terminal when the user should take over interactively. list_terminals and \
+read_terminal show what happens in the terminals the user has open (e.g. to explain an error \
+they just got); type_in_terminal types into one of them where the user can watch.";
 
 const DEFAULT_TIMEOUT_SECS: u64 = 120;
 const MAX_TIMEOUT_SECS: u64 = 1800;
@@ -49,6 +51,9 @@ struct Def {
 }
 
 const HOST: &str = "Host id, label or address (see list_hosts).";
+const TERMINAL: &str = "Terminal id or label (see list_terminals).";
+/// Output returned by the terminal tools, in characters.
+const MAX_TERMINAL_OUTPUT: usize = 40_000;
 
 fn obj(props: Value, required: &[&str]) -> Value {
     json!({ "type": "object", "properties": props, "required": required, "additionalProperties": false })
@@ -236,6 +241,58 @@ const DEFS: &[Def] = &[
         },
     },
     Def {
+        name: "list_terminals",
+        title: "List open terminals",
+        description: "Lists the terminal tabs the user has open in Vaultport (SSH, local shell, \
+                      serial) with their working directory and the last command and its exit \
+                      status. Use read_terminal to see their output.",
+        changes: false,
+        destructive: false,
+        schema: || obj(json!({}), &[]),
+    },
+    Def {
+        name: "read_terminal",
+        title: "Read terminal output",
+        description: "Reads what happened in one of the user's open terminals: the most recent \
+                      commands with their output and exit status (when the shell has Vaultport's \
+                      shell integration), or else the last lines of output. Use it to see what \
+                      the user is looking at, e.g. to explain an error.",
+        changes: false,
+        destructive: false,
+        schema: || {
+            obj(
+                json!({
+                    "terminal": { "type": "string", "description": TERMINAL },
+                    "commands": { "type": "integer", "minimum": 1, "maximum": 20, "default": 5, "description": "How many recent commands to return." },
+                    "lines": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 120, "description": "Lines of plain output to return when commands are not tracked." }
+                }),
+                &["terminal"],
+            )
+        },
+    },
+    Def {
+        name: "type_in_terminal",
+        title: "Type in terminal",
+        description: "Types a command into one of the user's open terminals, where the user sees \
+                      it. With run=true it presses Enter and waits for the command to finish \
+                      (when the shell has shell integration) and returns its output; otherwise \
+                      the user can review and run it. Interactive programs keep running in the \
+                      user's terminal.",
+        changes: true,
+        destructive: true,
+        schema: || {
+            obj(
+                json!({
+                    "terminal": { "type": "string", "description": TERMINAL },
+                    "text": { "type": "string", "description": "One command line (no newlines)." },
+                    "run": { "type": "boolean", "default": false, "description": "Press Enter after typing." },
+                    "wait_seconds": { "type": "integer", "minimum": 0, "maximum": MAX_TIMEOUT_SECS, "default": 30, "description": "With run: how long to wait for the command to finish." }
+                }),
+                &["terminal", "text"],
+            )
+        },
+    },
+    Def {
         name: "open_terminal",
         title: "Open terminal",
         description: "Opens an interactive terminal tab for the user in Vaultport. You cannot \
@@ -307,7 +364,30 @@ enum Plan {
     StartForward(PortForwardRule),
     StopForward(PortForwardRule),
     OpenTerminal(Host),
+    ListTerminals,
+    ReadTerminal {
+        terminal: Terminal,
+        commands: usize,
+        lines: usize,
+    },
+    TypeInTerminal {
+        terminal: Terminal,
+        text: String,
+        run: bool,
+        wait: Duration,
+    },
 }
+
+/// An open terminal session agents may see.
+#[derive(Clone)]
+struct Terminal {
+    id: String,
+    info: crate::sessions::SessionInfo,
+    blocks: crate::sessions::Blocks,
+}
+
+/// Event asking the UI to show the tab of a session (payload: the session id).
+pub const SHOW_SESSION_EVENT: &str = "agent://show-session";
 
 #[derive(Clone, Copy, Deserialize, Default, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
@@ -409,6 +489,43 @@ impl AgentHandler {
             .filter(|h| settings.all_hosts || settings.hosts.contains(&h.id.to_string()))
             .collect();
         Ok((hosts, groups))
+    }
+
+    fn terminals_in_scope(&self) -> Vec<Terminal> {
+        let settings = self.state.settings();
+        self.app
+            .state::<crate::sessions::SessionManager>()
+            .list()
+            .into_iter()
+            .filter(|(_, info, _)| match &info.host_id {
+                Some(h) => settings.all_hosts || settings.hosts.contains(h),
+                // Local shells and ad-hoc connections are not saved hosts the user could pick.
+                None => settings.all_hosts,
+            })
+            .map(|(id, info, blocks)| Terminal { id, info, blocks })
+            .collect()
+    }
+
+    fn terminal(&self, needle: &str) -> Result<Terminal, String> {
+        let all = self.terminals_in_scope();
+        let n = needle.trim();
+        if let Some(t) = all.iter().find(|t| t.id == n) {
+            return Ok(t.clone());
+        }
+        let lower = n.to_lowercase();
+        let found: Vec<&Terminal> = all
+            .iter()
+            .filter(|t| t.info.label.to_lowercase() == lower)
+            .collect();
+        match found.as_slice() {
+            [t] => Ok((*t).clone()),
+            [] => Err(format!(
+                "no open terminal '{n}' is available to agents (see list_terminals)"
+            )),
+            _ => Err(format!(
+                "'{n}' matches several terminals; use an id from list_terminals"
+            )),
+        }
     }
 
     fn host(&self, needle: &str) -> Result<Host, String> {
@@ -623,6 +740,47 @@ impl AgentHandler {
                     Plan::StopForward(rule)
                 }
             }
+            "list_terminals" => Plan::ListTerminals,
+            "read_terminal" => {
+                #[derive(Deserialize)]
+                struct A {
+                    terminal: String,
+                    commands: Option<usize>,
+                    lines: Option<usize>,
+                }
+                let a: A = args(a)?;
+                Plan::ReadTerminal {
+                    terminal: self.terminal(&a.terminal)?,
+                    commands: a.commands.unwrap_or(5).clamp(1, 20),
+                    lines: a.lines.unwrap_or(120).clamp(1, 1000),
+                }
+            }
+            "type_in_terminal" => {
+                #[derive(Deserialize)]
+                struct A {
+                    terminal: String,
+                    text: String,
+                    #[serde(default)]
+                    run: bool,
+                    wait_seconds: Option<u64>,
+                }
+                let a: A = args(a)?;
+                if a.text.contains(['\n', '\r']) {
+                    return Err("text must be a single line; use run to press Enter".into());
+                }
+                if a.text.chars().any(|c| c.is_control() && c != '\t') {
+                    return Err("text must not contain control characters".into());
+                }
+                if a.text.trim().is_empty() {
+                    return Err("text is empty".into());
+                }
+                Plan::TypeInTerminal {
+                    terminal: self.terminal(&a.terminal)?,
+                    text: a.text,
+                    run: a.run,
+                    wait: Duration::from_secs(a.wait_seconds.unwrap_or(30).min(MAX_TIMEOUT_SECS)),
+                }
+            }
             "open_terminal" => {
                 #[derive(Deserialize)]
                 struct A {
@@ -643,7 +801,7 @@ impl AgentHandler {
                     .map_or_else(String::new, |q| format!("query: {q}")),
                 String::new(),
             ),
-            Plan::ListForwards => (None, String::new(), String::new()),
+            Plan::ListForwards | Plan::ListTerminals => (None, String::new(), String::new()),
             Plan::ListDir { host, path } => {
                 let p = path.clone().unwrap_or_else(|| "~".into());
                 (Some(host), p.clone(), p)
@@ -690,6 +848,32 @@ impl AgentHandler {
                 (None, r.label.clone(), r.label.clone())
             }
             Plan::OpenTerminal(h) => (Some(h), String::new(), String::new()),
+            Plan::ReadTerminal { terminal, .. } => (
+                None,
+                terminal.info.label.clone(),
+                format!(
+                    "Read the recent output of the terminal “{}”",
+                    terminal.info.label
+                ),
+            ),
+            Plan::TypeInTerminal {
+                terminal,
+                text,
+                run,
+                ..
+            } => (
+                None,
+                format!("{}: {text}", terminal.info.label),
+                format!(
+                    "{} in the terminal “{}”:\n\n{text}",
+                    if *run {
+                        "Type and run"
+                    } else {
+                        "Type (without running)"
+                    },
+                    terminal.info.label
+                ),
+            ),
         }
     }
 
@@ -937,6 +1121,101 @@ impl AgentHandler {
                     .map_err(|e| cmd_err(&e))?;
                 Ok(json!({ "rule": rule.label, "running": false }))
             }
+            Plan::ListTerminals => {
+                let list: Vec<Value> = self
+                    .terminals_in_scope()
+                    .iter()
+                    .map(|t| {
+                        let b = t.blocks.lock();
+                        let last = b
+                            .blocks()
+                            .back()
+                            .map(|l| json!({ "command": l.command, "exit_status": l.exit }));
+                        json!({
+                            "id": t.id,
+                            "label": t.info.label,
+                            "kind": t.info.kind,
+                            "host_id": t.info.host_id,
+                            "cwd": b.cwd(),
+                            "commands_tracked": b.has_integration(),
+                            "running": b.running().map(|r| r.command),
+                            "last_command": last,
+                        })
+                    })
+                    .collect();
+                Ok(json!({ "terminals": list }))
+            }
+            Plan::ReadTerminal {
+                terminal,
+                commands,
+                lines,
+            } => Ok(terminal_json(&terminal, commands, lines)),
+            Plan::TypeInTerminal {
+                terminal,
+                text,
+                run,
+                wait,
+            } => {
+                let manager = self.app.state::<crate::sessions::SessionManager>();
+                let before = terminal.blocks.lock().blocks().back().map_or(0, |b| b.id);
+                let _ = self.app.emit(SHOW_SESSION_EVENT, terminal.id.clone());
+                let mut data = text.into_bytes();
+                if run {
+                    data.push(b'\r');
+                }
+                manager
+                    .send(&terminal.id, crate::sessions::Input::Data(data))
+                    .map_err(|e| cmd_err(&e))?;
+                if !run {
+                    return Ok(json!({ "typed": true, "ran": false }));
+                }
+                let tracked = terminal.blocks.lock().has_integration();
+                if !tracked {
+                    tokio::time::sleep(Duration::from_millis(1500)).await;
+                    let tail = terminal.blocks.lock().tail(60).join("\n");
+                    return Ok(json!({
+                        "ran": true,
+                        "finished": null,
+                        "note": "This shell has no shell integration, so Vaultport cannot tell when the command ends. This is the output so far.",
+                        "output": shorten(&tail, MAX_TERMINAL_OUTPUT).0,
+                    }));
+                }
+                let deadline = tokio::time::Instant::now() + wait;
+                loop {
+                    let done = terminal
+                        .blocks
+                        .lock()
+                        .blocks()
+                        .iter()
+                        .rev()
+                        .find(|b| b.id > before)
+                        .cloned();
+                    if let Some(b) = done {
+                        let (output, cut) = shorten(&b.output, MAX_TERMINAL_OUTPUT);
+                        return Ok(json!({
+                            "ran": true,
+                            "finished": true,
+                            "command": b.command,
+                            "exit_status": b.exit,
+                            "output": output,
+                            "output_truncated": cut || b.omitted_lines > 0,
+                        }));
+                    }
+                    if manager.get(&terminal.id).is_none() {
+                        return Err("the terminal was closed".into());
+                    }
+                    if tokio::time::Instant::now() >= deadline {
+                        let running = terminal.blocks.lock().running();
+                        return Ok(json!({
+                            "ran": true,
+                            "finished": false,
+                            "note": "Still running in the user's terminal; use read_terminal later.",
+                            "output_so_far": running.map(|r| shorten(&r.output, MAX_TERMINAL_OUTPUT).0),
+                        }));
+                    }
+                    tokio::time::sleep(Duration::from_millis(150)).await;
+                }
+            }
             Plan::OpenTerminal(host) => {
                 self.app
                     .emit(OPEN_TERMINAL_EVENT, host.id.to_string())
@@ -1078,6 +1357,40 @@ impl mcp_server::Handler for AgentHandler {
     fn disconnected(&self, connection_id: u64) {
         self.state.disconnected(connection_id);
     }
+}
+
+/// The recent commands (or lines) of a terminal for read_terminal.
+fn terminal_json(t: &Terminal, commands: usize, lines: usize) -> Value {
+    let b = t.blocks.lock();
+    let mut budget = MAX_TERMINAL_OUTPUT;
+    let mut list: Vec<Value> = Vec::new();
+    // Newest first while spending the budget, then back to chronological order.
+    for block in b.recent(commands).iter().rev() {
+        let (output, cut) = shorten(&block.output, budget.max(200));
+        budget = budget.saturating_sub(output.len());
+        list.push(json!({
+            "command": block.command,
+            "cwd": block.cwd,
+            "exit_status": block.exit,
+            "finished": block.finished_at.is_some(),
+            "output": output,
+            "output_truncated": cut || block.omitted_lines > 0,
+        }));
+    }
+    list.reverse();
+    let tail = if b.has_integration() {
+        None
+    } else {
+        Some(shorten(&b.tail(lines).join("\n"), MAX_TERMINAL_OUTPUT).0)
+    };
+    json!({
+        "terminal": t.id,
+        "label": t.info.label,
+        "cwd": b.cwd(),
+        "commands_tracked": b.has_integration(),
+        "commands": list,
+        "output": tail,
+    })
 }
 
 #[cfg(test)]
