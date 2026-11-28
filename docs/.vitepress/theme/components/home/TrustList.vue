@@ -118,8 +118,8 @@ const ROWS = [
   font-size: 15px;
   color: var(--text-2);
   line-height: 1.55;
-  opacity: 0.6;
-  transition: opacity 0.4s;
+  color: var(--text-3);
+  transition: color 0.3s;
 }
 .go {
   display: grid;
@@ -142,7 +142,7 @@ const ROWS = [
   transform: translateX(10px);
 }
 .row:hover .text {
-  opacity: 1;
+  color: var(--text-2);
 }
 .row:hover .go {
   transform: rotate(45deg);

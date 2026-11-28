@@ -76,8 +76,13 @@ watch(
     void nextTick(onScroll);
   },
 );
-watch(menuOpen, (open) => {
+const menuBtn = ref<HTMLButtonElement | null>(null);
+watch(menuOpen, async (open, wasOpen) => {
   document.documentElement.style.overflow = open ? 'hidden' : '';
+  // Move focus into the menu when it opens and back to the button when it closes.
+  await nextTick();
+  if (open) document.querySelector<HTMLElement>('#mobile-menu a')?.focus();
+  else if (wasOpen) menuBtn.value?.focus();
 });
 </script>
 
@@ -133,6 +138,7 @@ watch(menuOpen, (open) => {
           <GithubIcon />
         </a>
         <button
+          ref="menuBtn"
           type="button"
           class="icon-btn menu-btn"
           :aria-expanded="menuOpen"
@@ -321,7 +327,7 @@ watch(menuOpen, (open) => {
 }
 .search-kbd {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   padding: 2px 7px;
   border-radius: 999px;
   border: 1px solid var(--border);

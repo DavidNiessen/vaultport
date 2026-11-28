@@ -47,7 +47,7 @@ html.dark,
   --border-strong: rgb(255 255 255 / 0.15);
   --text: #f3f2f8;
   --text-2: #aeabbe;
-  --text-3: #75728a;
+  --text-3: #86839b;
   --accent: var(--iris-400);
   --accent-strong: var(--iris-300);
   --accent-soft: rgb(157 139 255 / 0.14);
@@ -84,21 +84,21 @@ html:not(.dark) {
   --border-strong: rgb(30 20 80 / 0.18);
   --text: #0e0c1a;
   --text-2: #4d4a62;
-  --text-3: #85829a;
+  --text-3: #69667e;
   --accent: var(--iris-600);
   --accent-strong: #4330c4;
   --accent-soft: rgb(91 69 224 / 0.1);
   --accent-2: var(--cyan-600);
   --on-accent: #ffffff;
-  --ok: #138a55;
-  --warn: #a86b00;
-  --danger: #c8283f;
+  --ok: #0f7a4a;
+  --warn: #8c5a00;
+  --danger: #b42035;
   --glow-1: 123 102 245;
   --glow-2: 60 170 220;
   --glow-3: 255 122 184;
   --shadow-lg: 0 40px 100px -24px rgb(40 20 120 / 0.28), 0 0 0 1px rgb(30 20 80 / 0.08);
   --shadow-md: 0 16px 40px -14px rgb(40 20 120 / 0.25);
-  --code-bg: #f6f4fd;
+  --code-bg: #fdfcff;
   --grad-text: linear-gradient(100deg, #2a1d8f 0%, var(--iris-600) 45%, var(--cyan-600) 100%);
   --grain-opacity: 0.035;
 }

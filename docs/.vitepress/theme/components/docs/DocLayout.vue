@@ -7,7 +7,7 @@
  */
 import { ArrowLeft, ArrowRight, ChevronDown, PanelLeft, PencilLine, X } from '@lucide/vue';
 import { onContentUpdated, useData, useRoute, withBase } from 'vitepress';
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 
 import { sections } from '../../../nav';
 import { REPO_URL } from '../../../site';
@@ -37,9 +37,15 @@ watch(
     outlineOpen.value = false;
   },
 );
-watch(drawerOpen, (open) => {
+watch(drawerOpen, async (open) => {
   document.documentElement.style.overflow = open ? 'hidden' : '';
+  if (!open) return;
+  await nextTick();
+  document.querySelector<HTMLElement>('.drawer-close')?.focus();
 });
+function onDrawerKey(e: KeyboardEvent) {
+  if (e.key === 'Escape') drawerOpen.value = false;
+}
 
 const flat = computed(() =>
   sections.flatMap((s) => s.items.map((i) => ({ ...i, section: s.text }))),
@@ -110,7 +116,12 @@ const lastUpdated = computed(() => {
     </aside>
 
     <Transition name="drawer">
-      <div v-if="drawerOpen" class="drawer-backdrop" @click.self="drawerOpen = false">
+      <div
+        v-if="drawerOpen"
+        class="drawer-backdrop"
+        @click.self="drawerOpen = false"
+        @keydown="onDrawerKey"
+      >
         <div class="drawer" role="dialog" aria-modal="true" aria-label="Documentation navigation">
           <button
             type="button"
@@ -237,6 +248,7 @@ const lastUpdated = computed(() => {
   color: var(--text-3);
 }
 .edit {
+  min-height: 28px;
   display: inline-flex;
   align-items: center;
   gap: 8px;

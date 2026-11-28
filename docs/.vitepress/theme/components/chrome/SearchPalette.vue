@@ -201,7 +201,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKey));
               aria-expanded="true"
               :aria-activedescendant="itemCount ? `palette-item-${active}` : undefined"
             />
-            <kbd class="esc" @click="close">esc</kbd>
+            <button type="button" class="esc" aria-label="Close search" @click="close">
+              <kbd>esc</kbd>
+            </button>
             <span class="scan" :class="{ on: loading }" aria-hidden="true" />
           </div>
 
@@ -331,7 +333,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKey));
   display: none;
 }
 .esc {
-  cursor: pointer;
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
 }
 .scan {
   position: absolute;
@@ -366,7 +371,7 @@ kbd {
   border: 1px solid var(--border);
   background: var(--surface);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
 }
 .results {
@@ -377,7 +382,7 @@ kbd {
 }
 .group-label {
   padding: 12px 10px 6px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;

@@ -149,11 +149,15 @@ onBeforeUnmount(() => {
         class="vault"
         :class="{ unlocked, pointing }"
         :style="{ '--lx': `${lens.x}%`, '--ly': `${lens.y}%` }"
-        role="img"
-        aria-label="A vault table: sealed records that turn into readable hosts under a moving lens"
+        role="button"
+        tabindex="0"
+        :aria-pressed="unlocked"
+        aria-label="Demo vault: sealed records turn readable under a moving lens. Press to unlock it for a moment."
         @pointermove="onMove"
         @pointerleave="onLeave"
         @click="unlock"
+        @keydown.enter.prevent="unlock"
+        @keydown.space.prevent="unlock"
       >
         <div class="vault-head">
           <span class="status">
@@ -237,6 +241,10 @@ onBeforeUnmount(() => {
   cursor: none;
   user-select: none;
 }
+.vault:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
 .vault-head {
   display: flex;
   justify-content: space-between;
@@ -263,7 +271,7 @@ onBeforeUnmount(() => {
 }
 .layer {
   display: grid;
-  font-size: clamp(10.5px, 1vw, 13px);
+  font-size: clamp(12px, 1vw, 13px);
 }
 .row {
   display: grid;
@@ -362,7 +370,7 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 10.5px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }

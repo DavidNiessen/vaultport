@@ -61,7 +61,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <span ref="el" class="scramble" :aria-label="text" @pointerenter="hover && run()">
+  <span ref="el" class="scramble" @pointerenter="hover && run()">
+    <span class="sr-only">{{ text }}</span>
     <span aria-hidden="true">{{ shown }}</span>
   </span>
 </template>

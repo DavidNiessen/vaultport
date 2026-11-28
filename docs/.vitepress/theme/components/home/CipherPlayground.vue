@@ -275,7 +275,7 @@ textarea:focus {
   align-items: center;
   gap: 6px;
   margin-top: 8px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
 }
 .legend i {

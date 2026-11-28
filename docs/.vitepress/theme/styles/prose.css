@@ -50,6 +50,8 @@
 .prose .header-anchor {
   position: absolute;
   left: -1.1em;
+  min-width: 24px;
+  min-height: 24px;
   padding-right: 0.3em;
   color: var(--accent);
   font-weight: 500;
@@ -246,7 +248,7 @@ html.dark .vp-code span {
   top: 10px;
   right: 14px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-3);

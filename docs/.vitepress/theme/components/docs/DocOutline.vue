@@ -169,6 +169,7 @@ li a.active {
   transform: translateX(2px);
 }
 .top {
+  min-height: 28px;
   display: inline-flex;
   align-items: center;
   gap: 8px;

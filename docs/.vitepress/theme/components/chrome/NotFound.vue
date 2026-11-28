@@ -13,7 +13,7 @@ const path = computed(() => route.path);
     <div class="glitch" data-text="404" aria-hidden="true">404</div>
     <div class="term" role="img" aria-label="An SSH warning saying this page could not be found">
       <div class="term-bar"><span /><span /><span /></div>
-      <pre class="mono"><span class="p">$</span> ssh vaultport.niessen.dev{{ path }}
+      <pre class="mono" tabindex="0"><span class="p">$</span> ssh vaultport.niessen.dev{{ path }}
 <span class="w">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @    WARNING: REMOTE PAGE IDENTIFICATION HAS VANISHED!   @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span>
@@ -111,7 +111,7 @@ or the link may be mistyped.
 pre {
   margin: 0;
   padding: 18px 20px;
-  font-size: clamp(10px, 2.3vw, 13px);
+  font-size: clamp(11px, 2.3vw, 13px);
   line-height: 1.7;
   color: var(--text-2);
   overflow-x: auto;

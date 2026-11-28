@@ -157,6 +157,7 @@ function move(e: PointerEvent) {
   margin-bottom: 4px;
 }
 .col a {
+  padding: 3px 0;
   color: var(--text-2);
   width: fit-content;
   background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat;

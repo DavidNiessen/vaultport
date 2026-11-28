@@ -151,7 +151,7 @@ const published = computed(() => {
             </template>
           </div>
 
-          <div class="switch" role="tablist" aria-label="Platform" v-reveal="200">
+          <div class="switch" role="group" aria-label="Platform" v-reveal="200">
             <span
               class="switch-pill"
               :style="{ transform: `translateX(${index * 100}%)` }"
@@ -161,10 +161,9 @@ const published = computed(() => {
               v-for="p in PLATFORMS"
               :key="p.id"
               type="button"
-              role="tab"
               class="switch-btn"
               :class="{ on: p.id === selected }"
-              :aria-selected="p.id === selected"
+              :aria-pressed="p.id === selected"
               @click="choose(p.id)"
             >
               <component :is="p.icon" :size="16" aria-hidden="true" />
@@ -483,7 +482,7 @@ const published = computed(() => {
   font-size: 14px;
 }
 .file-main .mono {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-3);
 }
 .file-size {
@@ -639,7 +638,7 @@ const published = computed(() => {
 }
 @media (max-width: 520px) {
   .switch-btn span:not(.you) {
-    font-size: 11px;
+    font-size: 12px;
   }
   .extras {
     grid-template-columns: 1fr;

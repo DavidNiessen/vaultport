@@ -6,7 +6,9 @@
  * crossed out, because it does not exist.
  */
 import { Cloud, Folder, Globe, HardDrive, Laptop, Monitor, Smartphone } from '@lucide/vue';
-import { computed, ref, type Component } from 'vue';
+import { computed, onMounted, ref, type Component } from 'vue';
+
+import { prefersReducedMotion } from '../../composables/motion';
 
 interface Backend {
   id: string;
@@ -38,6 +40,12 @@ const backend = ref(0);
 const current = computed(() => BACKENDS[backend.value]!);
 const hovered = ref<number | null>(null);
 
+// SVG (SMIL) motion ignores CSS, so stop it explicitly for reduced motion.
+const wires = ref<SVGSVGElement | null>(null);
+onMounted(() => {
+  if (prefersReducedMotion()) wires.value?.pauseAnimations();
+});
+
 const DEVICES = [
   { icon: Laptop, label: 'Laptop', x: 90, y: 90, path: 'M130 110 C 230 110, 260 210, 360 210' },
   { icon: Smartphone, label: 'Phone', x: 90, y: 330, path: 'M130 330 C 230 330, 260 230, 360 230' },
@@ -61,7 +69,7 @@ const DEVICES = [
       </div>
 
       <div class="panel" v-reveal="120">
-        <div class="tabs" role="tablist" aria-label="Storage backend">
+        <div class="tabs" role="group" aria-label="Storage backend">
           <span
             class="tab-pill"
             :style="{ transform: `translateX(${backend * 100}%)` }"
@@ -71,8 +79,7 @@ const DEVICES = [
             v-for="(b, i) in BACKENDS"
             :key="b.id"
             type="button"
-            role="tab"
-            :aria-selected="i === backend"
+            :aria-pressed="i === backend"
             class="tab"
             :class="{ on: i === backend }"
             @click="backend = i"
@@ -82,7 +89,7 @@ const DEVICES = [
         </div>
 
         <div class="diagram">
-          <svg viewBox="0 0 800 440" class="wires" aria-hidden="true">
+          <svg ref="wires" viewBox="0 0 800 440" class="wires" aria-hidden="true">
             <path
               v-for="(d, i) in DEVICES"
               :id="`sync-wire-${i}`"
@@ -290,7 +297,7 @@ const DEVICES = [
   font-weight: 600;
 }
 .device-sub {
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--text-3);
 }
 .storage {
@@ -326,7 +333,7 @@ const DEVICES = [
   letter-spacing: -0.02em;
 }
 .storage-ex {
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--text-3);
   line-height: 1.5;
 }
@@ -335,7 +342,7 @@ const DEVICES = [
   border-radius: 999px;
   background: var(--accent-soft);
   color: var(--accent);
-  font-size: 11px;
+  font-size: 12px;
 }
 .swap-enter-active,
 .swap-leave-active {
@@ -410,7 +417,7 @@ const DEVICES = [
     top: 0;
     right: 50%;
     transform: translateX(50%);
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap;
   }
 }

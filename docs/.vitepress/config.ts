@@ -107,7 +107,8 @@ export default defineConfig({
   },
 
   markdown: {
-    theme: { light: 'github-light', dark: 'poimandres' },
+    // Both themes keep comments at 4.5:1 or better against the code background.
+    theme: { light: 'github-light', dark: 'github-dark-default' },
     config(md) {
       // Snippet placeholders such as `{{name:default}}` must not be read as Vue interpolation.
       const renderInlineCode = md.renderer.rules.code_inline;

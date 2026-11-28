@@ -265,11 +265,14 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
   flex-direction: column;
   justify-content: center;
   padding: 40px 0;
-  opacity: 0.28;
   transition: opacity 0.6s var(--ease-out);
 }
-.chapter.on {
-  opacity: 1;
+/* Inactive chapters are dimmed by colour, not opacity, so they keep 4.5:1 contrast. */
+.chapter:not(.on) :is(h3, .text, li) {
+  color: var(--text-3);
+}
+.chapter :is(h3, .text, li) {
+  transition: color 0.5s var(--ease-out);
 }
 .kicker {
   display: flex;
@@ -287,7 +290,7 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
   height: 22px;
   border-radius: 999px;
   border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
-  font-size: 11px;
+  font-size: 12px;
 }
 .chapter h3 {
   margin-top: 16px;
@@ -327,7 +330,8 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
   transform: rotate(45deg);
 }
 .more {
-  margin-top: 22px;
+  margin-top: 18px;
+  padding: 4px 0;
   font-weight: 550;
   font-size: 14.5px;
   color: var(--accent);
@@ -474,7 +478,7 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
   border-radius: 999px;
   background: var(--accent);
   color: var(--on-accent);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
 }

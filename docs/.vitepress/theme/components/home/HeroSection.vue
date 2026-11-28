@@ -392,7 +392,7 @@ const words = ['Your', 'servers.', 'Your', 'keys.'];
   color: var(--text);
 }
 .chip-text .mono {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
 }
 .c1 {

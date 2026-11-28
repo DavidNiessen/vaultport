@@ -25,6 +25,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { prefersReducedMotion, useInView } from '../../composables/motion';
 
 const grid = ref<HTMLElement | null>(null);
+const routeSvg = ref<SVGSVGElement | null>(null);
 const inView = useInView(grid);
 
 /* Protocol terminal: types one command after another */
@@ -101,6 +102,8 @@ function start() {
 
 watch(inView, (v) => (v ? start() : stop()));
 onMounted(() => {
+  // SVG (SMIL) motion ignores CSS, so stop it explicitly for reduced motion.
+  if (prefersReducedMotion()) routeSvg.value?.pauseAnimations();
   if (inView.value) start();
 });
 onBeforeUnmount(stop);
@@ -142,7 +145,7 @@ const serviceName = computed(() => SERVICES[service.value]);
         <!-- Jump hosts -->
         <article v-spotlight v-reveal="80" class="card span-2">
           <div class="visual route">
-            <svg viewBox="0 0 420 120" class="route-svg" aria-hidden="true">
+            <svg ref="routeSvg" viewBox="0 0 420 120" class="route-svg" aria-hidden="true">
               <defs>
                 <linearGradient id="fg-route" x1="0" x2="1">
                   <stop offset="0" style="stop-color: rgb(var(--glow-1))" />
@@ -435,7 +438,7 @@ const serviceName = computed(() => SERVICES[service.value]);
 .term-bar em {
   margin-left: auto;
   font-style: normal;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
 }
 .term-body {
@@ -456,7 +459,7 @@ const serviceName = computed(() => SERVICES[service.value]);
 }
 .ok {
   color: var(--ok);
-  font-size: 11px;
+  font-size: 12px;
 }
 @keyframes line-in {
   from {
@@ -499,7 +502,7 @@ const serviceName = computed(() => SERVICES[service.value]);
   gap: 6px;
   transform: translate(-50%, -50%);
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-2);
 }
 .node svg {
@@ -568,7 +571,7 @@ const serviceName = computed(() => SERVICES[service.value]);
   }
 }
 .key-hint {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-3);
 }
 
@@ -627,7 +630,7 @@ const serviceName = computed(() => SERVICES[service.value]);
   }
 }
 .pq-name {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-2);
 }
 
@@ -694,7 +697,7 @@ const serviceName = computed(() => SERVICES[service.value]);
 }
 .snippet-meta {
   margin-top: 14px;
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-3);
 }
 .flip-enter-active,
@@ -740,7 +743,7 @@ const serviceName = computed(() => SERVICES[service.value]);
   min-height: 1.6em;
 }
 .ai-note {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
 }
 
@@ -791,7 +794,7 @@ const serviceName = computed(() => SERVICES[service.value]);
   display: flex;
   justify-content: space-between;
   margin-top: 16px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-3);
 }
 
