@@ -54,6 +54,18 @@ const layers = [
   { cls: 'card', style: slice(1573 / 2000, 200 / 1250, 410 / 2000, 153 / 1250) },
 ];
 
+/**
+ * Plain fills under each lifted slice, so when the scene tilts the layer below shows a shadowy
+ * gap instead of a second copy of the slice.
+ */
+function hole(x: number, y: number, w: number, h: number) {
+  return { left: `${x * 100}%`, top: `${y * 100}%`, width: `${w * 100}%`, height: `${h * 100}%` };
+}
+const holes = [
+  { cls: 'hole-panel', style: hole(1557 / 2000, 66 / 1250, 443 / 2000, 1184 / 1250) },
+  { cls: 'hole-card', style: hole(1573 / 2000, 200 / 1250, 410 / 2000, 153 / 1250) },
+];
+
 /** Chips pinned to the part of the app they describe, at increasing depth. */
 const chips = [
   { icon: Lock, title: 'Vault unlocked', sub: 'XChaCha20-Poly1305', cls: 'c1' },
@@ -140,6 +152,14 @@ const words = ['Your', 'servers.', 'Your', 'keys.'];
               width="2000"
               height="1250"
               fetchpriority="high"
+            />
+            <div
+              v-for="h in holes"
+              :key="h.cls"
+              class="hole"
+              :class="h.cls"
+              :style="h.style"
+              aria-hidden="true"
             />
             <div
               v-for="l in layers"
@@ -294,7 +314,20 @@ const words = ['Your', 'servers.', 'Your', 'keys.'];
   border-radius: 14px;
   background: #0d0c12;
 }
-/* Slices of the same screenshot, lifted off the window. */
+/* Slices of the same screenshot, lifted off the window, each over a plain fill. */
+.hole {
+  position: absolute;
+  background: rgb(9 10 14);
+  pointer-events: none;
+}
+.hole-panel {
+  border-bottom-right-radius: 14px;
+  transform: translateZ(1px);
+}
+.hole-card {
+  border-radius: 12px;
+  transform: translateZ(29px);
+}
 .layer {
   position: absolute;
   background-repeat: no-repeat;
