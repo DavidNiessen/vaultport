@@ -15,16 +15,20 @@ Vaultport is a full terminal app, for SSH, Mosh, Telnet and serial sessions as w
 | Close tab                | <kbd>Ctrl</kbd>+<kbd>W</kbd>                                         | <kbd>⌘</kbd>+<kbd>W</kbd>                                                        |
 | Reopen closed tab        | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>                        | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>T</kbd>                                           |
 | Connect to a host…       | <kbd>Ctrl</kbd>+<kbd>O</kbd>                                         | <kbd>⌘</kbd>+<kbd>O</kbd>                                                        |
-| Duplicate / rename tab   | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> / <kbd>R</kbd>         | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd> / <kbd>R</kbd>                            |
+| Split pane               | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>                        | <kbd>⌘</kbd>+<kbd>D</kbd>                                                        |
+| Next / previous pane     | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>→</kbd> / <kbd>←</kbd>           | <kbd>⌘</kbd>+<kbd>]</kbd> / <kbd>[</kbd>                                         |
+| Rename tab               | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>                        | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd>                                           |
 | Next / previous tab      | <kbd>Ctrl</kbd>+<kbd>Tab</kbd>, <kbd>Ctrl</kbd>+<kbd>PgDn/PgUp</kbd> | <kbd>⌃</kbd>+<kbd>Tab</kbd>, <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>]</kbd>/<kbd>[</kbd> |
 | Go to tab 1–8, last tab¹ | <kbd>Ctrl</kbd>+<kbd>1</kbd>…<kbd>8</kbd>, <kbd>9</kbd>              | <kbd>⌘</kbd>+<kbd>1</kbd>…<kbd>8</kbd>, <kbd>9</kbd>                             |
 
 ¹ The pinned Vault and SFTP tabs are 1 and 2. On Windows and Linux, <kbd>Alt</kbd>+<kbd>1</kbd>…<kbd>9</kbd> works too.
 
 - **New terminal tab** opens a local shell on desktop, in the directory of the local tab you are in. On phones and tablets, where there is no local shell, it opens the connection picker.
-- **Duplicate** opens another connection to the same host (or another local shell in the same directory) right next to the tab.
+- **Split** a tab to see two sessions side by side: the new pane is another connection to the same host (or a local shell in the same directory). In a split, <kbd>Mod</kbd>+<kbd>W</kbd> closes only the focused pane, and when one pane is left it becomes a normal tab again. Splits support up to 16 panes, [broadcast input](/guide/workspaces) and focus mode.
+- **Duplicate** (tab menu or command palette) opens another connection to the same host (or another local shell in the same directory) right next to the tab.
 - **Double-click** a tab (or press <kbd>F2</kbd> on it) to rename it; a renamed tab keeps its name even when a program sets the title. Clear the name to hand the title back.
 - **Right-click** a tab for duplicate, rename, close, close other tabs, close tabs to the right and reopen closed tab. Up to 20 closed terminal tabs are remembered until you quit.
+- **Reopen tabs on start** (Settings → Terminal) reopens your terminal tabs and splits after you unlock. Only host references and directories are saved, encrypted in this device's vault, and never synced.
 
 ::: tip Ctrl+W and Ctrl+T in the shell
 On Windows and Linux, <kbd>Ctrl</kbd>+<kbd>W</kbd> (delete word) and <kbd>Ctrl</kbd>+<kbd>T</kbd> (swap characters) no longer reach the shell, as in most terminal apps with tabs. If you need them there, remove or change the shortcuts in **Settings → Shortcuts** — every shortcut can be rebound, and <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd> closes tabs as well.
@@ -67,6 +71,14 @@ With [shell integration](#shell-integration), every command and its output form 
 - while you scroll through long output, the command it belongs to stays visible at the top — click it to jump there;
 - when a command that ran 10 seconds or longer finishes while you are in another tab or app, Vaultport tells you, with a link back to the tab. Change the threshold (or turn it off with `0`) in **Settings → Terminal → Command blocks**.
 
+## Mistyped commands
+
+When a command fails because it does not exist, Vaultport offers the closest installed command — `gti status` → `git status` — with **Run** and **Edit** buttons. The rest of the line is kept.
+
+## Context bar
+
+A slim bar under the terminal shows the working directory (click it to copy the path), the **git branch** (or commit, when detached) and the exit status and duration of the last command. Turn it off in **Settings → Terminal → Command blocks**.
+
 ## History search
 
 <kbd>Ctrl</kbd>+<kbd>R</kbd> opens a search over every command you ran on this host, newest and most frequent first, matching words in any order and fuzzy abbreviations. <kbd>Enter</kbd> puts the command on the prompt to edit, <kbd>Mod</kbd>+<kbd>Enter</kbd> runs it. While a command or a full-screen program runs, <kbd>Ctrl</kbd>+<kbd>R</kbd> goes to it as usual.
@@ -94,6 +106,7 @@ Command blocks, exit codes, the working directory for new tabs and the best sugg
 
 ## More
 
-- **Zoom**: <kbd>Mod</kbd>+<kbd>=</kbd> / <kbd>Mod</kbd>+<kbd>-</kbd> / <kbd>Mod</kbd>+<kbd>0</kbd>; **clear** with <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd>; **search** the output with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> (<kbd>⌘</kbd>+<kbd>F</kbd> on macOS).
+- **Search** the output with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> (<kbd>⌘</kbd>+<kbd>F</kbd> on macOS): results update as you type, show the match count, and can match case, whole words or a regular expression.
+- **Zoom**: <kbd>Mod</kbd>+<kbd>=</kbd> / <kbd>Mod</kbd>+<kbd>-</kbd> / <kbd>Mod</kbd>+<kbd>0</kbd>; **clear** with <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd>.
 - **macOS line editing**: <kbd>⌘</kbd>+<kbd>←</kbd>/<kbd>→</kbd> jump to the start or end of the line, <kbd>⌥</kbd>+<kbd>←</kbd>/<kbd>→</kbd> move by word, <kbd>⌘</kbd>+<kbd>⌫</kbd> deletes to the start of the line and <kbd>⌥</kbd>+<kbd>⌫</kbd> deletes a word.
 - **Themes, fonts, truecolor, OSC 52 clipboard, remote titles** and more are described under [Hosts & groups](/guide/hosts-and-groups#terminal-features); the full list of shortcuts is under [Keyboard shortcuts](/guide/keyboard-shortcuts).

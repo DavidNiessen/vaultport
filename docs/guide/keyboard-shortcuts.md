@@ -21,7 +21,6 @@ Terminal shortcuts take the key away from the shell. If you need a key in the sh
 | Connect to a host…    | <kbd>Ctrl</kbd>+<kbd>O</kbd>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd>      | <kbd>⌘</kbd>+<kbd>O</kbd>, <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>N</kbd>                                                        |
 | Close tab             | <kbd>Ctrl</kbd>+<kbd>W</kbd>, <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>W</kbd>      | <kbd>⌘</kbd>+<kbd>W</kbd>, <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>W</kbd>                                                        |
 | Reopen closed tab     | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd>                                    | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>T</kbd>                                                                                   |
-| Duplicate tab         | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>                                    | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>D</kbd>                                                                                   |
 | Rename tab            | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>, or double-click it                | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>R</kbd>, or double-click it                                                               |
 | Next tab              | <kbd>Ctrl</kbd>+<kbd>Tab</kbd>, <kbd>Ctrl</kbd>+<kbd>PgDn</kbd>                  | <kbd>⌃</kbd>+<kbd>Tab</kbd>, <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>]</kbd>, <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>→</kbd>              |
 | Previous tab          | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Tab</kbd>, <kbd>Ctrl</kbd>+<kbd>PgUp</kbd> | <kbd>⌃</kbd>+<kbd>⇧</kbd>+<kbd>Tab</kbd>, <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>[</kbd>, <kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>←</kbd> |
@@ -72,10 +71,15 @@ Plain <kbd>Ctrl</kbd>+<kbd>C</kbd> is always sent to the remote program (to inte
 
 ## Workspaces
 
-| Action               | Shortcut                                     |
-| -------------------- | -------------------------------------------- |
-| Toggle broadcast     | <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd> |
-| Toggle split / focus | <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> |
+| Action               | Shortcut                                                                                                                          |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Toggle broadcast     | <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>                                                                                      |
+| Toggle split / focus | <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd>                                                                                      |
+| Split pane           | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd> or <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>; <kbd>⌘</kbd>+<kbd>D</kbd> on macOS |
+| Next / previous pane | <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>→</kbd> / <kbd>←</kbd>; <kbd>⌘</kbd>+<kbd>]</kbd> / <kbd>[</kbd> on macOS                     |
+| Close pane           | <kbd>Mod</kbd>+<kbd>W</kbd> (in a split)                                                                                          |
+
+**Duplicate tab** has no shortcut by default; it is in the tab menu and the command palette.
 
 ## Mouse and touch
 
