@@ -18,7 +18,12 @@ pub enum SessionTarget {
         username: Option<String>,
     },
     /// A local shell (desktop only).
-    Local,
+    Local {
+        /// Directory to start in (e.g. that of the tab it was opened from). Ignored unless it
+        /// is an existing directory; the home directory is used otherwise.
+        #[serde(default)]
+        cwd: Option<String>,
+    },
     /// A serial port.
     #[serde(rename_all = "camelCase")]
     Serial {

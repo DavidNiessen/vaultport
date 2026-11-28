@@ -15,7 +15,7 @@ import { cn } from '@/lib/cn';
 import { EMPTY } from '@/lib/empty';
 import type { VaultStatus } from '@/lib/ipc';
 import { isApple, useBreakpoint, usePlatform } from '@/lib/platform';
-import { useGroups, useHosts } from '@/lib/queries';
+import { useGroups, useHosts, useSettings } from '@/lib/queries';
 import { SFTP_TAB, VAULT_TAB, useApp, type Tab } from '@/stores/app';
 
 import { ForwardingView } from '../features/forwarding/ForwardingView';
@@ -29,7 +29,12 @@ import { LogViewer } from '../features/logs/LogViewer';
 import { LogsView } from '../features/logs/LogsView';
 import { CommandPalette } from '../features/palette/CommandPalette';
 import { NewTabDialog } from '../features/palette/NewTabDialog';
-import { SHORTCUTS, matches } from '../features/palette/shortcuts';
+import {
+  SHORTCUTS_DOC,
+  actionFor,
+  useKeymap,
+  type ShortcutOverrides,
+} from '../features/palette/shortcuts';
 import { SettingsView } from '../features/settings/SettingsView';
 import { SftpView } from '../features/sftp/SftpView';
 import { SnippetsView } from '../features/snippets/SnippetsView';
@@ -37,6 +42,15 @@ import { TerminalSidePanel } from '../features/terminal/SidePanel';
 import { TerminalView } from '../features/terminal/TerminalView';
 import { AgentApprovals } from '../features/agents/AgentApprovals';
 import { useSessions } from '../features/terminal/sessions';
+import {
+  activeTerminal,
+  currentTabId,
+  cycleTab,
+  duplicate,
+  goToTab,
+  moveActive,
+  newTab,
+} from '../features/terminal/tabActions';
 import { WorkspaceView } from '../features/workspaces/WorkspaceView';
 import { SerialDialog } from '../features/terminal/SerialDialog';
 import { GlobalPrompts } from './GlobalPrompts';
@@ -51,49 +65,95 @@ interface ShellProps {
 
 function useShortcuts(onLock: () => void) {
   const platform = usePlatform();
-  const app = useApp();
   const sessions = useSessions();
+  const { settings: overrides } = useSettings<ShortcutOverrides>(SHORTCUTS_DOC, {});
+  const apple = isApple(platform);
   useEffect(() => {
-    const apple = isApple(platform);
-    const byId = Object.fromEntries(SHORTCUTS.map((s) => [s.id, s.keys]));
-    const visible = () => [
-      VAULT_TAB,
-      SFTP_TAB,
-      ...useApp
-        .getState()
-        .tabs.filter((x) => !(x.kind === 'terminal' && x.workspace))
-        .map((x) => x.id),
-    ];
+    useKeymap.getState().set(apple, overrides);
+  }, [apple, overrides]);
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const is = (id: string) => matches(e, byId[id] ?? '', apple);
+      if (e.type !== 'keydown' || e.isComposing) return;
+      const { keymap, recording } = useKeymap.getState();
+      if (recording) return;
       const s = useApp.getState();
+      const action = actionFor(e, keymap, apple, 'global');
       let handled = true;
-      if (is('palette')) s.setPaletteOpen(!s.paletteOpen);
-      else if (is('newTab')) s.setNewTabOpen(true);
-      else if (is('jump')) s.setPaletteOpen(true);
-      else if (is('local') && platform.localTerminal) sessions.openLocal();
-      else if (is('closeTab') && s.activeTab !== VAULT_TAB && s.activeTab !== SFTP_TAB)
-        s.closeTab(s.activeTab);
-      else if (is('sidePanel')) s.setSidePanelOpen(!s.sidePanelOpen);
-      else if (is('lock')) onLock();
-      else if (is('settings')) s.setSection('settings');
-      else if (is('broadcast')) {
-        const ws = s.tabs.find((x) => x.id === s.activeTab);
-        if (ws?.kind === 'workspace') s.updateTab(ws.id, { broadcast: !ws.broadcast });
-      } else if (is('splitMode')) {
-        const ws = s.tabs.find((x) => x.id === s.activeTab);
-        if (ws?.kind === 'workspace')
-          s.updateTab(ws.id, { mode: ws.mode === 'split' ? 'focus' : 'split' });
-      } else if (is('nextTab') || is('prevTab')) {
-        const ids = visible();
-        const i = ids.indexOf(s.activeTab);
-        const next = ids[(i + (is('nextTab') ? 1 : ids.length - 1)) % ids.length];
-        if (next) s.activate(next);
-      } else if ((apple ? e.metaKey : e.altKey) && /^[1-9]$/.test(e.key)) {
-        const ids = visible();
-        const target = ids[Number(e.key) - 1];
-        if (target) s.activate(target);
-      } else handled = false;
+      switch (action) {
+        case 'palette':
+          s.setPaletteOpen(!s.paletteOpen);
+          break;
+        case 'newTab':
+          newTab(platform.localTerminal);
+          break;
+        case 'connect':
+          s.setNewTabOpen(true);
+          break;
+        case 'jump':
+          s.setPaletteOpen(true);
+          break;
+        case 'local':
+          if (platform.localTerminal) sessions.openLocal();
+          break;
+        case 'closeTab': {
+          const id = currentTabId();
+          if (id) s.closeTab(id);
+          break;
+        }
+        case 'reopenTab':
+          s.reopenClosed();
+          break;
+        case 'duplicateTab': {
+          const term = activeTerminal();
+          if (term) duplicate(term.id);
+          break;
+        }
+        case 'renameTab': {
+          const id = currentTabId();
+          if (id) s.setRenaming(id);
+          break;
+        }
+        case 'nextTab':
+          cycleTab(1);
+          break;
+        case 'prevTab':
+          cycleTab(-1);
+          break;
+        case 'moveTabLeft':
+          moveActive(-1);
+          break;
+        case 'moveTabRight':
+          moveActive(1);
+          break;
+        case 'sidePanel':
+          s.setSidePanelOpen(!s.sidePanelOpen);
+          break;
+        case 'lock':
+          onLock();
+          break;
+        case 'settings':
+          s.setSection('settings');
+          break;
+        case 'broadcast': {
+          const ws = s.tabs.find((x) => x.id === s.activeTab);
+          if (ws?.kind === 'workspace') s.updateTab(ws.id, { broadcast: !ws.broadcast });
+          break;
+        }
+        case 'splitMode': {
+          const ws = s.tabs.find((x) => x.id === s.activeTab);
+          if (ws?.kind === 'workspace')
+            s.updateTab(ws.id, { mode: ws.mode === 'split' ? 'focus' : 'split' });
+          break;
+        }
+        default: {
+          // Mod+1…9 everywhere, and Alt+1…9 outside Apple platforms as before.
+          const digit = /^Digit([1-9])$/.exec(e.code)?.[1];
+          const mod = apple ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey;
+          const alt = !apple && e.altKey && !e.ctrlKey && !e.metaKey;
+          if (digit && !e.shiftKey && ((mod && !e.altKey) || alt)) goToTab(Number(digit));
+          else handled = false;
+        }
+      }
       if (handled) {
         e.preventDefault();
         e.stopPropagation();
@@ -101,7 +161,7 @@ function useShortcuts(onLock: () => void) {
     };
     window.addEventListener('keydown', handler, { capture: true });
     return () => window.removeEventListener('keydown', handler, { capture: true });
-  }, [platform, app.paletteOpen, sessions, onLock]);
+  }, [platform, apple, sessions, onLock]);
 }
 
 function SectionView({

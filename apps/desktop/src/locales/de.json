@@ -411,7 +411,8 @@
     "snippets": "Snippet im aktuellen Tab ausführen",
     "tabs": "Offene Tabs",
     "title": "Befehlspalette",
-    "short": "Suchen …"
+    "short": "Suchen …",
+    "terminal": "Terminal"
   },
   "serial": {
     "baud": "Baudrate",
@@ -513,7 +514,27 @@
     "recordSessionsHint": "Verschlüsselte Aufzeichnung der Terminalausgabe. Tastatureingaben werden nicht aufgezeichnet.",
     "localShell": "Lokale Shell",
     "localShellHint": "Programm für lokale Terminals, z. B. /bin/zsh oder pwsh.exe. Leer lassen für die Systemvorgabe.",
-    "systemDefault": "Systemvorgabe"
+    "systemDefault": "Systemvorgabe",
+    "shortcutsHint": "Klicke auf + und drücke eine Tastenkombination, um ein Kürzel hinzuzufügen; fahre über ein Kürzel, um es zu entfernen. Terminal-Kürzel nehmen der Shell die Taste weg – entferne also die, die du dort brauchst (etwa Strg+R für die Verlaufssuche der Shell).",
+    "shortcutGroup": {
+      "tabs": "Tabs",
+      "app": "App",
+      "terminal": "Terminal",
+      "workspaces": "Arbeitsbereiche",
+      "fixed": "Eingebaut"
+    },
+    "shortcutPress": "Tasten drücken…",
+    "shortcutNone": "Nicht belegt",
+    "shortcutAdd": "Kürzel für {{action}} hinzufügen",
+    "shortcutRemove": "{{keys}} entfernen",
+    "shortcutReset": "Auf Standard zurücksetzen",
+    "shortcutResetAll": "Alle Kürzel zurücksetzen",
+    "shortcutConflict": "Auch belegt von: {{actions}}",
+    "shortcutGoTo": "Zu Tab 1–8 (9: letzter Tab)",
+    "shortcutLineStartEnd": "Zeilenanfang / -ende",
+    "shortcutWordJump": "Vorheriges / nächstes Wort",
+    "shortcutDeleteLine": "Bis Zeilenanfang löschen",
+    "shortcutAccept": "Vorschlag übernehmen"
   },
   "sftp": {
     "actions": "Aktionen",
@@ -570,14 +591,32 @@
     "jump": "Zu Tab oder Host springen",
     "local": "Lokales Terminal",
     "lock": "Tresor sperren",
-    "newTab": "Neuer Tab",
+    "newTab": "Neuer Terminal-Tab",
     "nextTab": "Nächster Tab",
     "palette": "Befehlspalette",
     "prevTab": "Vorheriger Tab",
     "search": "Im Terminal suchen",
     "settings": "Einstellungen",
     "sidePanel": "Seitenleiste ein/aus",
-    "splitMode": "Geteilt / Fokus umschalten"
+    "splitMode": "Geteilt / Fokus umschalten",
+    "connect": "Mit Host verbinden…",
+    "reopenTab": "Geschlossenen Tab wiederherstellen",
+    "duplicateTab": "Tab duplizieren",
+    "renameTab": "Tab umbenennen",
+    "moveTabLeft": "Tab nach links",
+    "moveTabRight": "Tab nach rechts",
+    "clear": "Terminal leeren",
+    "historySearch": "Befehlsverlauf durchsuchen",
+    "suggest": "Vorschläge anzeigen",
+    "aiCommand": "KI nach einem Befehl fragen",
+    "composer": "Befehlseditor öffnen",
+    "prevBlock": "Vorheriger Befehl",
+    "nextBlock": "Nächster Befehl",
+    "copyLastOutput": "Letzte Ausgabe kopieren",
+    "zoomIn": "Größere Schrift",
+    "zoomOut": "Kleinere Schrift",
+    "zoomReset": "Schriftgröße zurücksetzen",
+    "paste": "Einfügen"
   },
   "snippets": {
     "all": "Alle",
@@ -670,7 +709,13 @@
     "recent": "Letzte Verbindungen",
     "searchPlaceholder": "Hosts suchen oder ssh user@host eingeben",
     "sftp": "SFTP",
-    "vault": "Tresor"
+    "vault": "Tresor",
+    "rename": "Tab umbenennen",
+    "duplicate": "Duplizieren",
+    "closeTab": "Schließen",
+    "closeOthers": "Andere Tabs schließen",
+    "closeRight": "Tabs rechts schließen",
+    "reopen": "Geschlossenen Tab wiederherstellen"
   },
   "terminal": {
     "autocomplete": {
@@ -704,7 +749,8 @@
     "sessionClosed": "Sitzung beendet",
     "sidePanel": "Seitenleiste",
     "themeQuickOnly": "Speichere diese Verbindung als Host, um ihr Farbschema anzupassen.",
-    "themes": "Farbschemata"
+    "themes": "Farbschemata",
+    "installIntegration": "Befehlsblöcke in dieser Sitzung aktivieren"
   },
   "window": {
     "close": "Schließen",

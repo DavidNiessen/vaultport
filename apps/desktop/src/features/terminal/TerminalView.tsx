@@ -4,7 +4,7 @@
  * channel (base64 chunks, batched by the core); keystrokes go back through `session_write`.
  */
 import { Channel } from '@tauri-apps/api/core';
-import { writeText } from '@tauri-apps/plugin-clipboard-manager';
+import { readText, writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { openUrl } from '@tauri-apps/plugin-opener';
 import { FitAddon } from '@xterm/addon-fit';
 import { SearchAddon } from '@xterm/addon-search';
@@ -33,7 +33,9 @@ import { AuthPromptDialog, HostKeyDialog, type PendingPrompt } from './Prompts';
 import { highlightKeywords } from './highlight';
 import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from './settings';
 import { minimumContrast, terminalBackdrop, themeColors } from './themes';
-import { terminalRegistry } from './registry';
+import { terminalRegistry, type TerminalAction } from './registry';
+import { macEditingKeys } from './keys';
+import { actionFor, useKeymap } from '../palette/shortcuts';
 
 /** Where path suggestions can be listed for this tab. */
 function pathSource(tab: TerminalTab): PathSource {
@@ -76,11 +78,16 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     settingsRef.current = settings;
   }, [settings]);
 
+  /** Runs a terminal action; returns `false` when it does not apply right now. */
+  const runActionRef = useRef<(action: TerminalAction, e?: KeyboardEvent) => boolean>(() => false);
+
   const themeId = host?.config.terminal.theme ?? settings.theme;
   const preset = useApp((s) => s.preset);
   // Search matches use the preset colour for the current theme.
   const match = themeColors(themeId, scheme, preset).cursor ?? '#888888';
-  const fontSize = host?.config.terminal.fontSize ?? settings.fontSize;
+  const [zoom, setZoom] = useState(0);
+  const baseFontSize = host?.config.terminal.fontSize ?? settings.fontSize;
+  const fontSize = Math.min(40, Math.max(6, baseFontSize + zoom));
 
   // Create the terminal once.
   useEffect(() => {
@@ -212,22 +219,34 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       if (id) void commands.sessionResize(id, cols, rows).catch(() => undefined);
     });
     term.onTitleChange((title) => {
+      const current = useApp.getState().tabs.find((x) => x.id === tab.id);
+      if (current?.kind === 'terminal' && current.customTitle) return;
       if (title && settingsRef.current.remoteTitles) updateTab(tab.id, { title });
     });
     term.attachCustomKeyEventHandler((e) => {
       if (ac.handleKey(e)) return false;
       if (e.type !== 'keydown') return true;
-      const mod = e.ctrlKey || e.metaKey;
-      if (mod && e.shiftKey && e.key.toLowerCase() === 'f') {
-        setSearchOpen(true);
+      const { keymap, apple, recording } = useKeymap.getState();
+      if (recording) return true;
+      const action = actionFor(e, keymap, apple, 'terminal');
+      if (action && runActionRef.current(action as TerminalAction, e)) {
+        e.preventDefault();
         return false;
       }
+      const mod = e.ctrlKey || e.metaKey;
       if (mod && e.shiftKey && e.key.toLowerCase() === 'c' && term.hasSelection()) {
         void writeText(term.getSelection());
         return false;
       }
       if (e.metaKey && e.key.toLowerCase() === 'c' && term.hasSelection()) {
         void writeText(term.getSelection());
+        return false;
+      }
+      const seq = apple ? macEditingKeys(e) : null;
+      if (seq) {
+        e.preventDefault();
+        ac.noteInput(seq);
+        send(seq);
         return false;
       }
       return true;
@@ -244,6 +263,10 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       },
       focus: () => term.focus(),
       sessionId: () => sessionRef.current,
+      cwd: () => ac.cwd(),
+      action: (a) => {
+        runActionRef.current(a);
+      },
     });
     const ro = new ResizeObserver(() => {
       if (el.offsetParent !== null) fit.fit();
@@ -260,6 +283,42 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- created once per tab
   }, [tab.id]);
+
+  const runAction = (action: TerminalAction): boolean => {
+    const term = termRef.current;
+    if (!term) return false;
+    switch (action) {
+      case 'search':
+        setSearchOpen(true);
+        return true;
+      case 'clear':
+        term.clear();
+        acRef.current?.close();
+        return true;
+      case 'zoomIn':
+        setZoom((z) => z + 1);
+        return true;
+      case 'zoomOut':
+        setZoom((z) => z - 1);
+        return true;
+      case 'zoomReset':
+        setZoom(0);
+        return true;
+      case 'paste':
+        void readText()
+          .then((text) => {
+            if (text) term.paste(text);
+          })
+          .catch(() => undefined);
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  useEffect(() => {
+    runActionRef.current = runAction;
+  });
 
   // Live theme / font updates.
   useEffect(() => {
@@ -334,7 +393,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       tab.protocol === 'serial' && tab.serial
         ? ({ type: 'serial', ...tab.serial } as const)
         : tab.protocol === 'local'
-          ? ({ type: 'local' } as const)
+          ? ({ type: 'local', cwd: tab.cwd ?? null } as const)
           : tab.hostId
             ? ({ type: 'host', hostId: tab.hostId } as const)
             : ({
@@ -527,15 +586,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
             if (id) void commands.sessionWrite(id, seq);
             termRef.current?.focus();
           }}
-          onFontSize={(delta) => {
-            const term = termRef.current;
-            if (!term) return;
-            term.options.fontSize = Math.min(
-              32,
-              Math.max(8, (term.options.fontSize ?? 14) + delta),
-            );
-            fitRef.current?.fit();
-          }}
+          onFontSize={(delta) => setZoom((z) => z + delta)}
         />
       ) : null}
 

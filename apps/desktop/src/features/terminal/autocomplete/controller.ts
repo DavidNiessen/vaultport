@@ -42,6 +42,8 @@ export interface Autocomplete {
   pick: (index: number) => void;
   hover: (index: number) => void;
   close: () => void;
+  /** The shell's working directory, from OSC 7 / OSC 633 P. */
+  cwd: () => string | null;
   dispose: () => void;
 }
 
@@ -244,6 +246,7 @@ export function attachAutocomplete(term: Terminal, deps: AutocompleteDeps): Auto
       if (view && index !== view.selected) setView({ ...view, selected: index });
     },
     close,
+    cwd: () => cwd,
     dispose: () => {
       close();
       marker?.dispose();

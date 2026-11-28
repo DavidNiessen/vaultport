@@ -1145,7 +1145,12 @@ export type SessionTarget_Deserialize =
 /**  An ad-hoc `user@host:port` connection from the omnibox. */
 { type: "quick"; host: string; port?: number | null; username?: string | null } | 
 /**  A local shell (desktop only). */
-{ type: "local" } | 
+{ type: "local"; 
+/**
+ *  Directory to start in (e.g. that of the tab it was opened from). Ignored unless it
+ *  is an existing directory; the home directory is used otherwise.
+ */
+cwd?: string | null } | 
 /**  A serial port. */
 { type: "serial"; path: string; baudRate: number; dataBits: number; stopBits: number; parity: string; flowControl: string };
 
@@ -1156,7 +1161,12 @@ export type SessionTarget_Serialize =
 /**  An ad-hoc `user@host:port` connection from the omnibox. */
 { type: "quick"; host: string; port: number | null; username: string | null } | 
 /**  A local shell (desktop only). */
-{ type: "local" } | 
+{ type: "local"; 
+/**
+ *  Directory to start in (e.g. that of the tab it was opened from). Ignored unless it
+ *  is an existing directory; the home directory is used otherwise.
+ */
+cwd: string | null } | 
 /**  A serial port. */
 { type: "serial"; path: string; baudRate: number; dataBits: number; stopBits: number; parity: string; flowControl: string };
 

@@ -190,9 +190,9 @@ pub fn spawn(
     let (cols, rows) = (request.cols, request.rows);
     match request.target {
         #[cfg(desktop)]
-        SessionTarget::Local => local::spawn(app, id, cols, rows, input, sink),
+        SessionTarget::Local { cwd } => local::spawn(app, id, cwd, cols, rows, input, sink),
         #[cfg(mobile)]
-        SessionTarget::Local => Err(CmdError::new(
+        SessionTarget::Local { .. } => Err(CmdError::new(
             ErrorCode::Unsupported,
             "local terminals are not available on this platform",
         )),

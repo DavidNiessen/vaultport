@@ -411,7 +411,8 @@
     "snippets": "Run snippet in current tab",
     "tabs": "Open tabs",
     "title": "Command palette",
-    "short": "Search…"
+    "short": "Search…",
+    "terminal": "Terminal"
   },
   "serial": {
     "baud": "Baud rate",
@@ -513,7 +514,27 @@
     "recordSessionsHint": "Encrypted recordings of terminal output. Keyboard input is not recorded.",
     "localShell": "Local shell",
     "localShellHint": "Program for local terminals, e.g. /bin/zsh or pwsh.exe. Leave empty for the system default.",
-    "systemDefault": "System default"
+    "systemDefault": "System default",
+    "shortcutsHint": "Click + and press a key combination to add a shortcut; hover a shortcut to remove it. Terminal shortcuts take the key away from the shell, so remove any you need there (for example Ctrl+R for the shell's own history search).",
+    "shortcutGroup": {
+      "tabs": "Tabs",
+      "app": "App",
+      "terminal": "Terminal",
+      "workspaces": "Workspaces",
+      "fixed": "Built in"
+    },
+    "shortcutPress": "Press keys…",
+    "shortcutNone": "Not set",
+    "shortcutAdd": "Add a shortcut for {{action}}",
+    "shortcutRemove": "Remove {{keys}}",
+    "shortcutReset": "Reset to default",
+    "shortcutResetAll": "Reset all shortcuts",
+    "shortcutConflict": "Also used by: {{actions}}",
+    "shortcutGoTo": "Go to tab 1–8 (9: last tab)",
+    "shortcutLineStartEnd": "Start / end of line",
+    "shortcutWordJump": "Previous / next word",
+    "shortcutDeleteLine": "Delete to start of line",
+    "shortcutAccept": "Accept suggestion"
   },
   "sftp": {
     "actions": "Actions",
@@ -570,14 +591,32 @@
     "jump": "Jump to tab or host",
     "local": "Local terminal",
     "lock": "Lock vault",
-    "newTab": "New tab",
+    "newTab": "New terminal tab",
     "nextTab": "Next tab",
     "palette": "Command palette",
     "prevTab": "Previous tab",
     "search": "Search in terminal",
     "settings": "Settings",
     "sidePanel": "Toggle side panel",
-    "splitMode": "Toggle split / focus"
+    "splitMode": "Toggle split / focus",
+    "connect": "Connect to a host…",
+    "reopenTab": "Reopen closed tab",
+    "duplicateTab": "Duplicate tab",
+    "renameTab": "Rename tab",
+    "moveTabLeft": "Move tab left",
+    "moveTabRight": "Move tab right",
+    "clear": "Clear terminal",
+    "historySearch": "Search command history",
+    "suggest": "Show suggestions",
+    "aiCommand": "Ask AI for a command",
+    "composer": "Open command editor",
+    "prevBlock": "Previous command",
+    "nextBlock": "Next command",
+    "copyLastOutput": "Copy last output",
+    "zoomIn": "Larger text",
+    "zoomOut": "Smaller text",
+    "zoomReset": "Reset text size",
+    "paste": "Paste"
   },
   "snippets": {
     "all": "All",
@@ -670,7 +709,13 @@
     "recent": "Recent connections",
     "searchPlaceholder": "Search hosts or type ssh user@host",
     "sftp": "SFTP",
-    "vault": "Vault"
+    "vault": "Vault",
+    "rename": "Rename tab",
+    "duplicate": "Duplicate",
+    "closeTab": "Close",
+    "closeOthers": "Close other tabs",
+    "closeRight": "Close tabs to the right",
+    "reopen": "Reopen closed tab"
   },
   "terminal": {
     "autocomplete": {
@@ -704,7 +749,8 @@
     "sessionClosed": "Session closed",
     "sidePanel": "Side panel",
     "themeQuickOnly": "Save this connection as a host to customize its theme.",
-    "themes": "Themes"
+    "themes": "Themes",
+    "installIntegration": "Enable command blocks in this session"
   },
   "window": {
     "close": "Close",

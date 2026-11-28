@@ -38,6 +38,10 @@ export interface TerminalTab {
     | undefined;
   /** Workspace the terminal belongs to, if any. */
   workspace?: string | undefined;
+  /** Working directory to start a local shell in (e.g. inherited from another tab). */
+  cwd?: string | undefined;
+  /** The user renamed the tab: remote programs may no longer change its title. */
+  customTitle?: boolean | undefined;
 }
 
 export interface SftpTab {
@@ -69,6 +73,27 @@ export type Tab = TerminalTab | SftpTab | WorkspaceTab | LogTab;
 export const VAULT_TAB = 'vault';
 export const SFTP_TAB = 'sftp';
 
+/** Closed terminal tabs remembered for "Reopen closed tab". */
+const MAX_CLOSED = 20;
+
+/** A fresh, unconnected copy of a terminal tab (for duplicate and reopen). */
+export function cloneTerminal(tab: TerminalTab, id: string, cwd?: string): TerminalTab {
+  return {
+    id,
+    kind: 'terminal',
+    title: tab.title,
+    hostId: tab.hostId,
+    protocol: tab.protocol,
+    sessionId: null,
+    status: 'connecting',
+    unread: false,
+    quick: tab.quick,
+    serial: tab.serial,
+    cwd: cwd ?? tab.cwd,
+    customTitle: tab.customTitle,
+  };
+}
+
 interface AppState {
   theme: ThemePref;
   preset: PresetId;
@@ -84,6 +109,10 @@ interface AppState {
   paletteOpen: boolean;
   sidePanelOpen: boolean;
   newTabOpen: boolean;
+  /** Recently closed terminal tabs, newest last. */
+  closedTabs: TerminalTab[];
+  /** Tab whose title is being edited in the tab bar. */
+  renaming: string | null;
 
   setTheme: (t: ThemePref) => void;
   setPreset: (p: PresetId) => void;
@@ -96,6 +125,17 @@ interface AppState {
   openTab: (tab: Tab) => void;
   updateTab: (id: string, patch: Partial<Tab>) => void;
   closeTab: (id: string) => void;
+  /** Closes every session tab except `id`. */
+  closeOthers: (id: string) => void;
+  /** Closes the session tabs to the right of `id`. */
+  closeToRight: (id: string) => void;
+  /** Reopens the most recently closed terminal tab. Returns `false` if there is none. */
+  reopenClosed: () => boolean;
+  /** Opens a new connection like terminal tab `id`, right next to it. */
+  duplicateTab: (id: string, newId: string, cwd?: string) => void;
+  /** Renames a tab (an empty title gives control back to the remote program). */
+  renameTab: (id: string, title: string) => void;
+  setRenaming: (id: string | null) => void;
   activate: (id: string) => void;
   moveTab: (from: number, to: number) => void;
   setPaletteOpen: (o: boolean) => void;
@@ -119,6 +159,8 @@ export const useApp = create<AppState>()(
       paletteOpen: false,
       sidePanelOpen: false,
       newTabOpen: false,
+      closedTabs: [],
+      renaming: null,
 
       setTheme: (theme) => set({ theme }),
       setPreset: (preset) => set({ preset }),
@@ -141,13 +183,68 @@ export const useApp = create<AppState>()(
       closeTab: (id) => {
         const { tabs, activeTab } = get();
         const idx = tabs.findIndex((t) => t.id === id);
-        const next = tabs.filter((t) => t.id !== id);
+        const closing = tabs[idx];
+        if (!closing) return;
+        // A workspace takes its panes with it.
+        const gone = new Set([id, ...(closing.kind === 'workspace' ? closing.panes : [])]);
+        const next = tabs.filter((t) => !gone.has(t.id));
         let active = activeTab;
-        if (activeTab === id) {
-          active = next[Math.max(0, idx - 1)]?.id ?? VAULT_TAB;
+        if (gone.has(activeTab)) {
+          const visible = next.filter((t) => !(t.kind === 'terminal' && t.workspace));
+          const before = tabs
+            .slice(0, idx)
+            .filter((t) => !(t.kind === 'terminal' && t.workspace) && !gone.has(t.id));
+          active = before[before.length - 1]?.id ?? visible[0]?.id ?? VAULT_TAB;
         }
-        set({ tabs: next, activeTab: active });
+        const remembered =
+          closing.kind === 'terminal' && !closing.workspace
+            ? [...get().closedTabs, closing].slice(-MAX_CLOSED)
+            : get().closedTabs;
+        set({ tabs: next, activeTab: active, closedTabs: remembered });
       },
+      closeOthers: (id) => {
+        for (const t of get().tabs) {
+          if (t.id !== id && !(t.kind === 'terminal' && t.workspace)) get().closeTab(t.id);
+        }
+        get().activate(id);
+      },
+      closeToRight: (id) => {
+        const visible = get().tabs.filter((t) => !(t.kind === 'terminal' && t.workspace));
+        const i = visible.findIndex((t) => t.id === id);
+        if (i < 0) return;
+        for (const t of visible.slice(i + 1)) get().closeTab(t.id);
+      },
+      reopenClosed: () => {
+        const closed = [...get().closedTabs];
+        const last = closed.pop();
+        if (!last) return false;
+        const tab = cloneTerminal(last, crypto.randomUUID());
+        set((s) => ({ closedTabs: closed, tabs: [...s.tabs, tab], activeTab: tab.id }));
+        return true;
+      },
+      duplicateTab: (id, newId, cwd) => {
+        const { tabs } = get();
+        const i = tabs.findIndex((t) => t.id === id);
+        const tab = tabs[i];
+        if (tab?.kind !== 'terminal') return;
+        const copy = cloneTerminal({ ...tab, workspace: undefined }, newId, cwd);
+        const next = [...tabs];
+        next.splice(i + 1, 0, copy);
+        set({ tabs: next, activeTab: newId });
+      },
+      renameTab: (id, title) =>
+        set((s) => ({
+          renaming: null,
+          tabs: s.tabs.map((t) => {
+            if (t.id !== id) return t;
+            const trimmed = title.trim();
+            if (t.kind !== 'terminal') return trimmed ? { ...t, title: trimmed } : t;
+            return trimmed
+              ? { ...t, title: trimmed, customTitle: true }
+              : { ...t, customTitle: false };
+          }),
+        })),
+      setRenaming: (renaming) => set({ renaming }),
       activate: (activeTab) =>
         set((s) => ({
           activeTab,
