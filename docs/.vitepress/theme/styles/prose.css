@@ -1,0 +1,468 @@
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+/* Markdown content: typography, code blocks, containers, tables and code groups. */
+
+.prose {
+  font-size: 16.5px;
+  line-height: 1.75;
+  color: var(--text-2);
+  overflow-wrap: break-word;
+}
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+  position: relative;
+  color: var(--text);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  scroll-margin-top: calc(var(--nav-h) + 24px);
+}
+.prose h1 {
+  font-size: clamp(36px, 4.4vw, 52px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  margin-bottom: 20px;
+  text-wrap: balance;
+}
+.prose h2 {
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 64px 0 16px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+.prose h3 {
+  font-size: 20px;
+  line-height: 1.35;
+  margin: 40px 0 10px;
+  letter-spacing: -0.02em;
+}
+.prose h4 {
+  font-size: 16px;
+  margin: 28px 0 8px;
+  letter-spacing: -0.01em;
+}
+
+.prose .header-anchor {
+  position: absolute;
+  left: -1.1em;
+  padding-right: 0.3em;
+  color: var(--accent);
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.2s;
+  text-decoration: none;
+}
+.prose .header-anchor::before {
+  content: '#';
+}
+.prose h2 .header-anchor {
+  top: 28px;
+}
+.prose :is(h2, h3, h4):hover .header-anchor,
+.prose .header-anchor:focus-visible {
+  opacity: 1;
+}
+
+.prose p,
+.prose ul,
+.prose ol,
+.prose table,
+.prose blockquote,
+.prose details,
+.prose .custom-block,
+.prose div[class*='language-'],
+.prose .vp-code-group {
+  margin: 18px 0;
+}
+
+.prose strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.prose a {
+  color: var(--accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--accent) 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition:
+    text-decoration-color 0.2s,
+    color 0.2s;
+}
+.prose a:hover {
+  color: var(--accent-strong);
+  text-decoration-color: currentColor;
+}
+.prose a[target='_blank']:not(.header-anchor)::after {
+  content: '↗';
+  display: inline-block;
+  margin-left: 2px;
+  font-size: 0.8em;
+  opacity: 0.6;
+  text-decoration: none;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+.prose li {
+  margin: 6px 0;
+  padding-left: 0.2em;
+}
+.prose ul > li::marker {
+  color: var(--accent);
+}
+.prose ol > li::marker {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+.prose li > ul,
+.prose li > ol {
+  margin: 4px 0;
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+
+.prose blockquote {
+  margin-left: 0;
+  padding: 2px 0 2px 20px;
+  border-left: 2px solid var(--accent);
+  color: var(--text-2);
+}
+
+.prose img {
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+/* Inline code */
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  padding: 0.16em 0.42em;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  border: 1px solid color-mix(in oklab, var(--accent) 18%, transparent);
+}
+.prose a > code {
+  color: inherit;
+}
+
+/* Tables scroll on their own instead of widening the page. */
+.prose table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.prose th,
+.prose td {
+  padding: 12px 16px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+.prose th {
+  color: var(--text);
+  font-weight: 600;
+  background: var(--surface);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+.prose tr:last-child td {
+  border-bottom: 0;
+}
+.prose tbody tr {
+  transition: background-color 0.2s;
+}
+.prose tbody tr:hover {
+  background: var(--surface);
+}
+.prose td:first-child {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Code blocks (Shiki output with both themes as CSS variables) */
+.prose div[class*='language-'] {
+  position: relative;
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.prose div[class*='language-']::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgb(var(--glow-1) / 0.6), transparent);
+  opacity: 0.6;
+}
+.prose pre {
+  margin: 0;
+  padding: 20px 22px;
+  overflow-x: auto;
+  background: transparent !important;
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.7;
+  tab-size: 2;
+}
+.prose pre code {
+  display: block;
+  width: fit-content;
+  min-width: 100%;
+  font-family: inherit;
+}
+.vp-code span {
+  color: var(--shiki-light, inherit);
+}
+html.dark .vp-code span {
+  color: var(--shiki-dark, inherit);
+}
+.prose div[class*='language-'] > span.lang {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-3);
+  transition: opacity 0.25s;
+  pointer-events: none;
+}
+.prose div[class*='language-'] > button.copy {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23908da3' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E")
+    center / 16px no-repeat;
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    opacity 0.2s,
+    transform 0.3s var(--ease-spring),
+    border-color 0.2s;
+}
+.prose div[class*='language-']:hover > button.copy,
+.prose div[class*='language-'] > button.copy:focus-visible {
+  opacity: 1;
+  transform: none;
+}
+.prose div[class*='language-']:hover > span.lang {
+  opacity: 0;
+}
+.prose div[class*='language-'] > button.copy:hover {
+  border-color: var(--border-strong);
+}
+.prose div[class*='language-'] > button.copy.copied {
+  opacity: 1;
+  transform: none;
+  border-color: color-mix(in oklab, var(--ok) 50%, transparent);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235fd69b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+}
+.prose div[class*='language-'] > button.copy.copied::before {
+  content: 'Copied';
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  color: var(--ok);
+  white-space: nowrap;
+  animation: pop-in 0.3s var(--ease-spring);
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translate(6px, -50%) scale(0.9);
+  }
+}
+
+/* Code groups: tabs are radio inputs handled by VitePress' runtime. */
+.prose .vp-code-group {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--code-bg);
+  overflow: hidden;
+}
+.prose .vp-code-group .tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px 0;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+}
+.prose .vp-code-group .tabs input {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+}
+.prose .vp-code-group .tabs label {
+  position: relative;
+  padding: 8px 14px 10px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--text-3);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.prose .vp-code-group .tabs label::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transition: transform 0.35s var(--ease-out);
+}
+.prose .vp-code-group .tabs label:hover {
+  color: var(--text-2);
+}
+.prose .vp-code-group .tabs input:checked + label {
+  color: var(--text);
+}
+.prose .vp-code-group .tabs input:checked + label::after {
+  transform: scaleX(1);
+}
+.prose .vp-code-group .tabs input:focus-visible + label {
+  outline: 2px solid var(--accent);
+  outline-offset: -4px;
+  border-radius: 8px;
+}
+.prose .vp-code-group div[class*='language-'] {
+  display: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.prose .vp-code-group div[class*='language-'].active {
+  display: block;
+  animation: page-in 0.35s var(--ease-out);
+}
+
+/* Custom containers: ::: tip / info / warning / danger / details */
+.prose .custom-block {
+  --tone: var(--accent);
+  position: relative;
+  padding: 16px 20px 16px 52px;
+  border-radius: var(--radius);
+  border: 1px solid color-mix(in oklab, var(--tone) 28%, transparent);
+  background:
+    radial-gradient(
+      120% 140% at 0% 0%,
+      color-mix(in oklab, var(--tone) 12%, transparent),
+      transparent 60%
+    ),
+    var(--surface);
+  font-size: 15px;
+  line-height: 1.65;
+}
+.prose .custom-block::before {
+  content: '';
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  width: 20px;
+  height: 20px;
+  background: var(--tone);
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+}
+.prose .custom-block.info {
+  --tone: var(--accent-2);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='M12 16v-4M12 8h.01'/%3E%3C/svg%3E");
+}
+.prose .custom-block.tip {
+  --tone: var(--ok);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5M9 18h6M10 22h4'/%3E%3C/svg%3E");
+}
+.prose .custom-block.warning {
+  --tone: var(--warn);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3M12 9v4M12 17h.01'/%3E%3C/svg%3E");
+}
+.prose .custom-block.danger {
+  --tone: var(--danger);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7.9 2h8.2L22 7.9v8.2L16.1 22H7.9L2 16.1V7.9zM12 8v4M12 16h.01'/%3E%3C/svg%3E");
+}
+.prose .custom-block.details {
+  --tone: var(--text-3);
+  --icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E");
+}
+.prose details.custom-block::before {
+  transition: transform 0.3s var(--ease-out);
+}
+.prose details.custom-block[open]::before {
+  transform: rotate(90deg);
+}
+.prose .custom-block-title {
+  margin: 0 0 4px;
+  font-weight: 600;
+  color: var(--text);
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
+.prose details > summary.custom-block-title {
+  cursor: pointer;
+  list-style: none;
+  margin: 0;
+}
+.prose details > summary::-webkit-details-marker {
+  display: none;
+}
+.prose details[open] > summary {
+  margin-bottom: 8px;
+}
+.prose .custom-block > p {
+  margin: 6px 0;
+}
+.prose .custom-block > :last-child {
+  margin-bottom: 0;
+}
+.prose .custom-block div[class*='language-'] {
+  margin: 10px 0;
+}
+
+/* Markdown below a landing component (the download page's verification guide). */
+.prose.download-doc {
+  max-width: 820px;
+  margin: 72px auto 0;
+  padding: 0 var(--gutter);
+}

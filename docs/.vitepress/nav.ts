@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /** Navigation and sidebar. The sidebar order is also the order of llms.txt and llms-full.txt. */
-import type { DefaultTheme } from 'vitepress';
 
 export interface DocSection {
   text: string;
@@ -75,13 +74,16 @@ export const sections: DocSection[] = [
   },
 ];
 
-export const sidebar: DefaultTheme.Sidebar = {
-  '/': sections.map((s) => ({ text: s.text, collapsed: false, items: s.items })),
-};
+export interface NavLink {
+  text: string;
+  link: string;
+  /** Pages under these path prefixes mark the link as active. */
+  match: RegExp;
+}
 
-export const nav: DefaultTheme.NavItem[] = [
-  { text: 'Docs', link: '/guide/', activeMatch: '^/(guide|concepts|faq)' },
-  { text: 'Security', link: '/security/', activeMatch: '^/security/' },
-  { text: 'Develop', link: '/development/building', activeMatch: '^/(development|architecture)' },
-  { text: 'Download', link: '/download' },
+export const navLinks: NavLink[] = [
+  { text: 'Docs', link: '/guide/', match: /^\/(guide|concepts|faq)/ },
+  { text: 'Security', link: '/security/', match: /^\/security\// },
+  { text: 'Develop', link: '/development/building', match: /^\/(development|architecture)/ },
+  { text: 'Download', link: '/download', match: /^\/download/ },
 ];

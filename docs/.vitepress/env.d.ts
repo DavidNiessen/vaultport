@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /// <reference types="vitepress/client" />
 
-import type { vReveal } from './theme/composables/reveal';
+import type { vMagnetic, vReveal, vSpotlight, vTilt } from './theme/composables/motion';
 
 declare module 'vue' {
   interface GlobalDirectives {
     vReveal: typeof vReveal;
+    vSpotlight: typeof vSpotlight;
+    vMagnetic: typeof vMagnetic;
+    vTilt: typeof vTilt;
   }
 }
 
