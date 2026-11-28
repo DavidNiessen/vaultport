@@ -137,6 +137,11 @@ pub struct Completion {
     pub expected: Option<ArgKind>,
     /// Set when path suggestions are missing because the listing was not available.
     pub needs_paths: Option<NeedsPaths>,
+    /// Canonical names of the command and subcommands the cursor is in (after wrappers such
+    /// as `sudo`), e.g. `["git", "checkout"]`. The first entry may be a command without a
+    /// spec. Lets the app pick a generator for [`Self::expected`].
+    #[serde(default)]
+    pub command_path: Vec<String>,
     #[serde(skip)]
     open_quote: Option<char>,
     #[serde(skip)]
@@ -164,6 +169,42 @@ impl Completion {
         }
         finalize(&mut self.suggestions, self.limit);
     }
+
+    /// Like [`Self::add_values`], with a description per value. Fuzzy matches are kept too,
+    /// ranked below prefix matches.
+    pub fn add_described<S: AsRef<str>, D: AsRef<str>>(
+        &mut self,
+        values: impl IntoIterator<Item = (S, Option<D>)>,
+    ) {
+        for (v, d) in values.into_iter().take(MAX_ENTRIES) {
+            let v = v.as_ref();
+            if v == self.current {
+                continue;
+            }
+            if let Some(bonus) = match_bonus(&self.current, v) {
+                self.suggestions.push(Suggestion {
+                    text: quote_word(self.open_quote, v, false),
+                    replace: self.replace.clone(),
+                    label: v.to_owned(),
+                    description: d.map(|d| d.as_ref().to_owned()),
+                    kind: SuggestionKind::Value,
+                    score: SCORE_VALUE + bonus,
+                    snippet_id: None,
+                });
+            }
+        }
+        finalize(&mut self.suggestions, self.limit);
+    }
+}
+
+/// A command that exists on the machine the shell runs on (an executable on `PATH`, a
+/// builtin, an alias or a function).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct KnownCommand {
+    pub name: String,
+    /// E.g. "executable in /usr/bin", "shell builtin", or what an alias expands to.
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -181,6 +222,10 @@ pub struct Completer {
     specs: Cow<'static, SpecSet>,
     history: HistoryIndex,
     snippets: Vec<SnippetEntry>,
+    /// Commands found on the machine (sorted by name, no duplicates).
+    commands: Vec<KnownCommand>,
+    /// Environment variables for `$NAME` completion.
+    env: Vec<crate::generators::Value>,
     limit: usize,
 }
 
@@ -198,6 +243,8 @@ impl Completer {
             specs: Cow::Borrowed(SpecSet::builtin()),
             history: HistoryIndex::new(),
             snippets: Vec::new(),
+            commands: Vec::new(),
+            env: crate::generators::env_values(std::iter::empty()),
             limit: DEFAULT_LIMIT,
         }
     }
@@ -246,6 +293,34 @@ impl Completer {
             .collect();
     }
 
+    /// Sets the commands that exist on the machine (from `PATH`, builtins, aliases), offered
+    /// at the command position next to the commands with a spec.
+    pub fn set_commands(&mut self, commands: impl IntoIterator<Item = KnownCommand>) {
+        let mut list: Vec<KnownCommand> = commands
+            .into_iter()
+            .filter(|c| !c.name.is_empty() && !c.name.contains(['/', ' ', '\n']))
+            .take(MAX_ENTRIES)
+            .collect();
+        list.sort_by(|a, b| a.name.cmp(&b.name));
+        list.dedup_by(|a, b| a.name == b.name);
+        self.commands = list;
+    }
+
+    /// The commands set with [`Self::set_commands`].
+    #[must_use]
+    pub fn commands(&self) -> &[KnownCommand] {
+        &self.commands
+    }
+
+    /// Sets the environment variables offered after `$` (name, value). Common variables are
+    /// always included.
+    pub fn set_environment<'a>(
+        &mut self,
+        vars: impl IntoIterator<Item = (&'a str, Option<&'a str>)>,
+    ) {
+        self.env = crate::generators::env_values(vars);
+    }
+
     /// Sets the maximum number of suggestions (at least 1).
     pub fn set_limit(&mut self, limit: usize) {
         self.limit = limit.max(1);
@@ -274,6 +349,7 @@ impl Completer {
             current: ctx.current.clone(),
             expected: None,
             needs_paths: None,
+            command_path: Vec::new(),
             open_quote: ctx.open_quote,
             limit: self.limit,
         };
@@ -387,6 +463,9 @@ impl Completer {
         out: &mut Completion,
     ) {
         let cur = ctx.current.as_str();
+        if self.env_suggestions(line, ctx, out) {
+            return;
+        }
         if ctx.after_redirect {
             out.expected = Some(ArgKind::Path);
             path_suggestions(ctx, false, paths, out);
@@ -402,11 +481,15 @@ impl Completer {
                     self.command_names(ctx, out);
                 }
             }
-            Position::Unknown => {
+            Position::Unknown(name) => {
+                out.command_path = vec![name];
                 out.expected = Some(ArgKind::Path);
                 path_suggestions(ctx, false, paths, out);
             }
-            Position::InSpec(r) => self.in_spec(line, ctx, &r, paths, out),
+            Position::InSpec(r) => {
+                out.command_path = r.chain.iter().map(|c| c.name().to_owned()).collect();
+                self.in_spec(line, ctx, &r, paths, out);
+            }
         }
     }
 
@@ -415,22 +498,103 @@ impl Completer {
         if cur.is_empty() {
             return; // History covers the empty command position.
         }
+        let mut named: std::collections::HashSet<&str> = std::collections::HashSet::new();
         for (name, spec) in self.specs.names() {
-            if let Some(bonus) = prefix_bonus(cur, name) {
-                if name == cur {
-                    continue;
-                }
+            named.insert(name);
+            if name == cur {
+                continue;
+            }
+            if let Some(bonus) = match_bonus(cur, name) {
+                // A spec'd command that is known to be missing on this machine ranks lower.
+                let missing = !self.commands.is_empty()
+                    && self
+                        .commands
+                        .binary_search_by(|c| c.name.as_str().cmp(name))
+                        .is_err();
                 out.suggestions.push(Suggestion {
                     text: quote_word(ctx.open_quote, name, false),
                     replace: ctx.replace.clone(),
                     label: name.to_owned(),
                     description: Some(spec.description.clone()),
                     kind: SuggestionKind::Command,
-                    score: SCORE_COMMAND + bonus,
+                    score: SCORE_COMMAND + bonus - if missing { 60.0 } else { 0.0 },
                     snippet_id: None,
                 });
             }
         }
+        for c in &self.commands {
+            if named.contains(c.name.as_str()) || c.name == cur {
+                continue;
+            }
+            if let Some(bonus) = match_bonus(cur, &c.name) {
+                out.suggestions.push(Suggestion {
+                    text: quote_word(ctx.open_quote, &c.name, false),
+                    replace: ctx.replace.clone(),
+                    label: c.name.clone(),
+                    description: c.description.clone(),
+                    kind: SuggestionKind::Command,
+                    // Below spec'd commands, which come with subcommands and options.
+                    score: SCORE_COMMAND - 1.0 + bonus,
+                    snippet_id: None,
+                });
+            }
+        }
+    }
+
+    /// `$NAME` / `${NAME` at the cursor: suggests environment variables. Returns whether the
+    /// word is a variable reference (then nothing else is suggested).
+    fn env_suggestions(&self, line: &str, ctx: &CommandContext, out: &mut Completion) -> bool {
+        if ctx.open_quote == Some('\'') {
+            return false;
+        }
+        let Some(raw) = line.get(ctx.replace.clone()) else {
+            return false;
+        };
+        let Some(dollar) = raw.rfind('$') else {
+            return false;
+        };
+        let after = &raw[dollar + 1..];
+        let (brace, name) = match after.strip_prefix('{') {
+            Some(n) => (true, n),
+            None => (false, after),
+        };
+        if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+            return false;
+        }
+        let start = ctx.replace.start + dollar + 1 + usize::from(brace);
+        let replace = start..ctx.replace.end;
+        for v in &self.env {
+            if v.value == name {
+                continue;
+            }
+            // Special parameters ($?, $$, $!) only make sense right after `$`.
+            let special = !v
+                .value
+                .starts_with(|c: char| c.is_ascii_alphanumeric() || c == '_');
+            if special && (brace || !name.is_empty()) {
+                continue;
+            }
+            let Some(bonus) = match_bonus(name, &v.value) else {
+                continue;
+            };
+            let text = if brace {
+                format!("{}}}", v.value)
+            } else {
+                v.value.clone()
+            };
+            out.suggestions.push(Suggestion {
+                text,
+                replace: replace.clone(),
+                label: format!("${}", v.value),
+                description: v.description.clone(),
+                kind: SuggestionKind::Value,
+                score: SCORE_VALUE + bonus,
+                snippet_id: None,
+            });
+        }
+        out.replace = replace;
+        name.clone_into(&mut out.current);
+        true
     }
 
     fn in_spec(
@@ -492,7 +656,12 @@ impl Completer {
                 let hit = sub
                     .names
                     .iter()
-                    .find_map(|n| prefix_bonus(cur, n).map(|b| (n, b)));
+                    .find_map(|n| prefix_bonus(cur, n).map(|b| (n, b)))
+                    .or_else(|| {
+                        sub.names
+                            .iter()
+                            .find_map(|n| match_bonus(cur, n).map(|b| (n, b)))
+                    });
                 if let Some((name, bonus)) = hit {
                     out.suggestions.push(Suggestion {
                         text: quote_word(ctx.open_quote, name, false),
@@ -540,9 +709,38 @@ fn prefix_bonus(prefix: &str, candidate: &str) -> Option<f64> {
     }
 }
 
+/// [`prefix_bonus`], or for queries of two or more characters a fuzzy (subsequence) match
+/// ranked well below prefix matches.
+fn match_bonus(query: &str, candidate: &str) -> Option<f64> {
+    if let Some(b) = prefix_bonus(query, candidate) {
+        return Some(b);
+    }
+    if query.chars().count() < 2 || !query.is_ascii() {
+        return None;
+    }
+    // Typing starts with the first letter: `chk` may mean `checkout`, not `bucket`.
+    let (Some(q0), Some(c0)) = (query.bytes().next(), candidate.bytes().next()) else {
+        return None;
+    };
+    if !q0.eq_ignore_ascii_case(&c0) {
+        return None;
+    }
+    let q = query.to_ascii_lowercase();
+    fuzzy_quality(q.as_bytes(), candidate.as_bytes()).map(|quality| -40.0 + 10.0 * quality)
+}
+
+/// Fuzzy match for long options, ignoring the dashes: needs three letters after `--`.
+fn option_fuzzy(query: &str, candidate: &str) -> Option<f64> {
+    let (q, c) = (query.strip_prefix("--")?, candidate.strip_prefix("--")?);
+    if q.len() < 3 {
+        return None;
+    }
+    match_bonus(q, c)
+}
+
 fn values(ctx: &CommandContext, vals: &[String], replace: Range<usize>, out: &mut Completion) {
     for v in vals {
-        if let Some(bonus) = prefix_bonus(&ctx.current, v) {
+        if let Some(bonus) = match_bonus(&ctx.current, v) {
             out.suggestions.push(Suggestion {
                 text: quote_word(ctx.open_quote, v, false),
                 replace: replace.clone(),
@@ -574,7 +772,13 @@ fn option_suggestions(ctx: &CommandContext, r: &Resolved<'_>, out: &mut Completi
                 .names
                 .iter()
                 .filter(|n| !long_only || n.starts_with("--"))
-                .find_map(|n| prefix_bonus(cur, n).map(|b| (n, b)));
+                .find_map(|n| prefix_bonus(cur, n).map(|b| (n, b)))
+                .or_else(|| {
+                    // `--fwl` finds `--force-with-lease`.
+                    opt.names
+                        .iter()
+                        .find_map(|n| option_fuzzy(cur, n).map(|b| (n, b)))
+                });
             if let Some((name, bonus)) = pick {
                 if name == cur {
                     continue;
@@ -739,7 +943,7 @@ enum Position<'s> {
     /// Completing the command name itself.
     CommandName,
     /// The command has no spec.
-    Unknown,
+    Unknown(String),
     InSpec(Resolved<'s>),
 }
 
@@ -766,7 +970,7 @@ fn resolve<'s>(specs: &'s SpecSet, words: &[String]) -> Position<'s> {
         };
         let name = first.rsplit('/').next().unwrap_or(first);
         let Some(spec) = specs.get(name) else {
-            return Position::Unknown;
+            return Position::Unknown(name.to_owned());
         };
         let mut r = Resolved {
             chain: vec![spec],
@@ -1090,6 +1294,92 @@ mod tests {
         // Target is < 2 ms in release builds; generous bound for debug/CI machines.
         let bound = if cfg!(debug_assertions) { 300 } else { 10 };
         assert!(best.as_millis() < bound, "took {best:?}");
+    }
+
+    #[test]
+    fn commands_found_on_the_machine() {
+        let mut comp = Completer::new();
+        comp.set_commands([
+            KnownCommand {
+                name: "zoxide".into(),
+                description: Some("executable in /usr/bin".into()),
+            },
+            KnownCommand {
+                name: "git".into(),
+                description: None,
+            },
+            KnownCommand {
+                name: "bad/name".into(),
+                description: None,
+            },
+        ]);
+        assert_eq!(comp.commands().len(), 2);
+        let c = comp.complete("zox", 3, NOW);
+        assert_eq!(labels(&c), ["zoxide"]);
+        assert_eq!(
+            c.suggestions[0].description.as_deref(),
+            Some("executable in /usr/bin")
+        );
+        // A spec'd command that is not installed ranks below one that is.
+        let c = comp.complete("g", 1, NOW);
+        let git = c.suggestions.iter().position(|s| s.label == "git");
+        let gem = c.suggestions.iter().position(|s| s.label == "gzip");
+        if let (Some(git), Some(gem)) = (git, gem) {
+            assert!(git < gem);
+        }
+    }
+
+    #[test]
+    fn fuzzy_subcommands_and_long_options() {
+        let comp = Completer::new();
+        let c = comp.complete("git chkout", 10, NOW);
+        assert!(labels(&c).contains(&"checkout"), "{:?}", labels(&c));
+        let c = comp.complete("git push --fwl", 14, NOW);
+        assert_eq!(texts(&c).first(), Some(&"--force-with-lease"));
+        // Prefix matches beat fuzzy ones.
+        let c = comp.complete("git st", 6, NOW);
+        assert!(labels(&c)[0].starts_with("st"));
+    }
+
+    #[test]
+    fn environment_variables() {
+        let mut comp = Completer::new();
+        comp.set_environment([("MY_TOKEN_FILE", Some("/run/x")), ("MYSQL_HOST", None)]);
+        let line = "echo $MY";
+        let c = comp.complete(line, line.len(), NOW);
+        assert_eq!(labels(&c)[..2], ["$MYSQL_HOST", "$MY_TOKEN_FILE"]);
+        assert_eq!(c.suggestions[0].replace, 6..8);
+        assert_eq!(c.suggestions[0].text, "MYSQL_HOST");
+        let line = "cd \"${HO";
+        let c = comp.complete(line, line.len(), NOW);
+        assert_eq!(texts(&c), ["HOME}", "HOSTNAME}"]);
+        // Not inside single quotes.
+        let line = "echo '$HO";
+        let c = comp.complete(line, line.len(), NOW);
+        assert!(!texts(&c).contains(&"HOME"));
+    }
+
+    #[test]
+    fn command_path_names_the_command() {
+        let comp = Completer::new();
+        let line = "sudo git checkout ";
+        let c = comp.complete(line, line.len(), NOW);
+        assert_eq!(c.command_path, ["git", "checkout"]);
+        let line = "mytool --x ";
+        let c = comp.complete(line, line.len(), NOW);
+        assert_eq!(c.command_path, ["mytool"]);
+        let mut c = comp.complete("git checkout ma", 15, NOW);
+        assert_eq!(c.expected, Some(ArgKind::Ref));
+        c.add_described([
+            ("main", Some("current branch")),
+            ("feature/x", None),
+            ("master", None),
+        ]);
+        assert_eq!(labels(&c), ["main", "master"]);
+        assert_eq!(
+            c.suggestions[0].description.as_deref(),
+            Some("current branch")
+        );
     }
 
     #[test]
