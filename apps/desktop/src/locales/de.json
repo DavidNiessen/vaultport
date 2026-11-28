@@ -834,7 +834,9 @@
       "noAnswer": "Die Shell hat nicht geantwortet. Die Shell-Integration funktioniert mit bash und zsh an einer Eingabeaufforderung.",
       "unsupported": "Diese Shell wird noch nicht unterstützt (bash und zsh schon)",
       "enabled": "Befehlsblöcke sind für diese {{shell}}-Sitzung aktiv"
-    }
+    },
+    "didYouMean": "Meintest du",
+    "edit": "Bearbeiten"
   },
   "window": {
     "close": "Schließen",

@@ -834,7 +834,9 @@
       "noAnswer": "The shell did not answer. Shell integration works with bash and zsh at a prompt.",
       "unsupported": "This shell is not supported yet (bash and zsh are)",
       "enabled": "Command blocks are on for this {{shell}} session"
-    }
+    },
+    "didYouMean": "Did you mean",
+    "edit": "Edit"
   },
   "window": {
     "close": "Close",

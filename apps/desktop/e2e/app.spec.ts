@@ -100,6 +100,15 @@ test('shows commands as blocks, searches history and suggests inline', async ({
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();
 
+  // A mistyped command offers the closest installed one.
+  await page.locator('.xterm-helper-textarea').first().focus();
+  await page.keyboard.type('gti status\r');
+  const fix = page.getByTestId('did-you-mean');
+  await expect(fix).toContainText('git status');
+  await fix.getByRole('button', { name: 'Run' }).click();
+  await expect(fix).toBeHidden();
+  await expect.poll(text).toContain('$ git status');
+
   // Ctrl+R searches the command history.
   await page.locator('.xterm-helper-textarea').first().focus();
   await page.keyboard.press('Control+r');

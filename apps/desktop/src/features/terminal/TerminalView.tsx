@@ -13,7 +13,15 @@ import { WebLinksAddon } from '@xterm/addon-web-links';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { Terminal } from '@xterm/xterm';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowUpToLine, ChevronDown, ChevronUp, Loader2, RotateCw, X } from 'lucide-react';
+import {
+  ArrowUpToLine,
+  ChevronDown,
+  Lightbulb,
+  ChevronUp,
+  Loader2,
+  RotateCw,
+  X,
+} from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -39,6 +47,7 @@ import {
 import { BlockMenu, type BlockMenuView } from './BlockMenu';
 import { attachBlocks, blockText, formatDuration, type Block, type BlockTracker } from './blocks';
 import { Composer } from './Composer';
+import { closestCommand, fixCommandLine, isNotFound } from './didYouMean';
 import { HistorySearch } from './HistorySearch';
 import { attachInputHighlight, solidColor, type InputHighlighter } from './inputHighlight';
 import { DEFAULT_AI_SETTINGS, type AiSettings } from '../ai/settings';
@@ -92,6 +101,8 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   const [overlay, setOverlay] = useState<Overlay | null>(null);
   const [blockMenu, setBlockMenu] = useState<BlockMenuView | null>(null);
   const [sticky, setSticky] = useState<{ id: number; command: string } | null>(null);
+  /** A corrected command line after "command not found". */
+  const [didYouMean, setDidYouMean] = useState<string | null>(null);
   const blocksRef = useRef<BlockTracker | null>(null);
   const highlightRef = useRef<InputHighlighter | null>(null);
   /** Commands that exist on the machine (null: not known yet). */
@@ -312,6 +323,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     });
 
     term.onData((data) => {
+      setDidYouMean(null);
       ac.noteInput(data);
       // Enter: the line as coloured now is the command that runs.
       if (data === '\r') highlighter.freeze();
@@ -429,6 +441,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     (text: string, run: boolean) => {
       const term = termRef.current;
       setOverlay(null);
+      setDidYouMean(null);
       term?.focus();
       writeSession(CLEAR_LINE);
       if (text.includes('\n')) {
@@ -507,6 +520,12 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   const onBlockFinished = (b: Block) => {
     const first = b.command.trim().split(/\s+/)[0];
     if (first && b.exit === 0) knownRef.current?.add(first);
+    const known = knownRef.current;
+    if (first && known && !known.has(first)) {
+      const output = blocksRef.current?.outputOf(b) ?? '';
+      const fixed = isNotFound(b.exit, output) ? closestCommand(first, known) : null;
+      setDidYouMean(fixed ? fixCommandLine(b.command.trim(), fixed) : null);
+    } else setDidYouMean(null);
     const secs = settingsRef.current.notifyAfterSeconds;
     const ms = b.startedAt !== null && b.finishedAt !== null ? b.finishedAt - b.startedAt : 0;
     const away = !document.hasFocus() || useApp.getState().activeTab !== tab.id || !active;
@@ -651,9 +670,9 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         case 'status':
           if (ev.status === 'connected') {
             updateTab(tab.id, { status: 'connected' });
+            void loadKnownCommands();
             setTimeout(() => {
               if (disposed) return;
-              void loadKnownCommands();
               if (
                 (tab.protocol === 'ssh' || tab.protocol === 'mosh') &&
                 settingsRef.current.sshIntegration === 'auto' &&
@@ -867,6 +886,35 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
           <ArrowUpToLine className="size-3.5 shrink-0" aria-hidden />
           <span className="truncate">{sticky.command}</span>
         </button>
+      ) : null}
+
+      {didYouMean && !overlay ? (
+        <div
+          role="status"
+          data-testid="did-you-mean"
+          className="bg-surface-2/95 border-border animate-fade-in absolute right-4 bottom-3 z-20 flex max-w-[calc(100%-2rem)] items-center gap-2 rounded-full border py-1 pr-1 pl-3 text-[13px] shadow-[var(--shadow)] backdrop-blur-md"
+        >
+          <Lightbulb className="text-warning size-4 shrink-0" aria-hidden />
+          <span className="text-muted shrink-0">{t('terminal.didYouMean')}</span>
+          <code className="text-text min-w-0 truncate font-mono">{didYouMean}</code>
+          <Button size="sm" variant="primary" onClick={() => putLine(didYouMean, true)}>
+            {t('terminal.run')}
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => putLine(didYouMean, false)}>
+            {t('terminal.edit')}
+          </Button>
+          <Button
+            size="icon-sm"
+            variant="ghost"
+            aria-label={t('common.close')}
+            onClick={() => {
+              setDidYouMean(null);
+              termRef.current?.focus();
+            }}
+          >
+            <X className="size-3.5" />
+          </Button>
+        </div>
       ) : null}
 
       {ghost && !overlay ? (
