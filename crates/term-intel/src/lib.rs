@@ -11,7 +11,7 @@
 //!   the machine, environment variables and paths).
 //! * [`generators`]: argument values (git branches, npm scripts, make targets, users, SSH
 //!   hosts, services, …) parsed from small files the app reads over the local disk or SFTP.
-//! * [`spec`]: the command spec model. The built-in specs for about 60 common commands are in
+//! * [`spec`]: the command spec model. The built-in specs for about 300 common commands are in
 //!   `specs/commands.json`; JSON cannot carry an SPDX header, so note that this file is part
 //!   of this crate and licensed GPL-3.0-or-later like the rest of it.
 //! * [`risk`]: deterministic [`assess_risk`] rating of command lines.

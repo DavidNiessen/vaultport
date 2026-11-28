@@ -323,7 +323,7 @@ static BUILTIN: LazyLock<SpecSet> =
     LazyLock::new(|| SpecSet::from_json(BUILTIN_JSON).unwrap_or_default());
 
 impl SpecSet {
-    /// The built-in specs (about 60 common commands).
+    /// The built-in specs (about 300 common commands).
     #[must_use]
     pub fn builtin() -> &'static SpecSet {
         &BUILTIN
@@ -399,7 +399,7 @@ mod tests {
     #[test]
     fn builtin_specs_parse_and_cover_common_commands() {
         let set = SpecSet::from_json(BUILTIN_JSON).unwrap();
-        assert!(set.len() >= 60, "{}", set.len());
+        assert!(set.len() >= 300, "{}", set.len());
         for name in [
             "git",
             "docker",
@@ -468,6 +468,26 @@ mod tests {
             "vi",
             "podman",
             "head",
+            "docker-compose",
+            "gh",
+            "rg",
+            "jq",
+            "ffmpeg",
+            "uv",
+            "go",
+            "rustup",
+            "bun",
+            "deno",
+            "xargs",
+            "timeout",
+            "openssl",
+            "open",
+            "defaults",
+            "launchctl",
+            "diskutil",
+            "pbcopy",
+            "caffeinate",
+            "winget",
         ] {
             assert!(set.get(name).is_some(), "missing spec for {name}");
         }
