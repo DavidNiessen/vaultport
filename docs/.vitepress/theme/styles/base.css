@@ -349,7 +349,7 @@ figure {
     filter 0.9s var(--ease-out);
   transition-delay: var(--reveal-delay, 0ms);
 }
-.js [data-reveal].is-visible {
+.js [data-reveal='in'] {
   opacity: 1;
   transform: none;
   filter: none;
