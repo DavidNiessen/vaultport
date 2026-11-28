@@ -46,7 +46,7 @@ The pinned Vault and SFTP tabs count as tabs 1 and 2. **New terminal tab** opens
 | ----------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
 | Search command history        | <kbd>Ctrl</kbd>+<kbd>R</kbd>                                 | <kbd>⌃</kbd>+<kbd>R</kbd>                               |
 | Show suggestions              | <kbd>Ctrl</kbd>+<kbd>Space</kbd>                             | <kbd>⌃</kbd>+<kbd>Space</kbd>                           |
-| Ask AI for a command          | <kbd>Ctrl</kbd>+<kbd>&#96;</kbd>                                 | <kbd>⌃</kbd>+<kbd>&#96;</kbd>                               |
+| Ask AI for a command          | <kbd>Ctrl</kbd>+<kbd>&#96;</kbd>                             | <kbd>⌃</kbd>+<kbd>&#96;</kbd>                           |
 | Command editor                | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>E</kbd>                | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>E</kbd>                  |
 | Previous / next command       | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>↑</kbd> / <kbd>↓</kbd> | <kbd>⌘</kbd>+<kbd>↑</kbd> / <kbd>↓</kbd>                |
 | Copy last output              | <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>O</kbd>                | <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>O</kbd>                  |
