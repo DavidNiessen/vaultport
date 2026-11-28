@@ -7,8 +7,9 @@
 //! local AI) context such as "the last command failed with this output" without them ever
 //! seeing the raw stream. Without shell integration it still keeps the last lines of output.
 //!
-//! Memory is bounded: at most [`MAX_BLOCKS`] blocks of at most [`MAX_BLOCK_LINES`] lines
-//! (the middle of longer outputs is dropped) and [`MAX_TAIL_LINES`] lines of plain tail.
+//! Memory is bounded: at most [`MAX_BLOCKS`] blocks of at most [`MAX_BLOCK_LINES`] lines of
+//! at most 1 KiB (the middle of longer outputs is dropped, long lines are wrapped) and
+//! [`MAX_TAIL_LINES`] lines of plain tail — about 32 MiB per session in the worst case.
 
 use crate::shell::{ShellEvent, parse_osc};
 use crate::vt::{LineBuf, VtEvent, VtScanner};
@@ -16,12 +17,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 
 /// Finished blocks kept.
-pub const MAX_BLOCKS: usize = 50;
+pub const MAX_BLOCKS: usize = 30;
 /// Output lines kept per block (head and tail).
-pub const MAX_BLOCK_LINES: usize = 2000;
+pub const MAX_BLOCK_LINES: usize = 1000;
 /// Plain output lines kept regardless of blocks.
 pub const MAX_TAIL_LINES: usize = 1000;
-const MAX_LINE_BYTES: usize = 4096;
+const MAX_LINE_BYTES: usize = 1024;
 /// Echoed input kept between the end of the prompt and the start of the command.
 const MAX_INPUT_BYTES: usize = 4096;
 

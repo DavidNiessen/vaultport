@@ -107,6 +107,7 @@ Command blocks, exit codes, the working directory for new tabs and the best sugg
 ## More
 
 - **Search** the output with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> (<kbd>⌘</kbd>+<kbd>F</kbd> on macOS): results update as you type, show the match count, and can match case, whole words or a regular expression.
+- **Tab activity**: a tab shows a spinner while a command runs in it, and a check, a cross or a bell when a command finished, failed or the bell rang while you were elsewhere. **Bell** in Settings → Terminal chooses between a flash, a short tone or nothing.
 - **Zoom**: <kbd>Mod</kbd>+<kbd>=</kbd> / <kbd>Mod</kbd>+<kbd>-</kbd> / <kbd>Mod</kbd>+<kbd>0</kbd>; **clear** with <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>K</kbd>.
 - **macOS line editing**: <kbd>⌘</kbd>+<kbd>←</kbd>/<kbd>→</kbd> jump to the start or end of the line, <kbd>⌥</kbd>+<kbd>←</kbd>/<kbd>→</kbd> move by word, <kbd>⌘</kbd>+<kbd>⌫</kbd> deletes to the start of the line and <kbd>⌥</kbd>+<kbd>⌫</kbd> deletes a word.
 - **Themes, fonts, truecolor, OSC 52 clipboard, remote titles** and more are described under [Hosts & groups](/guide/hosts-and-groups#terminal-features); the full list of shortcuts is under [Keyboard shortcuts](/guide/keyboard-shortcuts).
