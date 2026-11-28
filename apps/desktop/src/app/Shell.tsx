@@ -39,7 +39,7 @@ import { SettingsView } from '../features/settings/SettingsView';
 import { SftpView } from '../features/sftp/SftpView';
 import { SnippetsView } from '../features/snippets/SnippetsView';
 import { TerminalSidePanel } from '../features/terminal/SidePanel';
-import { TerminalView } from '../features/terminal/TerminalView';
+import { TerminalLayer, TerminalSlot } from '../features/terminal/TerminalLayer';
 import { AgentApprovals } from '../features/agents/AgentApprovals';
 import { useSessions } from '../features/terminal/sessions';
 import {
@@ -241,7 +241,9 @@ function SessionArea({ tabs, activeTab }: { tabs: Tab[]; activeTab: string }) {
             aria-hidden={!active}
           >
             <div className="min-w-0 flex-1">
-              {tab.kind === 'terminal' ? <TerminalView tab={tab} active={active} /> : null}
+              {tab.kind === 'terminal' ? (
+                <TerminalSlot id={tab.id} visible={active} className="h-full" />
+              ) : null}
               {tab.kind === 'workspace' ? <WorkspaceView ws={tab} active={active} /> : null}
               {tab.kind === 'log' ? <LogViewer tab={tab} /> : null}
             </div>
@@ -293,6 +295,7 @@ function DesktopShell({ status, onStatus, onLock }: ShellProps) {
           <SftpView />
         </div>
         <SessionArea tabs={tabs} activeTab={activeTab} />
+        <TerminalLayer />
       </main>
       {showInspector && bp !== 'desktop' ? (
         <Sheet open onOpenChange={(o) => !o && select(null)} title="">
@@ -475,6 +478,7 @@ function PhoneShell({ status, onStatus, onLock }: ShellProps) {
           </div>
         ) : null}
         <SessionArea tabs={sessionTabs} activeTab={inSession ? activeTab : ''} />
+        <TerminalLayer />
         {activeTab === SFTP_TAB ? (
           <div className="bg-bg absolute inset-0 flex flex-col">
             <Button variant="ghost" className="m-2 self-start" onClick={() => activate(VAULT_TAB)}>

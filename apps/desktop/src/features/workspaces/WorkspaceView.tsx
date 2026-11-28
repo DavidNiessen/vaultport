@@ -14,7 +14,7 @@ import { useApp, type TerminalTab, type WorkspaceTab } from '@/stores/app';
 
 import { terminalRegistry } from '../terminal/registry';
 import { splitPane } from '../terminal/tabActions';
-import { TerminalView } from '../terminal/TerminalView';
+import { TerminalSlot } from '../terminal/TerminalLayer';
 
 /** Grid dimensions for `n` panes (max 16), preferring wide layouts. */
 export function gridFor(n: number): { cols: number; rows: number } {
@@ -198,9 +198,7 @@ export function WorkspaceView({ ws, active }: { ws: WorkspaceTab; active: boolea
                     </button>
                   </div>
                 ) : null}
-                <div className="min-h-0 flex-1">
-                  <TerminalView tab={p} active={active && show} />
-                </div>
+                <TerminalSlot id={p.id} visible={active && show} className="min-h-0 flex-1" />
               </div>
             );
           })}

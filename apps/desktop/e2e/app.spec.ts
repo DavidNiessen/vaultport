@@ -166,12 +166,20 @@ test('opens, closes and reopens terminal tabs from the keyboard', async ({ page,
   await page.keyboard.press('Control+Shift+t');
   await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
 
-  // Ctrl+Shift+D splits the tab into panes; Ctrl+W closes the focused pane.
+  // Ctrl+Shift+D splits the tab into panes; Ctrl+W closes the focused pane. The session of
+  // the split tab keeps running (its output stays) instead of reconnecting.
+  const text = () =>
+    page.evaluate(() => (window as unknown as { __terminalText: () => string }).__terminalText());
+  await expect.poll(text, { timeout: 10_000 }).toContain('Welcome to localhost');
+  await page.keyboard.type('whoami\r');
+  // The output of whoami on a line of its own (the prompt line may wrap on narrow screens).
+  await expect.poll(text).toContain('\ndeploy\n');
   await page.keyboard.press('Control+Shift+d');
   await expect(page.getByRole('button', { name: /Close pane/ })).toHaveCount(2);
   await page.keyboard.press('Control+w');
   await expect(page.getByRole('button', { name: /Close pane/ })).toHaveCount(0);
   await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
+  await expect.poll(text).toContain('\ndeploy\n');
 });
 
 test('creates a snippet', async ({ page, isMobile }) => {

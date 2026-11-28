@@ -255,6 +255,16 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       return true;
     });
 
+    // A pane of a workspace becomes the focused pane when its terminal gets focus.
+    term.textarea?.addEventListener('focus', () => {
+      const { tabs } = useApp.getState();
+      const self = tabs.find((x) => x.id === tab.id);
+      const ws =
+        self?.kind === 'terminal' && self.workspace
+          ? tabs.find((x) => x.id === self.workspace)
+          : null;
+      if (ws?.kind === 'workspace' && ws.focused !== tab.id) updateTab(ws.id, { focused: tab.id });
+    });
     term.onSelectionChange(() => {
       if (settingsRef.current.copyOnSelect && term.hasSelection()) {
         void writeText(term.getSelection());
@@ -869,10 +879,18 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     if (active) {
       requestAnimationFrame(() => {
         fitRef.current?.fit();
+        // In a split, only the focused pane takes the keyboard.
+        const { tabs } = useApp.getState();
+        const self = tabs.find((x) => x.id === tab.id);
+        const ws =
+          self?.kind === 'terminal' && self.workspace
+            ? tabs.find((x) => x.id === self.workspace)
+            : null;
+        if (ws?.kind === 'workspace' && ws.focused && ws.focused !== tab.id) return;
         termRef.current?.focus();
       });
     }
-  }, [active]);
+  }, [active, tab.id]);
 
   const runSearch = useCallback(
     (dir: 'next' | 'prev' | 'live', term = searchTerm, options = searchOpts) => {
