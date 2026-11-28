@@ -203,8 +203,9 @@ const lastUpdated = computed(() => {
   top: calc(var(--nav-h) + 24px);
   align-self: start;
   max-height: calc(100vh - var(--nav-h) - 40px);
-  overflow-y: auto;
+  overflow: hidden auto;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 .doc-sidebar {
   margin-left: -10px;
