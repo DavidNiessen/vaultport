@@ -6,6 +6,7 @@
 //! * [`scripts`]: small opt-in bash / zsh / fish snippets that make a remote shell emit those
 //!   sequences.
 //! * [`history`]: bash / zsh / fish history import and a frecency-ranked [`HistoryIndex`].
+//! * [`blocks`]: the output stream split into commands with their output and exit status.
 //! * [`complete`]: the [`Completer`] (history, snippets, command specs, commands found on
 //!   the machine, environment variables and paths).
 //! * [`generators`]: argument values (git branches, npm scripts, make targets, users, SSH
@@ -22,6 +23,7 @@
 
 #![forbid(unsafe_code)]
 
+pub mod blocks;
 pub mod complete;
 pub mod generators;
 pub mod history;
@@ -32,6 +34,7 @@ pub mod spec;
 pub mod tokenize;
 pub mod vt;
 
+pub use blocks::{Block, BlockRecorder};
 pub use complete::{
     Completer, Completion, KnownCommand, NeedsPaths, PathEntry, PathProvider, Suggestion,
     SuggestionKind,

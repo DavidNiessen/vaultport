@@ -165,7 +165,10 @@ impl ShellIntegrationParser {
     }
 }
 
-fn parse_osc(payload: &[u8], pending_command: &mut Option<String>) -> Option<ShellEvent> {
+pub(crate) fn parse_osc(
+    payload: &[u8],
+    pending_command: &mut Option<String>,
+) -> Option<ShellEvent> {
     let (code, rest) = split_once(payload, b';').unwrap_or((payload, &[]));
     match code {
         b"7" => parse_file_url(rest).map(ShellEvent::Cwd),
