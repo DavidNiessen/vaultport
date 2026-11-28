@@ -443,7 +443,7 @@
     "autoLockHint": "Entfernt entschlüsselte Daten aus dem Speicher",
     "autoReconnect": "Nach Netzverlust automatisch neu verbinden",
     "autocomplete": "Autovervollständigung",
-    "autocompleteHint": "Vorschläge aus Verlauf, Snippets, den auf dem Rechner installierten Befehlen, Pfaden, Git-Branches, Skripten und über 200 Befehlsbeschreibungen. Entfernte Dateien werden über einen SFTP-Kanal derselben Verbindung gelesen. Keine KI.",
+    "autocompleteHint": "Vorschläge aus Verlauf, Snippets, den auf dem Rechner installierten Befehlen, Pfaden, Git-Branches, Skripten und rund 300 Befehlsbeschreibungen. Entfernte Dateien werden über einen SFTP-Kanal derselben Verbindung gelesen. Keine KI.",
     "behaviour": "Verhalten",
     "brightBold": "Helle Farben für fetten Text",
     "changePassword": "Master-Passwort ändern",

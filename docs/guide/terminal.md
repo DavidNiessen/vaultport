@@ -35,7 +35,7 @@ On Windows and Linux, <kbd>Ctrl</kbd>+<kbd>W</kbd> (delete word) and <kbd>Ctrl</
 Suggestions appear at the cursor while you type at the prompt. They come from Vaultport's deterministic completion engine (no AI):
 
 - **Commands installed on the machine.** Vaultport lists the directories on `PATH` — plus the usual places such as `/usr/local/bin`, Homebrew, `~/.local/bin`, `~/.cargo/bin` — and knows the shell builtins. On a server it does this over an SFTP channel of your SSH connection, in the background, once every few minutes.
-- **Subcommands, options and values** of more than 200 tools: `git`, `docker` and `docker compose`, `kubectl`, `systemctl`, `npm`/`pnpm`/`yarn`/`bun`, `cargo`, `go`, `gh`, `aws`, `terraform`, `brew`, macOS tools such as `defaults`, `launchctl` and `diskutil`, and many more. Typos are forgiven: `git chkout` finds `checkout`, `--fwl` finds `--force-with-lease`.
+- **Subcommands, options and values** of about 300 tools: `git`, `docker` and `docker compose`, `kubectl`, `systemctl`, `npm`/`pnpm`/`yarn`/`bun`, `cargo`, `go`, `gh`, `aws`, `terraform`, `brew`, macOS tools such as `defaults`, `launchctl` and `diskutil`, and many more. Typos are forgiven: `git chkout` finds `checkout`, `--fwl` finds `--force-with-lease`.
 - **Files and folders** in the shell's working directory, on your computer or on the server.
 - **Values from the machine**: git branches, tags and remotes of the repository you are in; `npm run` scripts, `make` and `just` targets; users and groups; SSH hosts from `~/.ssh/config`, `known_hosts`, `/etc/hosts` and your saved hosts; systemd units, init scripts and launchd jobs; network interfaces; signals; environment variables after `$`.
 - Your **command history** for the host and your **snippets**.

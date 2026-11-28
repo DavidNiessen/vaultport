@@ -58,7 +58,7 @@ Vaultport's completion engine is deliberately **not** AI. It is a small, offline
 - your command **history** for the host,
 - your **snippets**,
 - the **commands installed on the machine** (everything on `PATH`, the usual tool directories and shell builtins),
-- **command specs** for more than 200 tools (subcommands, flags and values of `git`, `docker`, `kubectl`, `systemctl`, `npm`, `cargo`, `gh`, `aws`, `terraform`, macOS tools and many more), matched by prefix or fuzzily,
+- **command specs** for about 300 tools (subcommands, flags and values of `git`, `docker`, `kubectl`, `systemctl`, `npm`, `cargo`, `gh`, `aws`, `terraform`, macOS tools and many more), matched by prefix or fuzzily,
 - **values from the machine**: git branches, tags and remotes, `npm run` scripts, `make` and `just` targets, users and groups, SSH hosts, systemd units, network interfaces, signals and environment variables,
 - **paths**: on this computer in local terminals, and on the server.
 

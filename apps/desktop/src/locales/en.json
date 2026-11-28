@@ -443,7 +443,7 @@
     "autoLockHint": "Wipes decrypted data from memory",
     "autoReconnect": "Reconnect automatically after network loss",
     "autocomplete": "Autocomplete",
-    "autocompleteHint": "Suggestions from history, snippets, the commands installed on the machine, paths, git branches, scripts and more than 200 command specs. Remote files are read over an SFTP channel of the same connection. No AI.",
+    "autocompleteHint": "Suggestions from history, snippets, the commands installed on the machine, paths, git branches, scripts and about 300 command specs. Remote files are read over an SFTP channel of the same connection. No AI.",
     "behaviour": "Behaviour",
     "brightBold": "Bright colors for bold text",
     "changePassword": "Change master password",
