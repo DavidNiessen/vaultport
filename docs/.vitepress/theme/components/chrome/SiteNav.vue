@@ -1,8 +1,9 @@
 <!-- SPDX-License-Identifier: GPL-3.0-or-later -->
 <script setup lang="ts">
 /**
- * Top navigation. On marketing pages it floats as a glass pill that tucks away while scrolling
- * down and returns on the way up; in the docs it is a full-width bar. A highlight slides between
+ * Top navigation. On marketing pages it floats as a pill that gains a glass background once the
+ * page scrolls (its size and position never change, so it does not jump); in the docs it is a
+ * full-width bar. A highlight slides between
  * links under the pointer. Phones get a full-screen menu with staggered links.
  */
 import { Menu, Search, X } from '@lucide/vue';
@@ -16,11 +17,10 @@ import GithubIcon from './GithubIcon.vue';
 import LogoMark from './LogoMark.vue';
 import ThemeToggle from './ThemeToggle.vue';
 
-const props = defineProps<{ variant: 'landing' | 'doc' | 'notfound' }>();
+defineProps<{ variant: 'landing' | 'doc' | 'notfound' }>();
 const route = useRoute();
 
 const scrolled = ref(false);
-const hidden = ref(false);
 const menuOpen = ref(false);
 
 const activeIndex = computed(() => {
@@ -39,18 +39,12 @@ function unhover() {
   pill.value = { ...pill.value, visible: false };
 }
 
-let lastY = 0;
 let frame = 0;
 function onScroll() {
   if (frame) return;
   frame = requestAnimationFrame(() => {
     frame = 0;
-    const y = window.scrollY;
-    scrolled.value = y > 12;
-    // Tuck the floating nav away while reading downwards on marketing pages.
-    hidden.value = props.variant === 'landing' && y > 400 && y > lastY + 4 && !menuOpen.value;
-    if (y < lastY - 4 || y < 400) hidden.value = false;
-    lastY = y;
+    scrolled.value = window.scrollY > 12;
   });
 }
 
@@ -89,7 +83,7 @@ watch(menuOpen, async (open, wasOpen) => {
 <template>
   <header
     class="nav"
-    :class="[`nav--${variant === 'doc' ? 'doc' : 'landing'}`, { scrolled, hidden, open: menuOpen }]"
+    :class="[`nav--${variant === 'doc' ? 'doc' : 'landing'}`, { scrolled, open: menuOpen }]"
   >
     <div class="nav-inner">
       <a :href="withBase('/')" class="brand" aria-label="Vaultport home">
@@ -183,7 +177,6 @@ watch(menuOpen, async (open, wasOpen) => {
   z-index: 50;
   height: var(--nav-h);
   transition:
-    transform 0.5s var(--ease-out),
     background-color 0.3s,
     border-color 0.3s;
 }
@@ -223,20 +216,15 @@ watch(menuOpen, async (open, wasOpen) => {
   transition:
     background-color 0.4s,
     border-color 0.4s,
-    box-shadow 0.4s,
-    max-width 0.6s var(--ease-out);
+    box-shadow 0.4s;
 }
 .nav--landing.scrolled .nav-inner,
 .nav--landing.open .nav-inner {
-  max-width: 980px;
   background: color-mix(in oklab, var(--bg-elev) 72%, transparent);
   border-color: var(--border);
   box-shadow: var(--shadow-md);
   backdrop-filter: blur(20px) saturate(1.5);
   -webkit-backdrop-filter: blur(20px) saturate(1.5);
-}
-.nav--landing.hidden {
-  transform: translateY(-120%);
 }
 
 .brand {
