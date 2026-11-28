@@ -50,6 +50,7 @@ import {
   goToTab,
   moveActive,
   newTab,
+  splitPane,
 } from '../features/terminal/tabActions';
 import { WorkspaceView } from '../features/workspaces/WorkspaceView';
 import { SerialDialog } from '../features/terminal/SerialDialog';
@@ -99,7 +100,23 @@ function useShortcuts(onLock: () => void) {
           break;
         case 'closeTab': {
           const id = currentTabId();
-          if (id) s.closeTab(id);
+          const tab = s.tabs.find((x) => x.id === id);
+          // In a split, Mod+W closes the focused pane, as in other terminal apps.
+          if (tab?.kind === 'workspace' && tab.focused && tab.panes.length > 1) {
+            s.closePane(tab.id, tab.focused);
+          } else if (id) s.closeTab(id);
+          break;
+        }
+        case 'splitPane': {
+          const id = currentTabId();
+          if (id) splitPane(id);
+          break;
+        }
+        case 'nextPane':
+        case 'prevPane': {
+          const tab = s.tabs.find((x) => x.id === s.activeTab);
+          if (tab?.kind === 'workspace') s.cyclePane(tab.id, action === 'nextPane' ? 1 : -1);
+          else handled = false;
           break;
         }
         case 'reopenTab':

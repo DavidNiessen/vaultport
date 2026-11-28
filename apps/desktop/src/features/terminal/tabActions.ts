@@ -61,6 +61,16 @@ export function duplicate(id: string): void {
   s.duplicateTab(id, newId(), localCwd(tab));
 }
 
+/** Splits tab `id` (or the focused pane of a workspace) with another connection like it. */
+export function splitPane(id: string): void {
+  const s = useApp.getState();
+  const tab = s.tabs.find((t) => t.id === id);
+  const source =
+    tab?.kind === 'workspace' ? s.tabs.find((t) => t.id === (tab.focused ?? tab.panes[0])) : tab;
+  if (source?.kind !== 'terminal') return;
+  s.splitPane(id, newId(), newId(), localCwd(source));
+}
+
 /** The tab that tab-level actions (close, rename, duplicate) apply to. */
 export function currentTabId(): string | null {
   const { activeTab } = useApp.getState();

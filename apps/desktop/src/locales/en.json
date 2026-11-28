@@ -644,7 +644,10 @@
     "zoomIn": "Larger text",
     "zoomOut": "Smaller text",
     "zoomReset": "Reset text size",
-    "paste": "Paste"
+    "paste": "Paste",
+    "splitPane": "Split pane",
+    "nextPane": "Next pane",
+    "prevPane": "Previous pane"
   },
   "snippets": {
     "all": "All",
@@ -743,7 +746,8 @@
     "closeTab": "Close",
     "closeOthers": "Close other tabs",
     "closeRight": "Close tabs to the right",
-    "reopen": "Reopen closed tab"
+    "reopen": "Reopen closed tab",
+    "closePane": "Close pane {{title}}"
   },
   "terminal": {
     "autocomplete": {

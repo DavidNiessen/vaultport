@@ -100,4 +100,38 @@ describe('tab store', () => {
     expect(useApp.getState().tabs.map((t) => t.id)).toEqual(['b']);
     expect(useApp.getState().activeTab).toBe('b');
   });
+
+  it('splits a tab into panes and turns back into a tab', () => {
+    const s = useApp.getState();
+    s.openTab(term('a'));
+    s.openTab(term('b'));
+    expect(s.splitPane('a', 'a2', 'w', '/srv')).toBe('a2');
+    let st = useApp.getState();
+    expect(st.activeTab).toBe('w');
+    // The workspace takes the tab's place; panes are hidden from the tab bar.
+    expect(st.tabs.map((t) => t.id)).toEqual(['w', 'a', 'b', 'a2']);
+    const ws = st.tabs[0];
+    expect(ws?.kind === 'workspace' && ws.panes).toEqual(['a', 'a2']);
+    expect(ws?.kind === 'workspace' && ws.focused).toBe('a2');
+    const pane = st.tabs.find((t) => t.id === 'a2');
+    expect(pane?.kind === 'terminal' && pane.cwd).toBe('/srv');
+    // Splitting the workspace adds a pane like the focused one.
+    s.splitPane('w', 'a3', 'unused');
+    st = useApp.getState();
+    expect(st.tabs[0]?.kind === 'workspace' && st.tabs[0].panes).toEqual(['a', 'a2', 'a3']);
+    s.cyclePane('w', 1);
+    expect(
+      useApp.getState().tabs[0]?.kind === 'workspace' && useApp.getState().tabs[0],
+    ).toMatchObject({
+      focused: 'a',
+    });
+    s.closePane('w', 'a3');
+    s.closePane('w', 'a');
+    st = useApp.getState();
+    expect(st.tabs.map((t) => t.id)).toEqual(['a2', 'b']);
+    const back = st.tabs[0];
+    expect(back?.kind === 'terminal' && back.workspace).toBeUndefined();
+    expect(st.activeTab).toBe('a2');
+    expect(st.closedTabs.map((t) => t.title)).toEqual(['a', 'a']);
+  });
 });

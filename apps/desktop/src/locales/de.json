@@ -644,7 +644,10 @@
     "zoomIn": "Größere Schrift",
     "zoomOut": "Kleinere Schrift",
     "zoomReset": "Schriftgröße zurücksetzen",
-    "paste": "Einfügen"
+    "paste": "Einfügen",
+    "splitPane": "Bereich teilen",
+    "nextPane": "Nächster Bereich",
+    "prevPane": "Vorheriger Bereich"
   },
   "snippets": {
     "all": "Alle",
@@ -743,7 +746,8 @@
     "closeTab": "Schließen",
     "closeOthers": "Andere Tabs schließen",
     "closeRight": "Tabs rechts schließen",
-    "reopen": "Geschlossenen Tab wiederherstellen"
+    "reopen": "Geschlossenen Tab wiederherstellen",
+    "closePane": "Bereich {{title}} schließen"
   },
   "terminal": {
     "autocomplete": {

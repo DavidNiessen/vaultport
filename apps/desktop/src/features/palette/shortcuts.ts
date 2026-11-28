@@ -64,7 +64,10 @@ export type ShortcutId =
   | 'zoomReset'
   | 'paste'
   | 'broadcast'
-  | 'splitMode';
+  | 'splitMode'
+  | 'splitPane'
+  | 'nextPane'
+  | 'prevPane';
 
 const both = (...keys: string[]) => ({ apple: keys, other: keys });
 
@@ -92,12 +95,13 @@ export const SHORTCUTS: Shortcut[] = [
     scope: 'global',
     ...both('Mod+Shift+T'),
   },
+  // In the tab menu and the command palette; Mod+Shift+D is a common split shortcut.
   {
     id: 'duplicateTab',
     label: 'shortcuts.duplicateTab',
     group: 'tabs',
     scope: 'global',
-    ...both('Mod+Shift+D'),
+    ...both(),
   },
   {
     id: 'renameTab',
@@ -268,6 +272,30 @@ export const SHORTCUTS: Shortcut[] = [
     group: 'workspaces',
     scope: 'global',
     ...both('Mod+Shift+M'),
+  },
+  {
+    id: 'splitPane',
+    label: 'shortcuts.splitPane',
+    group: 'workspaces',
+    scope: 'global',
+    apple: ['Mod+D', 'Mod+Shift+D'],
+    other: ['Ctrl+Shift+D', 'Alt+Shift+D'],
+  },
+  {
+    id: 'nextPane',
+    label: 'shortcuts.nextPane',
+    group: 'workspaces',
+    scope: 'global',
+    apple: ['Mod+]'],
+    other: ['Ctrl+Alt+Right'],
+  },
+  {
+    id: 'prevPane',
+    label: 'shortcuts.prevPane',
+    group: 'workspaces',
+    scope: 'global',
+    apple: ['Mod+['],
+    other: ['Ctrl+Alt+Left'],
   },
 ];
 

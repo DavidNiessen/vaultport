@@ -135,6 +135,15 @@ interface AppState {
   duplicateTab: (id: string, newId: string, cwd?: string) => void;
   /** Renames a tab (an empty title gives control back to the remote program). */
   renameTab: (id: string, title: string) => void;
+  /**
+   * Splits the tab `id` (or the focused pane of a workspace): the tab becomes a workspace with
+   * a second connection like it. Returns the new pane's id.
+   */
+  splitPane: (id: string, newId: string, wsId: string, cwd?: string) => string | null;
+  /** Closes one pane of a workspace; a workspace left with one pane turns back into a tab. */
+  closePane: (wsId: string, paneId: string) => void;
+  /** Focuses the next / previous pane of a workspace. */
+  cyclePane: (wsId: string, delta: number) => void;
   setRenaming: (id: string | null) => void;
   activate: (id: string) => void;
   moveTab: (from: number, to: number) => void;
@@ -245,6 +254,101 @@ export const useApp = create<AppState>()(
           }),
         })),
       setRenaming: (renaming) => set({ renaming }),
+      splitPane: (id, newId, wsId, cwd) => {
+        const { tabs } = get();
+        const target = tabs.find((t) => t.id === id);
+        if (target?.kind === 'workspace') {
+          const src = tabs.find((t) => t.id === (target.focused ?? target.panes[0]));
+          if (src?.kind !== 'terminal' || target.panes.length >= 16) return null;
+          const pane = { ...cloneTerminal(src, newId, cwd), workspace: target.id };
+          set({
+            tabs: [
+              ...tabs.map((t) =>
+                t.id === target.id
+                  ? {
+                      ...target,
+                      panes: [...target.panes, newId],
+                      focused: newId,
+                      mode: 'split' as const,
+                    }
+                  : t,
+              ),
+              pane,
+            ],
+            activeTab: target.id,
+          });
+          return newId;
+        }
+        if (target?.kind !== 'terminal' || target.workspace) return null;
+        const ws: WorkspaceTab = {
+          id: wsId,
+          kind: 'workspace',
+          title: target.title,
+          panes: [target.id, newId],
+          mode: 'split',
+          broadcast: false,
+          focused: newId,
+          templateId: null,
+        };
+        const pane = { ...cloneTerminal(target, newId, cwd), workspace: wsId };
+        set({
+          // The workspace takes the tab's place in the tab bar.
+          tabs: [
+            ...tabs.flatMap((t) => (t.id === id ? [ws, { ...target, workspace: wsId }] : [t])),
+            pane,
+          ],
+          activeTab: wsId,
+        });
+        return newId;
+      },
+      closePane: (wsId, paneId) => {
+        const { tabs, activeTab } = get();
+        const ws = tabs.find((t) => t.id === wsId);
+        if (ws?.kind !== 'workspace' || !ws.panes.includes(paneId)) return;
+        const closing = tabs.find((t) => t.id === paneId);
+        const panes = ws.panes.filter((p) => p !== paneId);
+        const closed =
+          closing?.kind === 'terminal'
+            ? [...get().closedTabs, { ...closing, workspace: undefined }].slice(-MAX_CLOSED)
+            : get().closedTabs;
+        if (panes.length === 0) {
+          set({ closedTabs: closed });
+          get().closeTab(wsId);
+          return;
+        }
+        if (panes.length === 1) {
+          // Back to a plain tab, in the workspace's place.
+          const last = panes[0];
+          const rest = tabs.filter((t) => t.id !== paneId && t.id !== last);
+          const lastTab = tabs.find((t) => t.id === last);
+          if (lastTab?.kind !== 'terminal') return;
+          const plain: TerminalTab = { ...lastTab, workspace: undefined };
+          set({
+            tabs: rest.map((t) => (t.id === wsId ? plain : t)),
+            activeTab: activeTab === wsId ? plain.id : activeTab,
+            closedTabs: closed,
+          });
+          return;
+        }
+        const i = ws.panes.indexOf(paneId);
+        set({
+          tabs: tabs
+            .filter((t) => t.id !== paneId)
+            .map((t) =>
+              t.id === wsId
+                ? { ...ws, panes, focused: panes[Math.min(i, panes.length - 1)] ?? null }
+                : t,
+            ),
+          closedTabs: closed,
+        });
+      },
+      cyclePane: (wsId, delta) => {
+        const ws = get().tabs.find((t) => t.id === wsId);
+        if (ws?.kind !== 'workspace' || ws.panes.length === 0) return;
+        const i = ws.panes.indexOf(ws.focused ?? ws.panes[0] ?? '');
+        const next = ws.panes[(i + delta + ws.panes.length) % ws.panes.length] ?? null;
+        get().updateTab(wsId, { focused: next });
+      },
       activate: (activeTab) =>
         set((s) => ({
           activeTab,

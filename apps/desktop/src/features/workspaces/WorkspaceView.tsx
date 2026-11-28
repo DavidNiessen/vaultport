@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 /** Workspaces: several sessions in one tab, as a split grid or focus mode, with broadcast. */
-import { Columns2, Maximize2, Radio, Save, SquareTerminal } from 'lucide-react';
+import { Columns2, Maximize2, Radio, Save, SquarePlus, SquareTerminal, X } from 'lucide-react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 
@@ -11,6 +12,8 @@ import { useBreakpoint } from '@/lib/platform';
 import { useSaveWorkspace } from '@/lib/queries';
 import { useApp, type TerminalTab, type WorkspaceTab } from '@/stores/app';
 
+import { terminalRegistry } from '../terminal/registry';
+import { splitPane } from '../terminal/tabActions';
 import { TerminalView } from '../terminal/TerminalView';
 
 /** Grid dimensions for `n` panes (max 16), preferring wide layouts. */
@@ -41,6 +44,13 @@ export function WorkspaceView({ ws, active }: { ws: WorkspaceTab; active: boolea
   const focused = panes.find((p) => p.id === ws.focused) ?? panes[0];
   const visible = mode === 'split' ? panes.slice(0, maxPanes) : panes;
   const { cols, rows } = gridFor(visible.length);
+
+  // Keyboard focus follows the focused pane (e.g. after splitting or cycling panes).
+  useEffect(() => {
+    if (!active || !ws.focused) return;
+    const id = ws.focused;
+    requestAnimationFrame(() => terminalRegistry.get(id)?.focus());
+  }, [active, ws.focused]);
 
   const saveTemplate = () => {
     saveWs.mutate(
@@ -94,6 +104,16 @@ export function WorkspaceView({ ws, active }: { ws: WorkspaceTab; active: boolea
             {ws.mode === 'split' ? t('workspaces.focusMode') : t('workspaces.splitView')}
           </Button>
         ) : null}
+        <Tooltip content={t('shortcuts.splitPane')}>
+          <Button
+            size="sm"
+            variant="ghost"
+            aria-label={t('shortcuts.splitPane')}
+            onClick={() => splitPane(ws.id)}
+          >
+            <SquarePlus className="size-4" />
+          </Button>
+        </Tooltip>
         <Button size="sm" variant="ghost" onClick={saveTemplate}>
           <Save className="size-4" />
           {t('workspaces.saveTemplate')}
@@ -168,6 +188,14 @@ export function WorkspaceView({ ws, active }: { ws: WorkspaceTab; active: boolea
                       )}
                       aria-label={p.status}
                     />
+                    <button
+                      type="button"
+                      aria-label={t('tabs.closePane', { title: p.title })}
+                      onClick={() => useApp.getState().closePane(ws.id, p.id)}
+                      className="text-subtle hover:text-text hover:bg-text/[0.1] flex size-5 items-center justify-center rounded"
+                    >
+                      <X className="size-3.5" />
+                    </button>
                   </div>
                 ) : null}
                 <div className="min-h-0 flex-1">

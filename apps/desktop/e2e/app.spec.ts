@@ -130,6 +130,13 @@ test('opens, closes and reopens terminal tabs from the keyboard', async ({ page,
   await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(1);
   await page.keyboard.press('Control+Shift+t');
   await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
+
+  // Ctrl+Shift+D splits the tab into panes; Ctrl+W closes the focused pane.
+  await page.keyboard.press('Control+Shift+d');
+  await expect(page.getByRole('button', { name: /Close pane/ })).toHaveCount(2);
+  await page.keyboard.press('Control+w');
+  await expect(page.getByRole('button', { name: /Close pane/ })).toHaveCount(0);
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
 });
 
 test('creates a snippet', async ({ page, isMobile }) => {

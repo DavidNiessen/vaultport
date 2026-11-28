@@ -5,6 +5,7 @@
  * is a window drag region; double-clicking it toggles maximize (handled by Tauri).
  */
 import {
+  Columns2,
   Copy,
   FolderOpen,
   History,
@@ -27,7 +28,7 @@ import { formatShortcut, usePlatform } from '@/lib/platform';
 import { SFTP_TAB, VAULT_TAB, useApp, type Tab } from '@/stores/app';
 
 import { primaryBinding, useKeymap, type ShortcutId } from '../features/palette/shortcuts';
-import { duplicate } from '../features/terminal/tabActions';
+import { duplicate, splitPane } from '../features/terminal/tabActions';
 
 import { LinuxControls, WindowsControls, useWindowControls } from './WindowControls';
 
@@ -125,6 +126,16 @@ function SessionTab({ tab, index, active }: { tab: Tab; index: number; active: b
       shortcut: hint('renameTab'),
       onSelect: () => setRenaming(tab.id),
     },
+    ...(tab.kind === 'terminal' || tab.kind === 'workspace'
+      ? [
+          {
+            label: t('shortcuts.splitPane'),
+            icon: <Columns2 className="size-4" />,
+            shortcut: hint('splitPane'),
+            onSelect: () => splitPane(tab.id),
+          },
+        ]
+      : []),
     ...(tab.kind === 'terminal'
       ? [
           {

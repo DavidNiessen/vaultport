@@ -5,6 +5,7 @@ import {
   ArrowDown,
   ArrowUp,
   Code2,
+  Columns2,
   Copy,
   Eraser,
   History,
@@ -40,7 +41,7 @@ import { VAULT_TAB, useApp } from '@/stores/app';
 
 import { useSessions } from '../terminal/sessions';
 import { sendInput, terminalRegistry, type TerminalAction } from '../terminal/registry';
-import { activeTerminal as activeTerminalTab, duplicate } from '../terminal/tabActions';
+import { activeTerminal as activeTerminalTab, duplicate, splitPane } from '../terminal/tabActions';
 import { primaryBinding, useKeymap, type ShortcutId } from './shortcuts';
 
 const itemCls =
@@ -248,6 +249,15 @@ export function CommandPalette({ onLock, onImport }: { onLock: () => void; onImp
                   () => setRenaming(current.id),
                   [],
                   'renameTab',
+                )
+              : null}
+            {current?.kind === 'terminal' || current?.kind === 'workspace'
+              ? action(
+                  t('shortcuts.splitPane'),
+                  <Columns2 />,
+                  () => splitPane(current.id),
+                  ['split', 'pane'],
+                  'splitPane',
                 )
               : null}
             {current?.kind === 'terminal'
