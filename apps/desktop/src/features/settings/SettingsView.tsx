@@ -644,9 +644,14 @@ function ShortcutRecorder({
   );
 }
 
+const NO_OVERRIDES: ShortcutOverrides = {};
+
 function Shortcuts() {
   const { t } = useTranslation();
-  const { settings: overrides, update } = useSettings<ShortcutOverrides>(SHORTCUTS_DOC, {});
+  const { settings: overrides, update } = useSettings<ShortcutOverrides>(
+    SHORTCUTS_DOC,
+    NO_OVERRIDES,
+  );
   const keymap = useKeymap((s) => s.keymap);
   const apple = useKeymap((s) => s.apple);
   const [recording, setRecording] = useState<ShortcutId | null>(null);

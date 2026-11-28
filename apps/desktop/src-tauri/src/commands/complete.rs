@@ -33,6 +33,8 @@ const MAX_RECENT: usize = 500;
 const MAX_LINE: usize = 4096;
 /// How long the commands found on a machine are trusted.
 const COMMANDS_MAX_AGE: Duration = Duration::from_secs(300);
+/// How long to wait before searching a machine again after the search failed.
+const COMMANDS_RETRY: Duration = Duration::from_secs(30);
 /// How long generated values (branches, scripts, …) are reused.
 const VALUES_MAX_AGE: Duration = Duration::from_secs(8);
 
@@ -41,8 +43,10 @@ type Values = Arc<Vec<term_intel::generators::Value>>;
 /// Commands found on one machine.
 struct Discovered {
     at: Instant,
-    /// `None` while the listing is still running.
+    /// The last successful listing.
     commands: Option<Arc<Vec<term_intel::KnownCommand>>>,
+    /// A listing is running.
+    pending: bool,
 }
 
 struct Entry {
@@ -110,10 +114,14 @@ impl CompletionState {
         app: &AppHandle,
     ) -> Option<Arc<Vec<term_intel::KnownCommand>>> {
         let mut map = self.discovered.lock();
-        if let Some(d) = map.get(key)
-            && (d.at.elapsed() < COMMANDS_MAX_AGE || d.commands.is_none())
-        {
-            return d.commands.clone();
+        if let Some(d) = map.get(key) {
+            let fresh = match &d.commands {
+                Some(_) => d.at.elapsed() < COMMANDS_MAX_AGE,
+                None => d.at.elapsed() < COMMANDS_RETRY,
+            };
+            if d.pending || fresh {
+                return d.commands.clone();
+            }
         }
         let stale = map.get(key).and_then(|d| d.commands.clone());
         map.insert(
@@ -121,17 +129,26 @@ impl CompletionState {
             Discovered {
                 at: Instant::now(),
                 commands: stale.clone(),
+                pending: true,
             },
         );
         drop(map);
         let (fs, key, app) = (fs.clone(), key.to_owned(), app.clone());
         tauri::async_runtime::spawn(async move {
             let found = discover::commands(fs, local).await;
-            app.state::<CompletionState>().discovered.lock().insert(
+            let state = app.state::<CompletionState>();
+            let mut map = state.discovered.lock();
+            // Keep the last good listing when this one failed.
+            let commands = match found {
+                Some(f) => Some(Arc::new(f)),
+                None => map.get(&key).and_then(|d| d.commands.clone()),
+            };
+            map.insert(
                 key,
                 Discovered {
                     at: Instant::now(),
-                    commands: Some(Arc::new(found)),
+                    commands,
+                    pending: false,
                 },
             );
         });

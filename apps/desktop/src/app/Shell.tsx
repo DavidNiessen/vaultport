@@ -63,10 +63,12 @@ interface ShellProps {
   onLock: () => void;
 }
 
+const NO_OVERRIDES: ShortcutOverrides = {};
+
 function useShortcuts(onLock: () => void) {
   const platform = usePlatform();
   const sessions = useSessions();
-  const { settings: overrides } = useSettings<ShortcutOverrides>(SHORTCUTS_DOC, {});
+  const { settings: overrides } = useSettings<ShortcutOverrides>(SHORTCUTS_DOC, NO_OVERRIDES);
   const apple = isApple(platform);
   useEffect(() => {
     useKeymap.getState().set(apple, overrides);

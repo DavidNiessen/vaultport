@@ -105,8 +105,9 @@ fn command_name(
 }
 
 /// Lists the commands on `fs`: executables in the command directories (the first directory
-/// that has a name wins, as on `PATH`) and shell builtins.
-pub async fn commands(fs: Arc<dyn FileSystem>, local: bool) -> Vec<KnownCommand> {
+/// that has a name wins, as on `PATH`) and shell builtins. `None` when no directory could be
+/// listed in time, so an unreachable machine is not taken for one without commands.
+pub async fn commands(fs: Arc<dyn FileSystem>, local: bool) -> Option<Vec<KnownCommand>> {
     let home = fs.home().await.ok();
     let path = if local {
         std::env::var("PATH").ok()
@@ -122,7 +123,10 @@ pub async fn commands(fs: Arc<dyn FileSystem>, local: bool) -> Vec<KnownCommand>
     }));
     let listings = tokio::time::timeout(DISCOVER_TIMEOUT, listings)
         .await
-        .unwrap_or_default();
+        .ok()?;
+    if listings.iter().all(|(_, e)| e.is_none()) {
+        return None;
+    }
     let mut out: Vec<KnownCommand> = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for (dir, entries) in listings {
@@ -145,7 +149,7 @@ pub async fn commands(fs: Arc<dyn FileSystem>, local: bool) -> Vec<KnownCommand>
             });
         }
     }
-    out
+    Some(out)
 }
 
 /// Runs futures concurrently and collects their results in order.
