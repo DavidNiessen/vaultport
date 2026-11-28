@@ -93,7 +93,7 @@ A slim bar under the terminal shows the working directory (click it to copy the 
 With [Local AI](/guide/local-ai) turned on:
 
 - <kbd>Ctrl</kbd>+<kbd>&#96;</kbd> opens the AI command bar: describe what you want, and the on-device model suggests one command with an explanation and a risk rating;
-- or type `# what you want` at the prompt and press <kbd>Enter</kbd>;
+- or type `# what you want` at the prompt and press <kbd>Enter</kbd> (with [shell integration](#shell-integration), so that `#` lines elsewhere — in a heredoc or a REPL — are left alone);
 - after a command fails, **Fix with AI** in its block menu suggests a corrected command from the command and its output.
 
 The model gets the terminal's operating system, working directory and recent commands as context. Suggestions are put on the prompt (<kbd>Tab</kbd>) or run (<kbd>Mod</kbd>+<kbd>Enter</kbd>) only when you say so. AI agents connected over MCP can also [read your open terminals and type into them](/guide/ai-agents#terminals) with your approval.

@@ -848,7 +848,8 @@
       "already": "Die Shell-Integration ist in dieser Sitzung bereits aktiv",
       "noAnswer": "Die Shell hat nicht geantwortet. Die Shell-Integration funktioniert mit bash und zsh an einer Eingabeaufforderung.",
       "unsupported": "Diese Shell wird noch nicht unterstützt (bash und zsh schon)",
-      "enabled": "Befehlsblöcke sind für diese {{shell}}-Sitzung aktiv"
+      "enabled": "Befehlsblöcke sind für diese {{shell}}-Sitzung aktiv",
+      "notAtPrompt": "Führe das an einer Shell-Eingabeaufforderung aus, wenn kein Befehl läuft."
     },
     "didYouMean": "Meintest du",
     "edit": "Bearbeiten",

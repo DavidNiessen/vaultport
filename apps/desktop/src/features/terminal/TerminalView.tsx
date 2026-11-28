@@ -433,8 +433,10 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         aiRef.current.enabled &&
         settingsRef.current.aiHashPrompt
       ) {
-        const line = ac.input()?.line.trim() ?? '';
-        if (/^#\s*\S/.test(line) && ac.phase() !== 'running') {
+        // Only at a prompt the shell marked (shell integration): a heredoc or a Python REPL
+        // line can start with `#` too.
+        const line = ac.phase() === 'input' ? (ac.input()?.line.trim() ?? '') : '';
+        if (/^#\s*\S/.test(line)) {
           e.preventDefault();
           send(CLEAR_LINE);
           setOverlay({
@@ -539,6 +541,12 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         if (!quiet) toast.success(t('terminal.integration.already'));
         return;
       }
+      // The loader is typed at the prompt; anywhere else it would go to a running program.
+      const term = termRef.current;
+      if (term?.buffer.active.type !== 'normal' || !acRef.current?.input()) {
+        if (!quiet) toast.error(t('terminal.integration.notAtPrompt'));
+        return;
+      }
       try {
         const b = await commands.termIntegrationBootstrap();
         const shell = await new Promise<string | null>((resolve) => {
@@ -552,6 +560,9 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
           writeSession(b.start);
         });
         if (shell === null) {
+          // If the shell reads the loader late, it would wait (with echo off) for a lone `.`:
+          // send it now so typing never disappears.
+          writeSession('.\n');
           if (!quiet) toast.error(t('terminal.integration.noAnswer'));
           return;
         }

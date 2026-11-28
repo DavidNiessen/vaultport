@@ -108,6 +108,14 @@ fn command_name(
 /// that has a name wins, as on `PATH`) and shell builtins. `None` when no directory could be
 /// listed in time, so an unreachable machine is not taken for one without commands.
 pub async fn commands(fs: Arc<dyn FileSystem>, local: bool) -> Option<Vec<KnownCommand>> {
+    // Everything, the home directory lookup included, shares one deadline.
+    tokio::time::timeout(DISCOVER_TIMEOUT, list_commands(fs, local))
+        .await
+        .ok()
+        .flatten()
+}
+
+async fn list_commands(fs: Arc<dyn FileSystem>, local: bool) -> Option<Vec<KnownCommand>> {
     let home = fs.home().await.ok();
     let path = if local {
         std::env::var("PATH").ok()
@@ -121,9 +129,7 @@ pub async fn commands(fs: Arc<dyn FileSystem>, local: bool) -> Option<Vec<KnownC
         let d = d.clone();
         async move { (d.clone(), fs.list(&d).await.ok()) }
     }));
-    let listings = tokio::time::timeout(DISCOVER_TIMEOUT, listings)
-        .await
-        .ok()?;
+    let listings = listings.await;
     if listings.iter().all(|(_, e)| e.is_none()) {
         return None;
     }

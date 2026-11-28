@@ -129,11 +129,13 @@ fn attach_files(app: &tauri::AppHandle, id: &str, conn: &ssh_engine::Connection)
     tauri::async_runtime::spawn(async move {
         match conn.sftp().await {
             Ok(sftp) => {
-                // The session may have ended while the channel opened.
-                if app.state::<super::SessionManager>().get(&id).is_some() {
-                    let fs = std::sync::Arc::new(sftp_engine::Remote::new(sftp));
-                    app.state::<crate::commands::complete::CompletionState>()
-                        .attach(&id, fs);
+                let completions = app.state::<crate::commands::complete::CompletionState>();
+                let fs = std::sync::Arc::new(sftp_engine::Remote::new(sftp));
+                completions.attach(&id, fs);
+                // The session may have ended (and been detached) while the channel opened:
+                // check after attaching, so a late attach is undone either way.
+                if app.state::<super::SessionManager>().get(&id).is_none() {
+                    completions.detach(&id);
                 }
             }
             Err(e) => log::debug!("no SFTP for autocomplete: {e}"),
