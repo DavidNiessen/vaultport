@@ -134,4 +134,15 @@ describe('tab store', () => {
     expect(st.activeTab).toBe('a2');
     expect(st.closedTabs.map((t) => t.title)).toEqual(['a', 'a']);
   });
+
+  it('clears finished activity when a tab is shown, but not a running command', () => {
+    const s = useApp.getState();
+    s.openTab(term('a', { activity: 'failed' }));
+    s.openTab(term('b', { activity: 'running' }));
+    s.activate('a');
+    s.activate('b');
+    const [a, b] = useApp.getState().tabs;
+    expect(a?.kind === 'terminal' && a.activity).toBeUndefined();
+    expect(b?.kind === 'terminal' && b.activity).toBe('running');
+  });
 });

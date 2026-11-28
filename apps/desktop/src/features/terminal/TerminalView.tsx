@@ -76,6 +76,25 @@ type Overlay =
   | { kind: 'ai'; request: AiRequest; selection: string }
   | { kind: 'composer'; initial: string };
 
+let audio: AudioContext | null = null;
+
+/** A short, soft beep for the audible bell. */
+function playBell(): void {
+  try {
+    audio ??= new AudioContext();
+    const osc = audio.createOscillator();
+    const gain = audio.createGain();
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.06, audio.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audio.currentTime + 0.15);
+    osc.connect(gain).connect(audio.destination);
+    osc.start();
+    osc.stop(audio.currentTime + 0.16);
+  } catch {
+    // No audio output.
+  }
+}
+
 function decodeBase64(b64: string): Uint8Array {
   const bin = atob(b64);
   const out = new Uint8Array(bin.length);
@@ -113,6 +132,8 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   const contextRef = useRef<() => void>(() => undefined);
   /** A corrected command line after "command not found". */
   const [didYouMean, setDidYouMean] = useState<string | null>(null);
+  /** When the visual bell last rang (restarts the flash animation). */
+  const [bellFlash, setBellFlash] = useState(0);
   const blocksRef = useRef<BlockTracker | null>(null);
   const highlightRef = useRef<InputHighlighter | null>(null);
   /** Commands that exist on the machine (null: not known yet). */
@@ -295,6 +316,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     const blocks = attachBlocks(term, {
       enabled: () => settingsRef.current.commandBlocks,
       colors,
+      onStarted: () => updateTab(tab.id, { activity: 'running' }),
       onFinished: (b) => blockFinishedRef.current(b),
       onBadge: (b, rect) => {
         const root = rootRef.current?.getBoundingClientRect();
@@ -364,6 +386,24 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     term.onResize(({ cols, rows }) => {
       const id = sessionRef.current;
       if (id) void commands.sessionResize(id, cols, rows).catch(() => undefined);
+    });
+    let lastBell = 0;
+    term.onBell(() => {
+      const now = Date.now();
+      if (now - lastBell < 300) return;
+      lastBell = now;
+      const mode = settingsRef.current.bell;
+      if (mode === 'none') return;
+      if (mode === 'sound') playBell();
+      else setBellFlash(now);
+      const current = useApp.getState().tabs.find((x) => x.id === tab.id);
+      const { activeTab, tabs } = useApp.getState();
+      const ws = tabs.find((x) => x.id === activeTab);
+      const visible =
+        activeTab === tab.id || (ws?.kind === 'workspace' && ws.panes.includes(tab.id));
+      if (current?.kind === 'terminal' && current.activity !== 'running' && !visible) {
+        updateTab(tab.id, { activity: 'bell' });
+      }
     });
     term.onTitleChange((title) => {
       const current = useApp.getState().tabs.find((x) => x.id === tab.id);
@@ -565,7 +605,18 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     }));
   };
 
+  /** Whether this terminal is on screen (its tab, or the workspace it is a pane of). */
+  const isVisible = () => {
+    const { activeTab, tabs } = useApp.getState();
+    if (activeTab === tab.id) return true;
+    const ws = tabs.find((x) => x.id === activeTab);
+    return ws?.kind === 'workspace' && ws.panes.includes(tab.id);
+  };
+
   const onBlockFinished = (b: Block) => {
+    const away = !document.hasFocus() || !isVisible();
+    const failedRun = b.exit !== null && b.exit !== 0;
+    updateTab(tab.id, { activity: away ? (failedRun ? 'failed' : 'done') : undefined });
     void refreshContext({
       exit: b.exit,
       ms: b.startedAt !== null && b.finishedAt !== null ? b.finishedAt - b.startedAt : null,
@@ -580,7 +631,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     } else setDidYouMean(null);
     const secs = settingsRef.current.notifyAfterSeconds;
     const ms = b.startedAt !== null && b.finishedAt !== null ? b.finishedAt - b.startedAt : 0;
-    const away = !document.hasFocus() || useApp.getState().activeTab !== tab.id || !active;
+
     if (secs > 0 && ms >= secs * 1000 && away) {
       const failed = b.exit !== null && b.exit !== 0;
       const title = failed
@@ -982,6 +1033,15 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
             .catch(() => undefined);
         }}
       />
+
+      {bellFlash ? (
+        <div
+          key={bellFlash}
+          aria-hidden
+          className="vp-bell-flash pointer-events-none absolute inset-0 z-10"
+          onAnimationEnd={() => setBellFlash(0)}
+        />
+      ) : null}
 
       {sticky && !searchOpen ? (
         <button

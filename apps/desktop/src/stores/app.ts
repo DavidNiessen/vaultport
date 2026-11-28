@@ -42,6 +42,11 @@ export interface TerminalTab {
   cwd?: string | undefined;
   /** The user renamed the tab: remote programs may no longer change its title. */
   customTitle?: boolean | undefined;
+  /**
+   * What happened in the tab while you were elsewhere: a command is running, one finished or
+   * failed, or the bell rang. Cleared (except `running`) when the tab is activated.
+   */
+  activity?: 'running' | 'done' | 'failed' | 'bell' | undefined;
 }
 
 export interface SftpTab {
@@ -350,12 +355,22 @@ export const useApp = create<AppState>()(
         get().updateTab(wsId, { focused: next });
       },
       activate: (activeTab) =>
-        set((s) => ({
-          activeTab,
-          tabs: s.tabs.map((t) =>
-            t.id === activeTab && t.kind === 'terminal' ? { ...t, unread: false } : t,
-          ),
-        })),
+        set((s) => {
+          const ws = s.tabs.find((t) => t.id === activeTab && t.kind === 'workspace');
+          const seen = new Set([activeTab, ...(ws?.kind === 'workspace' ? ws.panes : [])]);
+          return {
+            activeTab,
+            tabs: s.tabs.map((t) =>
+              seen.has(t.id) && t.kind === 'terminal'
+                ? {
+                    ...t,
+                    unread: false,
+                    activity: t.activity === 'running' ? 'running' : undefined,
+                  }
+                : t,
+            ),
+          };
+        }),
       moveTab: (from, to) =>
         set((s) => {
           const tabs = [...s.tabs];

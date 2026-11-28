@@ -566,7 +566,11 @@
     "contextBar": "Context bar",
     "contextBarHint": "Shows the working directory, git branch and the last command's status under the terminal.",
     "restoreTabs": "Reopen tabs on start",
-    "restoreTabsHint": "Reopens the terminal tabs and splits that were open, after you unlock. Only host references and directories are kept, encrypted in this device's vault."
+    "restoreTabsHint": "Reopens the terminal tabs and splits that were open, after you unlock. Only host references and directories are kept, encrypted in this device's vault.",
+    "bell": "Bell",
+    "bellVisual": "Flash",
+    "bellSound": "Sound",
+    "bellNone": "Off"
   },
   "sftp": {
     "actions": "Actions",
@@ -751,7 +755,13 @@
     "closeOthers": "Close other tabs",
     "closeRight": "Close tabs to the right",
     "reopen": "Reopen closed tab",
-    "closePane": "Close pane {{title}}"
+    "closePane": "Close pane {{title}}",
+    "activity": {
+      "running": "A command is running",
+      "done": "A command finished",
+      "failed": "A command failed",
+      "bell": "The bell rang"
+    }
   },
   "terminal": {
     "autocomplete": {

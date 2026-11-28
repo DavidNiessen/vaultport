@@ -5,10 +5,14 @@
  * is a window drag region; double-clicking it toggles maximize (handled by Tauri).
  */
 import {
+  Bell,
+  CircleCheck,
+  CircleX,
   Columns2,
   Copy,
   FolderOpen,
   History,
+  Loader2,
   LayoutGrid,
   PanelRight,
   Pencil,
@@ -25,7 +29,7 @@ import { Kbd, Tooltip } from '@/components/ui/controls';
 import { ContextMenu, type MenuItemDef } from '@/components/ui/overlay';
 import { cn } from '@/lib/cn';
 import { formatShortcut, usePlatform } from '@/lib/platform';
-import { SFTP_TAB, VAULT_TAB, useApp, type Tab } from '@/stores/app';
+import { SFTP_TAB, VAULT_TAB, useApp, type Tab, type TerminalTab } from '@/stores/app';
 
 import { primaryBinding, useKeymap, type ShortcutId } from '../features/palette/shortcuts';
 import { duplicate, splitPane } from '../features/terminal/tabActions';
@@ -44,6 +48,34 @@ function statusColor(tab: Tab): string | null {
     case 'disconnected':
       return 'bg-subtle';
   }
+}
+
+type Activity = NonNullable<TerminalTab['activity']>;
+
+/** A tab's activity; a workspace shows the most important one of its panes. */
+export function activityOf(tab: Tab, tabs: Tab[]): Activity | null {
+  if (tab.kind === 'terminal') return tab.activity ?? null;
+  if (tab.kind !== 'workspace') return null;
+  const all = tab.panes
+    .map((id) => tabs.find((t) => t.id === id))
+    .map((t) => (t?.kind === 'terminal' ? t.activity : undefined));
+  for (const a of ['failed', 'bell', 'running', 'done'] as const) if (all.includes(a)) return a;
+  return null;
+}
+
+function ActivityIcon({ activity }: { activity: Activity }) {
+  const { t } = useTranslation();
+  const label = t(`tabs.activity.${activity}`);
+  const cls = 'size-3.5 shrink-0';
+  return (
+    <span title={label} className="flex">
+      <span className="sr-only">{label}</span>
+      {activity === 'running' ? <Loader2 className={cn(cls, 'text-muted animate-spin')} /> : null}
+      {activity === 'done' ? <CircleCheck className={cn(cls, 'text-success')} /> : null}
+      {activity === 'failed' ? <CircleX className={cn(cls, 'text-danger')} /> : null}
+      {activity === 'bell' ? <Bell className={cn(cls, 'text-warning')} /> : null}
+    </span>
+  );
 }
 
 function TabIcon({ tab }: { tab: Tab }) {
@@ -89,7 +121,17 @@ function PinnedTab({
   );
 }
 
-function SessionTab({ tab, index, active }: { tab: Tab; index: number; active: boolean }) {
+function SessionTab({
+  tab,
+  index,
+  active,
+  activity,
+}: {
+  tab: Tab;
+  index: number;
+  active: boolean;
+  activity: Activity | null;
+}) {
   const { t } = useTranslation();
   const platform = usePlatform();
   const keymap = useKeymap((s) => s.keymap);
@@ -211,7 +253,11 @@ function SessionTab({ tab, index, active }: { tab: Tab; index: number; active: b
         ) : (
           <span className="min-w-0 flex-1 truncate">{tab.title}</span>
         )}
-        {dot ? <span className={cn('size-1.5 shrink-0 rounded-full', dot)} aria-hidden /> : null}
+        {activity && !(active && activity !== 'running') ? (
+          <ActivityIcon activity={activity} />
+        ) : dot ? (
+          <span className={cn('size-1.5 shrink-0 rounded-full', dot)} aria-hidden />
+        ) : null}
         <button
           type="button"
           aria-label={t('tabs.close', { title: tab.title })}
@@ -288,7 +334,13 @@ export function TitleBar() {
           >
             {tabs.map((tab, i) =>
               tab.kind === 'sftp' || (tab.kind === 'terminal' && tab.workspace) ? null : (
-                <SessionTab key={tab.id} tab={tab} index={i} active={activeTab === tab.id} />
+                <SessionTab
+                  key={tab.id}
+                  tab={tab}
+                  index={i}
+                  active={activeTab === tab.id}
+                  activity={activityOf(tab, tabs)}
+                />
               ),
             )}
           </div>

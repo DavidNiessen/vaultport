@@ -496,6 +496,16 @@
   background: color-mix(in oklab, var(--vp-color) 10%, transparent);
   animation: vp-flash 900ms ease-out forwards;
 }
+.terminal-host ~ .vp-bell-flash,
+.vp-bell-flash {
+  background: color-mix(in oklab, var(--text) 8%, transparent);
+  animation: vp-bell 220ms ease-out forwards;
+}
+@keyframes vp-bell {
+  to {
+    opacity: 0;
+  }
+}
 @keyframes vp-flash {
   to {
     background: transparent;

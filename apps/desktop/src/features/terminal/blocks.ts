@@ -29,6 +29,8 @@ export interface Block {
 }
 
 export interface BlockEvents {
+  /** A command started running. */
+  onStarted?: (block: Block) => void;
   /** A command finished. */
   onFinished?: (block: Block) => void;
   /** The badge of a block was clicked. */
@@ -175,6 +177,7 @@ export function attachBlocks(term: Terminal, ev: BlockEvents): BlockTracker {
           current.end = term.registerMarker(0);
           current.finishedAt = Date.now();
           decorate(current);
+          if (current.command) ev.onFinished?.(current);
         }
         const prompt = term.registerMarker(0);
         const b: Block = {
@@ -216,6 +219,7 @@ export function attachBlocks(term: Terminal, ev: BlockEvents): BlockTracker {
         current.cwd = cwd;
         inputMark?.marker.dispose();
         inputMark = null;
+        if (current.command) ev.onStarted?.(current);
         break;
       }
       case 'D': {

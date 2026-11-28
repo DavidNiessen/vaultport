@@ -566,7 +566,11 @@
     "contextBar": "Kontextleiste",
     "contextBarHint": "Zeigt Arbeitsverzeichnis, Git-Branch und den Status des letzten Befehls unter dem Terminal.",
     "restoreTabs": "Tabs beim Start wiederherstellen",
-    "restoreTabsHint": "Öffnet die zuletzt offenen Terminal-Tabs und Teilungen nach dem Entsperren wieder. Gespeichert werden nur Host-Verweise und Verzeichnisse, verschlüsselt im Tresor dieses Geräts."
+    "restoreTabsHint": "Öffnet die zuletzt offenen Terminal-Tabs und Teilungen nach dem Entsperren wieder. Gespeichert werden nur Host-Verweise und Verzeichnisse, verschlüsselt im Tresor dieses Geräts.",
+    "bell": "Glocke",
+    "bellVisual": "Aufblitzen",
+    "bellSound": "Ton",
+    "bellNone": "Aus"
   },
   "sftp": {
     "actions": "Aktionen",
@@ -751,7 +755,13 @@
     "closeOthers": "Andere Tabs schließen",
     "closeRight": "Tabs rechts schließen",
     "reopen": "Geschlossenen Tab wiederherstellen",
-    "closePane": "Bereich {{title}} schließen"
+    "closePane": "Bereich {{title}} schließen",
+    "activity": {
+      "running": "Ein Befehl läuft",
+      "done": "Ein Befehl ist fertig",
+      "failed": "Ein Befehl ist fehlgeschlagen",
+      "bell": "Die Glocke hat geläutet"
+    }
   },
   "terminal": {
     "autocomplete": {

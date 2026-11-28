@@ -347,6 +347,18 @@ function Terminal() {
         {toggle('remoteTitles', t('settings.remoteTitles'))}
         {toggle('importHistory', t('settings.importHistory'), t('settings.execChannelsHint'))}
         {toggle('detectOs', t('settings.detectOs'), t('settings.execChannelsHint'))}
+        <Row label={t('settings.bell')}>
+          <Select
+            aria-label={t('settings.bell')}
+            className="w-32"
+            value={settings.bell}
+            onChange={(e) => update({ bell: e.target.value as TerminalSettings['bell'] })}
+          >
+            <option value="visual">{t('settings.bellVisual')}</option>
+            <option value="sound">{t('settings.bellSound')}</option>
+            <option value="none">{t('settings.bellNone')}</option>
+          </Select>
+        </Row>
         <Row label={t('settings.osc52')} description={t('settings.osc52Hint')}>
           <Select
             aria-label={t('settings.osc52')}
