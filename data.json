@@ -1,0 +1,210 @@
+{
+  "source": "graphql",
+  "generatedAt": "2026-11-28T10:25:31.231Z",
+  "login": "DavidNiessen",
+  "name": "DavidNiessen",
+  "createdAt": null,
+  "avatarUrl": "",
+  "bio": "",
+  "company": "",
+  "location": "",
+  "blog": "",
+  "followers": 0,
+  "following": 0,
+  "repoCount": 0,
+  "weeks": [],
+  "lastYearTotal": 0,
+  "yearTotal": 0,
+  "allTimeTotal": 0,
+  "totals": {
+    "commits": null,
+    "pullRequests": null,
+    "issues": null,
+    "reviews": null,
+    "stars": null,
+    "forks": null,
+    "privateContributions": null
+  },
+  "languages": [],
+  "projects": [],
+  "repos": [],
+  "yearTotals": {},
+  "events": [],
+  "commitHours": null,
+  "weather": null,
+  "releases": [],
+  "feeds": {},
+  "project": {
+    "owner": "DavidNiessen",
+    "name": "vaultport",
+    "fullName": "DavidNiessen/vaultport",
+    "description": "Secure, serverless SSH, SFTP, Mosh, Telnet and serial client for Windows, macOS, Linux, Android and iOS",
+    "homepage": "http://vaultport.niessen.dev/",
+    "url": "https://github.com/DavidNiessen/vaultport",
+    "topics": [],
+    "license": "GPL-3.0",
+    "defaultBranch": "main",
+    "createdAt": "2026-11-27T11:14:20Z",
+    "pushedAt": "2026-11-28T02:00:08Z",
+    "stars": 0,
+    "forks": 0,
+    "watchers": 0,
+    "openIssues": 0,
+    "closedIssues": 0,
+    "openPulls": 10,
+    "mergedPulls": 23,
+    "size": 21992,
+    "language": {
+      "name": "Rust",
+      "color": "#dea584"
+    },
+    "languages": [
+      {
+        "name": "Rust",
+        "color": "#dea584",
+        "bytes": 2170682
+      },
+      {
+        "name": "TypeScript",
+        "color": "#3178c6",
+        "bytes": 665544
+      },
+      {
+        "name": "CSS",
+        "color": "#663399",
+        "bytes": 15673
+      },
+      {
+        "name": "Kotlin",
+        "color": "#A97BFF",
+        "bytes": 13093
+      },
+      {
+        "name": "Swift",
+        "color": "#F05138",
+        "bytes": 6625
+      },
+      {
+        "name": "Shell",
+        "color": "#89e051",
+        "bytes": 5983
+      },
+      {
+        "name": "JavaScript",
+        "color": "#f1e05a",
+        "bytes": 4070
+      },
+      {
+        "name": "Dockerfile",
+        "color": "#384d54",
+        "bytes": 1828
+      },
+      {
+        "name": "HTML",
+        "color": "#e34c26",
+        "bytes": 658
+      }
+    ],
+    "contributors": [
+      {
+        "login": "DavidNiessen",
+        "avatar": "data:image/jpeg;base64,/9j/2wCEAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDIBCQkJDAsMGA0NGDIhHCEyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMv/AABEIAEAAQAMBIgACEQEDEQH/xAGiAAABBQEBAQEBAQAAAAAAAAAAAQIDBAUGBwgJCgsQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+gEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoLEQACAQIEBAMEBwUEBAABAncAAQIDEQQFITEGEkFRB2FxEyIygQgUQpGhscEJIzNS8BVictEKFiQ04SXxFxgZGiYnKCkqNTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AMOOLNThAop8acU5lO7FbWGRBTmnC6tQ21pVB6e351T126Nho80yZ3cLx71zCQalqUC/YoZGB4IAG0e9ZTnysuMeY7SK9s5pvJS4QyHouev0qw0VcE1hqdhEz3Vk25X++M7lHqK7XRdSXVbHzOPNjO1x7+tFOpzaBODiEkPtVWSKtd046VVkjrYzHxL2qSRAMGki7VPIMx1bRKZj69YzX+kSQ24zICGC/wB72rR0K8sdLeGwl3eaECcRnGR3zjB64/CpbcBplBGR6VZmu1izO8UXyLuLeWCQBzXFiKfMzqoVfZ6hd6tpVxqAs/mMmfmBjOD7Vi6Doo0q51IrxHJMRGvooz/Un8qfb69Jql9YSWNlbSWlxu8yWRAsikHsM8/r+Fbj4LMQMZOTU0KbjPQutWVSF3uV3Xiqsi9auPVeQV3WOO5AjBRnNBkLn2qAthQKVWq5EomW6igmiEkqo0jBEyfvMegFbi6FDbqxE5UMxdgqZ5PJ715ylhd6/wCPlhiuIYo7Dy5f3zkDAKkgYBySTXrjW9wy7kiMieqc/wD164a1SPNZnTTpya5ktDAHhbTr7UoLy1uRJc2oPlKRsx+GcVyt14yGm67caff2M0MUbbQ7DDjjqVPUHqPauwvcWxacbo3jG48YOBXF/ESxa6trbVxl5Ij5UzHk7Tyv5HI/EVjTnKM0m9zapCMqbcVax0VvfWt/CJrWdJU9VPT6+lD15NZX9xYTLNaymN/Y8H6+or0rTdQGo6bDc8B2GHA7MOtehCVzhasQNJ0FOWSqTSfNUiycVchI5PSlttY8YyvcagLKMyFklPfB4HUdRXr8VtqcMe+0njkTGQBJ/Q15N4q8PwaVHFdW6solPzrngE88elJp/jjVLVRFcFbmIADn5WA+o/rmvNmvaLmidtOSpPlloeuLqk6gW2oWLOp/vpkfgaTU7LTNa0e5sY1aN5oyDn+E9j+BwawdE8UrqkWbW5O9Vy8L/eX8O49xWqk7mXzSRu6nAxXHJNPsdykpLueJ3dhc2F/NZ3SNHLC21l/qD3BrpvB92UkuLNmyrL5iZ7EcH+n5V3fibw7beINMEqBI76Mfupf7w/ut7fyrzPR3ex12OOZCjhjE6kYIJ4/nXo4eqp69TzK1J035H//Z",
+        "contributions": 245
+      }
+    ],
+    "contributorCount": 2,
+    "commitWeeks": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      221
+    ],
+    "lastCommit": {
+      "message": "chore(readme-studio): update the README [skip ci]",
+      "sha": "e52bf86",
+      "date": "2026-11-28T01:59:38Z",
+      "author": "github-actions[bot]"
+    },
+    "releases": [
+      {
+        "repo": "vaultport",
+        "tag": "v0.1.1",
+        "name": "Vaultport 0.1.1",
+        "url": "https://github.com/DavidNiessen/vaultport/releases/tag/v0.1.1",
+        "publishedAt": "2026-11-27T19:50:24Z"
+      },
+      {
+        "repo": "vaultport",
+        "tag": "v0.1.0",
+        "name": "Vaultport 0.1.0",
+        "url": "https://github.com/DavidNiessen/vaultport/releases/tag/v0.1.0",
+        "publishedAt": "2026-11-27T19:11:19Z"
+      }
+    ],
+    "releaseNotes": {
+      "v0.1.1": "",
+      "v0.1.0": ""
+    },
+    "starHistory": [
+      {
+        "date": "2026-11-28",
+        "stars": 0
+      }
+    ],
+    "ci": {
+      "name": "Fuzz",
+      "status": "running",
+      "url": "https://github.com/DavidNiessen/vaultport/actions/runs/46134476345"
+    },
+    "milestones": [],
+    "downloads": []
+  }
+}
