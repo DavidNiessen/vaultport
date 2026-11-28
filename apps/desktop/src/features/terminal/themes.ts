@@ -345,6 +345,19 @@ export function terminalBackdrop(
   return themeColors(id, appScheme, preset).background ?? 'var(--bg)';
 }
 
+/**
+ * Background of the terminal side panel. With Pulse in dark mode it is see-through like the
+ * terminal, over a slightly darker tint so the panel still reads as its own column. `null` means
+ * the panel keeps its normal opaque surface.
+ */
+export function sidePanelBackdrop(
+  id: string | null | undefined,
+  appScheme: 'dark' | 'light',
+): string | null {
+  if (appScheme === 'light' || findTheme(id, appScheme).id !== PULSE_THEME) return null;
+  return 'color-mix(in oklab, color-mix(in oklab, var(--bg) 70%, black) 64%, transparent)';
+}
+
 /** Background for a theme's preview tile (Pulse shows the glow it sits on). */
 export function themePreviewBackground(theme: TerminalTheme): string {
   if (theme.id !== PULSE_THEME) return theme.colors.background ?? '#000';

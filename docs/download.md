@@ -1,13 +1,12 @@
 ---
-layout: home
-markdownStyles: false
+layout: landing
 title: Download
 description: Download Vaultport for Windows, macOS, Linux, iOS, iPadOS and Android, and verify the files with SHA-256 checksums, GitHub attestations and Sigstore signatures.
 ---
 
 <DownloadPage />
 
-<div class="vp-doc download-doc">
+<div class="prose download-doc">
 
 ## Verify your download
 

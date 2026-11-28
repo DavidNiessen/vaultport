@@ -2,7 +2,6 @@
 import { defineConfig, type HeadConfig } from 'vitepress';
 
 import { generateAiFiles } from './llms';
-import { nav, sidebar } from './nav';
 import { DESCRIPTION, NAME, REPO_URL, TAGLINE } from './site';
 
 /** Served at the root of the custom domain; override with DOCS_BASE (e.g. `/vaultport/` without one). */
@@ -44,6 +43,12 @@ const jsonLd = {
   ],
 };
 
+/**
+ * Stores section text in the search index so the search palette can show excerpts. VitePress
+ * types list only a few MiniSearch options but passes all of them on.
+ */
+const miniSearchOptions: Record<string, unknown> = { storeFields: ['title', 'titles', 'text'] };
+
 export default defineConfig({
   lang: 'en-US',
   title: NAME,
@@ -60,7 +65,9 @@ export default defineConfig({
     ['link', { rel: 'icon', type: 'image/svg+xml', href: `${base}logo.svg` }],
     ['link', { rel: 'icon', type: 'image/png', sizes: '32x32', href: `${base}favicon-32.png` }],
     ['link', { rel: 'apple-touch-icon', sizes: '180x180', href: `${base}apple-touch-icon.png` }],
-    ['meta', { name: 'theme-color', content: '#0d0c12' }],
+    ['meta', { name: 'theme-color', content: '#07060b' }],
+    // Lets CSS hide scroll-revealed content only when scripts run, so nothing stays invisible without them.
+    ['script', {}, "document.documentElement.classList.add('js')"],
     ['meta', { name: 'color-scheme', content: 'dark light' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:site_name', content: NAME }],
@@ -100,7 +107,8 @@ export default defineConfig({
   },
 
   markdown: {
-    theme: { light: 'github-light', dark: 'github-dark' },
+    // Both themes keep comments at 4.5:1 or better against the code background.
+    theme: { light: 'github-light', dark: 'github-dark-default' },
     config(md) {
       // Snippet placeholders such as `{{name:default}}` must not be read as Vue interpolation.
       const renderInlineCode = md.renderer.rules.code_inline;
@@ -113,23 +121,11 @@ export default defineConfig({
     },
   },
 
+  // The theme is custom (theme/); only the local search index is configured here.
   themeConfig: {
-    logo: { src: '/logo.svg', alt: '' },
-    siteTitle: NAME,
-    nav,
-    sidebar,
-    outline: { level: [2, 3], label: 'On this page' },
-    socialLinks: [{ icon: 'github', link: REPO_URL, ariaLabel: 'Vaultport on GitHub' }],
-    editLink: {
-      pattern: `${REPO_URL}/edit/main/docs/:path`,
-      text: 'Edit this page on GitHub',
+    search: {
+      provider: 'local',
+      options: { miniSearch: { options: miniSearchOptions } },
     },
-    lastUpdated: {
-      text: 'Last updated',
-      formatOptions: { dateStyle: 'medium' },
-    },
-    search: { provider: 'local' },
-    docFooter: { prev: 'Previous', next: 'Next' },
-    externalLinkIcon: true,
   },
 });
