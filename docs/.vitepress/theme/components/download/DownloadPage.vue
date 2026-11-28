@@ -22,6 +22,7 @@ import { withBase } from 'vitepress';
 import { computed, ref, watch, type Component } from 'vue';
 
 import { RELEASES_URL } from '../../../site';
+import PhoneMockup from '../PhoneMockup.vue';
 import { OS_LABEL, usePlatform, type OsId } from '../../composables/platform';
 import {
   formatBytes,
@@ -219,17 +220,15 @@ const published = computed(() => {
         <div class="showcase" v-reveal="160">
           <Transition name="device" mode="out-in">
             <div v-if="info.mobile" key="mobile" class="phones">
-              <img
-                :src="withBase('/screens/phone-hosts.webp')"
+              <PhoneMockup
+                shot="phone-hosts"
                 alt="Vaultport's hosts list on a phone"
-                width="780"
-                height="1688"
+                :lazy="false"
               />
-              <img
-                :src="withBase('/screens/phone-terminal.webp')"
+              <PhoneMockup
+                shot="phone-terminal"
                 alt="A terminal session on a phone"
-                width="780"
-                height="1688"
+                :lazy="false"
               />
             </div>
             <div v-else key="desktop" v-tilt="5" class="desk">
@@ -553,19 +552,14 @@ const published = computed(() => {
   justify-content: center;
   gap: 5%;
 }
-.phones img {
+.phones .phone {
   width: 40%;
-  height: auto;
-  border-radius: 26px;
-  border: 1px solid var(--border-strong);
-  box-shadow:
-    var(--shadow-lg),
-    0 0 80px -20px rgb(var(--glow-1) / 0.6);
+  max-width: 240px;
 }
-.phones img:first-child {
+.phones .phone:first-child {
   transform: rotate(-5deg) translateY(10px);
 }
-.phones img:last-child {
+.phones .phone:last-child {
   transform: rotate(5deg) translateY(-10px);
 }
 .device-enter-active,

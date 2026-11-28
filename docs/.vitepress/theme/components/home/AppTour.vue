@@ -8,6 +8,8 @@
 import { withBase } from 'vitepress';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
+import PhoneMockup from '../PhoneMockup.vue';
+
 interface Hotspot {
   x: number;
   y: number;
@@ -41,7 +43,7 @@ const CHAPTERS: Chapter[] = [
     ],
     image: 'terminal',
     alt: 'A terminal session in the see-through Pulse theme with the snippets side panel open',
-    hotspot: { x: 77.6, y: 5, w: 22, h: 46, label: 'Side panel' },
+    hotspot: { x: 78.2, y: 5.9, w: 21.4, h: 45.8, label: 'Side panel' },
     link: { text: 'The terminal', href: '/guide/terminal' },
   },
   {
@@ -56,7 +58,7 @@ const CHAPTERS: Chapter[] = [
     ],
     image: 'hosts',
     alt: 'The hosts view with groups, tagged host cards and the omnibox',
-    hotspot: { x: 18.4, y: 17.2, w: 69.5, h: 6.4, label: 'Omnibox' },
+    hotspot: { x: 18.7, y: 17.6, w: 69.35, h: 5.44, label: 'Omnibox' },
     link: { text: 'Hosts & groups', href: '/guide/hosts-and-groups' },
   },
   {
@@ -67,7 +69,7 @@ const CHAPTERS: Chapter[] = [
     points: ['Split and focus modes', 'Broadcast to every pane', 'Saved workspace templates'],
     image: 'workspace',
     alt: 'A workspace with four terminals side by side and broadcast input turned on',
-    hotspot: { x: 78.8, y: 4.6, w: 9, h: 5.6, label: 'Broadcast' },
+    hotspot: { x: 79.1, y: 5.44, w: 8.3, h: 4.16, label: 'Broadcast' },
     link: { text: 'Workspaces & broadcast', href: '/guide/workspaces' },
   },
   {
@@ -83,7 +85,7 @@ const CHAPTERS: Chapter[] = [
     ],
     image: 'agent',
     alt: 'An approval dialog for a command that Claude Code wants to run on a host',
-    hotspot: { x: 32, y: 33.2, w: 36.2, h: 33.6, label: 'Your call' },
+    hotspot: { x: 31.9, y: 33.4, w: 36.2, h: 33.1, label: 'Your call' },
     link: { text: 'AI agents (MCP)', href: '/guide/ai-agents' },
   },
   {
@@ -163,20 +165,8 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
           <!-- Inline screenshot for narrow screens -->
           <figure class="inline-shot">
             <div v-if="c.phones" class="phones-inline">
-              <img
-                :src="src('phone-hosts')"
-                alt="The hosts list on a phone"
-                loading="lazy"
-                width="780"
-                height="1688"
-              />
-              <img
-                :src="src('phone-terminal')"
-                alt="A terminal session on a phone"
-                loading="lazy"
-                width="780"
-                height="1688"
-              />
+              <PhoneMockup shot="phone-hosts" alt="The hosts list on a phone" />
+              <PhoneMockup shot="phone-terminal" alt="A terminal session on a phone" />
             </div>
             <img
               v-else
@@ -202,8 +192,8 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
           <div class="screen">
             <template v-for="(c, i) in CHAPTERS" :key="c.id">
               <div v-if="c.phones" class="shot phones" :class="{ on: i === active }">
-                <img :src="src('phone-hosts')" alt="" loading="lazy" width="780" height="1688" />
-                <img :src="src('phone-terminal')" alt="" loading="lazy" width="780" height="1688" />
+                <PhoneMockup shot="phone-hosts" class="ph" />
+                <PhoneMockup shot="phone-terminal" class="ph" />
               </div>
               <img
                 v-else
@@ -380,23 +370,25 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
 .progress span.on::after {
   transform: scaleX(1);
 }
+/* One border, and the screenshot fills it edge to edge, so hotspot percentages map 1:1 onto it. */
 .screen {
   position: relative;
   aspect-ratio: 16 / 10;
-  border-radius: 18px;
-  padding: 5px;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.03));
+  border-radius: 16px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  background: #0d0c12;
   box-shadow:
     var(--shadow-lg),
     0 0 140px -40px rgb(var(--glow-1) / 0.6);
+  overflow: hidden;
+  isolation: isolate;
 }
 .shot {
   position: absolute;
-  inset: 5px;
-  width: calc(100% - 10px);
-  height: calc(100% - 10px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  border-radius: 13px;
   background: #0d0c12;
   opacity: 0;
   transform: scale(1.04);
@@ -420,23 +412,20 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
     radial-gradient(60% 70% at 20% 0%, rgb(var(--glow-1) / 0.5), transparent 70%),
     radial-gradient(50% 60% at 100% 100%, rgb(var(--glow-2) / 0.35), transparent 70%), #0d0c12;
 }
-.shot.phones img {
-  height: 88%;
-  width: auto;
-  border-radius: 22px;
-  border: 1px solid rgb(255 255 255 / 0.16);
-  box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.8);
+.shot.phones .ph {
+  /* About 88% of the stage height: a mockup is ~1.94× as tall as it is wide. */
+  width: 27%;
   transition: transform 0.9s var(--ease-out);
 }
-.shot.phones.on img:first-child {
-  transform: rotate(-4deg) translateY(4px);
+.shot.phones.on .ph:first-child {
+  transform: rotate(-4deg) translateY(2%);
 }
-.shot.phones.on img:last-child {
-  transform: rotate(4deg) translateY(-4px);
+.shot.phones.on .ph:last-child {
+  transform: rotate(4deg) translateY(-2%);
 }
 .hotspot {
   position: absolute;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1.5px solid var(--accent);
   box-shadow:
     0 0 0 4000px rgb(4 3 10 / 0.28),
@@ -466,9 +455,6 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
       0 0 46px rgb(var(--glow-2) / 0.7),
       inset 0 0 26px rgb(var(--glow-2) / 0.3);
   }
-}
-.screen {
-  overflow: hidden;
 }
 .hotspot-label {
   position: absolute;
@@ -512,9 +498,8 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
     gap: 12px;
     justify-content: center;
   }
-  .phones-inline img {
-    width: 44%;
-    border-radius: 18px;
+  .phones-inline .phone {
+    width: min(44%, 220px);
   }
 }
 </style>
