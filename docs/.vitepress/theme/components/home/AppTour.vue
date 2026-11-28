@@ -131,7 +131,7 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
     <div class="head container">
       <p class="eyebrow" v-reveal>Take the tour</p>
       <h2 class="h-section" v-reveal="80">
-        Built like a native app. <span class="serif grad-text">Because it is one.</span>
+        Built like a native app. <span class="h-soft">Because it is one.</span>
       </h2>
       <p class="lede" v-reveal="160">
         A Rust core does everything that touches a secret; a fast, keyboard-first interface does the
@@ -153,9 +153,7 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
           class="chapter"
           :class="{ on: i === active }"
         >
-          <p class="kicker mono">
-            <span>0{{ i + 1 }}</span> {{ c.kicker }}
-          </p>
+          <p class="eyebrow">{{ c.kicker }}</p>
           <h3>{{ c.title }}</h3>
           <p class="text">{{ c.text }}</p>
           <ul>
@@ -265,26 +263,8 @@ const src = (name: string) => withBase(`/screens/${name}.webp`);
 .chapter :is(h3, .text, li) {
   transition: color 0.5s var(--ease-out);
 }
-.kicker {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--accent);
-}
-.kicker span {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 22px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
-  font-size: 12px;
-}
 .chapter h3 {
-  margin-top: 16px;
+  margin-top: 10px;
   font-size: clamp(28px, 3vw, 40px);
   line-height: 1.08;
   letter-spacing: -0.035em;

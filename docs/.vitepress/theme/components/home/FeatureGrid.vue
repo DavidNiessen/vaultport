@@ -117,7 +117,7 @@ const serviceName = computed(() => SERVICES[service.value]);
       <div class="head">
         <p class="eyebrow" v-reveal>Everything in one app</p>
         <h2 class="h-section" v-reveal="80">
-          Every tool you reach for. <span class="serif grad-text">None you have to trust.</span>
+          Every tool you reach for. <span class="h-soft">None you have to trust.</span>
         </h2>
       </div>
 

@@ -58,9 +58,7 @@ const DEVICES = [
     <div class="container">
       <div class="head">
         <p class="eyebrow" v-reveal>Serverless sync</p>
-        <h2 class="h-section" v-reveal="80">
-          Your devices talk through <span class="serif grad-text">your storage.</span>
-        </h2>
+        <h2 class="h-section" v-reveal="80">Your devices talk through your storage.</h2>
         <p class="lede" v-reveal="160">
           Changes are sealed on the device before they leave it. Your storage only ever holds
           ciphertext, and hash chains catch rollbacks and missing pieces. There is no Vaultport

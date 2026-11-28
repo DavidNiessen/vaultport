@@ -121,9 +121,7 @@ const published = computed(() => {
       <div class="hero-grid container">
         <div class="copy">
           <p class="eyebrow" v-reveal>Download</p>
-          <h1 class="display" v-reveal="60">
-            Get Vaultport <span class="serif grad-text">for {{ info.short }}.</span>
-          </h1>
+          <h1 class="display" v-reveal="60">Get Vaultport for {{ info.short }}.</h1>
           <p class="lede" v-reveal="120">
             Free and open source. No account — install it and create your vault.
           </p>

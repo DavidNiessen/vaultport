@@ -115,9 +115,7 @@ onBeforeUnmount(() => {
     <div class="container grid">
       <div class="copy">
         <p class="eyebrow" v-reveal>The vault</p>
-        <h2 class="h-section" v-reveal="80">
-          Ciphertext, <span class="serif grad-text">until you say so.</span>
-        </h2>
+        <h2 class="h-section" v-reveal="80">Ciphertext, until you say so.</h2>
         <p class="lede" v-reveal="160">
           Hosts, keys, passwords and snippets are sealed record by record with XChaCha20-Poly1305.
           The vault key is wrapped by Argon2id and your OS key store — and it never reaches the

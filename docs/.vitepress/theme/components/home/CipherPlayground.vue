@@ -92,7 +92,7 @@ const bodyHex = computed(() => shown.value.slice(0, -32));
       <div class="copy">
         <p class="eyebrow" v-reveal>Try the cipher</p>
         <h2 class="h-section" v-reveal="80">
-          Seal something. <span class="serif grad-text">Then break it.</span>
+          Seal something. <span class="h-soft">Then break it.</span>
         </h2>
         <p class="lede" v-reveal="160">
           This is XChaCha20-Poly1305 — the same authenticated cipher that seals every record in your

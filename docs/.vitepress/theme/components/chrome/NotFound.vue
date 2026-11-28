@@ -21,7 +21,7 @@ No page was found at this path. It may have moved,
 or the link may be mistyped.
 <span class="p">$</span> <span class="cursor" /></pre>
     </div>
-    <h1 class="h-section">This page <span class="serif grad-text">doesn't exist.</span></h1>
+    <h1 class="h-section">This page doesn't exist.</h1>
     <div class="actions">
       <a :href="withBase('/')" class="btn btn-primary">Take me home</a>
       <a :href="withBase('/guide/')" class="btn">Read the docs</a>
