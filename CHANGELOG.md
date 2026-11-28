@@ -1,5 +1,90 @@
 # Changelog
 
+## [0.2.0](https://github.com/DavidNiessen/vaultport/compare/v0.1.1...v0.2.0) (2026-11-28)
+
+
+### Features
+
+* **desktop:** add a context bar with directory, git branch and last status ([b45f6de](https://github.com/DavidNiessen/vaultport/commit/b45f6de34b89139fd337672e6538fd62155261e2))
+* **desktop:** add a see-through Pulse terminal theme as the default ([6423e48](https://github.com/DavidNiessen/vaultport/commit/6423e48a519b2172e3188759f15aab109a268a75))
+* **desktop:** add a see-through Pulse terminal theme as the default ([60a0c32](https://github.com/DavidNiessen/vaultport/commit/60a0c3277c41cf874744b29857de97cb143c5de1))
+* **desktop:** add a shell syntax lexer and richer output highlighting ([1e897a8](https://github.com/DavidNiessen/vaultport/commit/1e897a88d2165e7c846d4df027ef09b3f62a5866))
+* **desktop:** add configurable shortcuts and terminal tab management ([829a853](https://github.com/DavidNiessen/vaultport/commit/829a853b9d42b870fecf13fc3994fb3522e9f81e))
+* **desktop:** add the Pulse design tokens with selectable colour presets ([157faed](https://github.com/DavidNiessen/vaultport/commit/157faed80e2121631ecc95423dc81d46561efdea))
+* **desktop:** animate the ambient glow behind the app ([29b4ded](https://github.com/DavidNiessen/vaultport/commit/29b4deda3dead9d42a456a399cffc8732ee310e2))
+* **desktop:** complete from the remote machine and share terminal context with AI ([64e8131](https://github.com/DavidNiessen/vaultport/commit/64e8131e75abc44345126d0c83e72455e06880a5))
+* **desktop:** give every vault section a page header ([46c358f](https://github.com/DavidNiessen/vaultport/commit/46c358fa94db671fcaea32c008c41e81fdad3912))
+* **desktop:** let the default terminal themes follow the colour preset ([1f544e9](https://github.com/DavidNiessen/vaultport/commit/1f544e95f844c617821074e81f70194f2dbcd086))
+* **desktop:** let the terminal side panel show the background glow ([11013f5](https://github.com/DavidNiessen/vaultport/commit/11013f52711b43f2bb1b2e173f65f3da2aff5760))
+* **desktop:** make Iris the default colour preset ([f25bde8](https://github.com/DavidNiessen/vaultport/commit/f25bde848c40cc7c13a4d4044c03fda561bfe3ab))
+* **desktop:** make the background glow move like living blobs ([2310db4](https://github.com/DavidNiessen/vaultport/commit/2310db406ac3a8e16009b2dc0922f5be4290e5e9))
+* **desktop:** make the terminal feel like a modern terminal app ([cc15b30](https://github.com/DavidNiessen/vaultport/commit/cc15b3011eb3909ff6a0d9d22ae8c70828b76259))
+* **desktop:** optionally reopen terminal tabs after unlocking ([a97b869](https://github.com/DavidNiessen/vaultport/commit/a97b869365dea50dbf1097cc473784c525d6b864))
+* **desktop:** redesign the hosts page ([e6d450e](https://github.com/DavidNiessen/vaultport/commit/e6d450ef440972b218049fa68559e037570a6277))
+* **desktop:** redesign the lock screen ([f2c8c63](https://github.com/DavidNiessen/vaultport/commit/f2c8c63d188645dfaccad051e967f02bb1289118))
+* **desktop:** redesign the vault sidebar and title bar ([1679055](https://github.com/DavidNiessen/vaultport/commit/1679055092b59d99bcf768c7548e0362455aa683))
+* **desktop:** restyle the hosts page and lock screen for Pulse ([532a424](https://github.com/DavidNiessen/vaultport/commit/532a4245d83fc5076c6bee3268185a0b4ca0e21e))
+* **desktop:** restyle the title bar and sidebar and tint the logo by preset ([618627a](https://github.com/DavidNiessen/vaultport/commit/618627a183ac05fc5160fba15e215c7bedf0823c))
+* **desktop:** search terminal output with case, word and regex options ([332247f](https://github.com/DavidNiessen/vaultport/commit/332247ff05323334c6e0c1b19cc73bb6f750860d))
+* **desktop:** serve terminal completions from term-intel ([bb0b5e3](https://github.com/DavidNiessen/vaultport/commit/bb0b5e33d4442823b7e3aca8f62e49bcaf2291f0))
+* **desktop:** show command activity on tabs and ring the terminal bell ([89ff63e](https://github.com/DavidNiessen/vaultport/commit/89ff63ef726d55ad42bb33fc85b7585d8fb806bd))
+* **desktop:** split terminal tabs into panes ([5a57b61](https://github.com/DavidNiessen/vaultport/commit/5a57b61468e1aa8a4d6b30eb5c49b0c31e09fdb8))
+* **desktop:** suggest the right command after "command not found" ([587dbba](https://github.com/DavidNiessen/vaultport/commit/587dbba3511c1c72ae8547efd1fa24b647a44845))
+* **docs:** add screenshots of the real app for the website ([513e63f](https://github.com/DavidNiessen/vaultport/commit/513e63fbdcc891ee13010fa20288ffefcc9c51f1))
+* **docs:** bring the living background glow to the website ([1328b6a](https://github.com/DavidNiessen/vaultport/commit/1328b6a441a58389374c4fd3ae806fd27985cf95))
+* **docs:** rebuild the download page ([4b41c51](https://github.com/DavidNiessen/vaultport/commit/4b41c510fdb0ab1706b1cbfc8c0592dcf87be2b2))
+* **docs:** rebuild the landing page around the real app ([e59e3a3](https://github.com/DavidNiessen/vaultport/commit/e59e3a338d6dafc3aa58226c9dae29a8fa17af7d))
+* **docs:** rebuild the site on a custom theme with new docs and search ([8dc5673](https://github.com/DavidNiessen/vaultport/commit/8dc56737103e3dbbf1e9bb7e2469364fd3cc5381))
+* **docs:** recolour the site logo and social images for Glacier ([75fc770](https://github.com/DavidNiessen/vaultport/commit/75fc770a692b7c1c67333424738f520e8eadf4df))
+* **docs:** redesign the landing page ([7da0b30](https://github.com/DavidNiessen/vaultport/commit/7da0b306fedf21386f839415968dd597f55c0c12))
+* living background glow, new logo and pointer cursors ([d5585d1](https://github.com/DavidNiessen/vaultport/commit/d5585d1a073b9738071e63caf5063d5a736bbb49))
+* redesign the app and website with the Pulse design and colour presets ([523db60](https://github.com/DavidNiessen/vaultport/commit/523db6092725b5eaaa334384447b2ebe814a948c))
+* redesign the app logo for the Pulse look ([7943355](https://github.com/DavidNiessen/vaultport/commit/7943355e90656ea4c4d27a7b9a20425e42261f0a))
+* **site:** decrypt the hero headline with a key and layer the app screenshot ([fad9015](https://github.com/DavidNiessen/vaultport/commit/fad90156d7f601c5df1c4a60da746d7487a122a1))
+* **site:** frame phone screenshots in a phone mockup and align the tour hotspots ([6541aac](https://github.com/DavidNiessen/vaultport/commit/6541aac426b79a3835f94791b58148553de1eb54))
+* **term-intel:** complete installed commands, env vars and dynamic values ([f408ede](https://github.com/DavidNiessen/vaultport/commit/f408ede676292f334ba80e2239cb4cf3cd148397))
+* **term-intel:** record command blocks from shell integration marks ([f0281f2](https://github.com/DavidNiessen/vaultport/commit/f0281f2cd927d501910983e03caa3f6c8a15859b))
+* **term-intel:** report the command line from bash shell integration ([e8661fc](https://github.com/DavidNiessen/vaultport/commit/e8661fcecfc08c3a11ad6da5603174d2e3d44e09))
+* **term-intel:** ship completion specs for about 300 commands ([49058c0](https://github.com/DavidNiessen/vaultport/commit/49058c0966d882e4cfe35f1afe5cc8970f6aa3db))
+* **terminal:** autocomplete while typing, and faster local AI on Windows ARM ([c8a5121](https://github.com/DavidNiessen/vaultport/commit/c8a5121079b6afa5536a100a257bd02106ce82c1))
+* **terminal:** suggest completions while typing ([53a0336](https://github.com/DavidNiessen/vaultport/commit/53a0336d82b2eea020d21d44afaeffe789d3c397))
+* turn the terminal into a full terminal app (tabs, splits, smart autocomplete, blocks, AI) ([554b920](https://github.com/DavidNiessen/vaultport/commit/554b920d656b3370aaade2573301d7f963acd509))
+
+
+### Bug Fixes
+
+* **desktop:** ask before closing a busy tab and free Ctrl+O for the shell ([1572e5c](https://github.com/DavidNiessen/vaultport/commit/1572e5c3915ca5bebd5deccba4af1608b169d8ef))
+* **desktop:** find git repositories and project files from Windows paths ([09615d9](https://github.com/DavidNiessen/vaultport/commit/09615d9e5a735a47b1e1d3cf03730174f2ea3317))
+* **desktop:** keep sidebar counts out of names and give phone search room ([bcfc83b](https://github.com/DavidNiessen/vaultport/commit/bcfc83bb133a2f42a1ad0e7f2d547eeb4a21956a))
+* **desktop:** keep the generated IPC bindings as tauri-specta writes them ([9029645](https://github.com/DavidNiessen/vaultport/commit/9029645f8ec15b6603718308f0f8127bff401376))
+* **desktop:** keep the session alive when a tab is split or unsplit ([0ab1544](https://github.com/DavidNiessen/vaultport/commit/0ab1544c58b5476e647574d4c13335f133e99a43))
+* **desktop:** let the Glacier preset apply again ([1bdd7a4](https://github.com/DavidNiessen/vaultport/commit/1bdd7a4d79de29f795083d556faf98393dc1b87c))
+* **desktop:** load xterm under the frozen Object.prototype ([152fb73](https://github.com/DavidNiessen/vaultport/commit/152fb7328e1f260ff49216aefa836a07f9ff43eb))
+* **desktop:** make the AI prompt, integration loader and discovery robust ([437700d](https://github.com/DavidNiessen/vaultport/commit/437700db52ac3524608df33853f21a3fd09c6cf1))
+* **desktop:** retry command discovery instead of caching a failed search ([d01e533](https://github.com/DavidNiessen/vaultport/commit/d01e533abf2c8b2a17f36ae464012b6e432176b9))
+* **desktop:** scope agent terminal approvals and guard type_in_terminal ([9beae94](https://github.com/DavidNiessen/vaultport/commit/9beae94287897efcc65d1cc731e712516513090e))
+* **desktop:** show the pointer cursor on everything clickable ([a426830](https://github.com/DavidNiessen/vaultport/commit/a4268300ecfc73115c4d1b543e985382199b72c3))
+* **docs:** pass the UI/UX Pro Max accessibility checklist ([d42dee4](https://github.com/DavidNiessen/vaultport/commit/d42dee4107a7ed0240d99b4c1af5ca2c359c80ca))
+* **local-ai:** refuse to start on ARM CPUs without dot product instead of crashing ([94d3031](https://github.com/DavidNiessen/vaultport/commit/94d303109a2514adfce0a48e75c6f01f7320fe77))
+* **site:** hide the copies under lifted hero layers when the scene tilts ([790fa55](https://github.com/DavidNiessen/vaultport/commit/790fa55b62d0fcc9a2cbdc8be2e56a426f7d4df9))
+* **site:** keep revealed elements visible when their class binding changes ([7dd92e2](https://github.com/DavidNiessen/vaultport/commit/7dd92e204466d7f9b8e89974c4f809a84044689d))
+* **site:** remove the horizontal scrollbar from the docs outline and sidebar ([2b03b04](https://github.com/DavidNiessen/vaultport/commit/2b03b04ab18894a10b81125ed793922c27ac950e))
+* **site:** stop the landing nav from jumping while scrolling ([e3e38c2](https://github.com/DavidNiessen/vaultport/commit/e3e38c2d2d566f59c2b5be7b8e494c3a5bd3d902))
+* **site:** website UI/UX pass ([dfe2dbe](https://github.com/DavidNiessen/vaultport/commit/dfe2dbea0b2249d308fbf78984594b4946790788))
+* **term-intel:** bound the command block memory of a session more tightly ([bf7629b](https://github.com/DavidNiessen/vaultport/commit/bf7629b36eacbe30a5bae18a15436aa1c6dc4250))
+
+
+### Documentation
+
+* describe split panes, the context bar and the newer terminal features ([2dc0abf](https://github.com/DavidNiessen/vaultport/commit/2dc0abf2a95263329ad59a604e1de1ea9ea5dedd))
+* describe terminal autocomplete ([5c7ce1c](https://github.com/DavidNiessen/vaultport/commit/5c7ce1c8b1256dc6fddfd47bbdcb579a6154299e))
+* document the terminal features, shortcuts and AI integration ([7b88137](https://github.com/DavidNiessen/vaultport/commit/7b88137f187958e8c25bbdbcaa6750e88952f5be))
+* retake the README screenshots with the Iris default ([9432c52](https://github.com/DavidNiessen/vaultport/commit/9432c52298ca63dc6f1b606f54433afaa44b05c0))
+* retake the README screenshots with the new logo ([06f3f21](https://github.com/DavidNiessen/vaultport/commit/06f3f2158db9df683a4dff7acdb4035812e36bd5))
+* say about 300 command specs now that they ship ([11422a0](https://github.com/DavidNiessen/vaultport/commit/11422a0c191032d598036cb2a9ae7dbc6a088726))
+* showcase the Pulse theme in the README ([e4b1315](https://github.com/DavidNiessen/vaultport/commit/e4b13156ed5dbc0b573d6a0cd188b787b0a2828f))
+* update the README screenshots to the new design ([4b62f53](https://github.com/DavidNiessen/vaultport/commit/4b62f53a159ff58c252339d472377fd25afccaa4))
+
 ## [0.1.1](https://github.com/DavidNiessen/vaultport/compare/v0.1.0...v0.1.1) (2026-11-27)
 
 
