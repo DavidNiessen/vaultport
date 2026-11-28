@@ -25,13 +25,20 @@ Android release builds are currently compiled without the on-device inference en
 
 ## Using it
 
-Open the terminal side panel (<kbd>Mod</kbd>+<kbd>.</kbd>) and choose **AI**:
+In the terminal:
+
+- press <kbd>Ctrl</kbd>+<kbd>&#96;</kbd> to open the **AI command bar**, or type `# what you want` at the prompt and press <kbd>Enter</kbd>;
+- after a command fails, click its exit-status badge and choose **Fix with AI**: the model sees the command, its exit status and the end of its output, and suggests a corrected command.
+
+<kbd>Tab</kbd> puts the suggestion on the prompt, <kbd>Mod</kbd>+<kbd>Enter</kbd> runs it — nothing runs unless you choose to. See [The terminal](/guide/terminal#ai-in-the-terminal).
+
+Or open the terminal side panel (<kbd>Mod</kbd>+<kbd>.</kbd>) and choose **AI**:
 
 1. **Describe what you want to do.** Optionally **use selected terminal text as context**, for example an error message.
 2. **Generate command.** You get one command with a short explanation and a **risk rating** (low, medium, high, critical) from Vaultport's deterministic risk checker.
 3. **Insert into terminal.** The command is typed at the prompt — never executed. Review it and press <kbd>Enter</kbd> yourself.
 
-The engine can take more session context into account (remote OS, shell, working directory, recent commands); the current app passes only the request and, if you choose, the selected terminal text.
+The model gets the terminal's context: the operating system of the host (or this computer), the working directory and the last few commands (with [shell integration](/guide/terminal#shell-integration)), and — if you choose — the selected terminal text.
 
 In the Snippets editor, **Generate script from description** drafts a multi-line snippet the same way.
 

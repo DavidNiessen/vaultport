@@ -84,7 +84,7 @@ Port enumeration with USB details, validated line settings, and sessions over na
 
 ### `term-intel`
 
-Deterministic terminal intelligence: shell-integration escape-sequence parsing (OSC 7, 133, 633, 1337) and password-prompt detection, opt-in bash/zsh/fish integration scripts, history import with frecency ranking, the autocomplete engine with about 60 built-in command specs, and command risk rating.
+Deterministic terminal intelligence: shell-integration escape-sequence parsing (OSC 7, 133, 633, 1337) and password-prompt detection, command blocks recorded from the output stream (used by AI agents and the local AI), bash/zsh/fish integration scripts, history import with frecency ranking, the autocomplete engine with more than 200 built-in command specs, fuzzy matching, commands found on the machine and environment variables, generators that turn small files (git refs, `package.json`, Makefiles, `/etc/passwd`, SSH config, systemd units) into argument values, and command risk rating. The app reads those files over the local disk or an SFTP channel of the terminal's SSH connection.
 
 ### `session-log`
 

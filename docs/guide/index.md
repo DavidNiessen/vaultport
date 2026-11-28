@@ -15,15 +15,16 @@ It is built around three promises:
 
 ## What you can do with it
 
-| Area            | Highlights                                                                                                                                                                                                            |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Connections     | SSH with jump hosts, HTTP CONNECT and SOCKS5 proxies, agent forwarding and environment variables; Mosh; Telnet; serial consoles; a local terminal on desktop                                                          |
-| Security        | Strict host-key verification, `@cert-authority` and `@revoked` support, post-quantum `mlkem768x25519-sha256` key exchange, FIDO2 and biometric hardware keys                                                          |
-| Files           | A dual-pane SFTP browser with drag and drop, a resumable transfer queue and edit-and-upload                                                                                                                           |
-| Productivity    | Groups with inherited settings, tags and favorites, workspaces with broadcast input, snippets with variables, deterministic autocomplete, a command palette                                                           |
-| Your data       | Importers for OpenSSH, PuTTY, MobaXterm, SecureCRT and CSV; read-only cloud inventory for AWS, DigitalOcean and Azure; encrypted session logs; encrypted backups                                                      |
-| Sync            | End-to-end encrypted, conflict-free sync through a synced folder, WebDAV or S3-compatible storage, plus QR-code device pairing                                                                                        |
-| Optional extras | Local AI that turns plain language into a shell command, running entirely on your device; and an MCP server that lets AI agents such as Claude Code work with your hosts under your approval. Both are off by default |
+| Area            | Highlights                                                                                                                                                                                                                        |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Connections     | SSH with jump hosts, HTTP CONNECT and SOCKS5 proxies, agent forwarding and environment variables; Mosh; Telnet; serial consoles; a local terminal on desktop                                                                      |
+| Terminal        | A full terminal app for SSH and local shells: tabs with Ctrl/⌘+T and W, autocomplete from the commands installed on the machine, inline suggestions, syntax highlighting, command blocks, history search and rebindable shortcuts |
+| Security        | Strict host-key verification, `@cert-authority` and `@revoked` support, post-quantum `mlkem768x25519-sha256` key exchange, FIDO2 and biometric hardware keys                                                                      |
+| Files           | A dual-pane SFTP browser with drag and drop, a resumable transfer queue and edit-and-upload                                                                                                                                       |
+| Productivity    | Groups with inherited settings, tags and favorites, workspaces with broadcast input, snippets with variables, deterministic autocomplete, a command palette                                                                       |
+| Your data       | Importers for OpenSSH, PuTTY, MobaXterm, SecureCRT and CSV; read-only cloud inventory for AWS, DigitalOcean and Azure; encrypted session logs; encrypted backups                                                                  |
+| Sync            | End-to-end encrypted, conflict-free sync through a synced folder, WebDAV or S3-compatible storage, plus QR-code device pairing                                                                                                    |
+| Optional extras | Local AI that turns plain language into a shell command, running entirely on your device; and an MCP server that lets AI agents such as Claude Code work with your hosts under your approval. Both are off by default             |
 
 ## How it fits together
 

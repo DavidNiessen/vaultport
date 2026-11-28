@@ -27,6 +27,7 @@ export const sections: DocSection[] = [
   {
     text: 'Guides',
     items: [
+      { text: 'The terminal', link: '/guide/terminal' },
       { text: 'Hosts & groups', link: '/guide/hosts-and-groups' },
       { text: 'SSH keys & hardware keys', link: '/guide/keys' },
       { text: 'Known hosts', link: '/guide/known-hosts' },
