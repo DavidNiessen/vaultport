@@ -337,6 +337,7 @@ function Terminal() {
         />
       </Card>
       <Card title={t('settings.behaviour')}>
+        {toggle('restoreTabs', t('settings.restoreTabs'), t('settings.restoreTabsHint'))}
         {toggle('autoReconnect', t('settings.autoReconnect'))}
         {toggle('copyOnSelect', t('settings.copyOnSelect'))}
         {toggle('rightClickPaste', t('settings.rightClickPaste'))}

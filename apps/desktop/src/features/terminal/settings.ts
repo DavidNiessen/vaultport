@@ -36,6 +36,8 @@ export interface TerminalSettings {
   sshIntegration: 'off' | 'auto';
   /** `# what you want` at the prompt asks the local AI (when it is on). */
   aiHashPrompt: boolean;
+  /** Reopen the terminal tabs that were open, after unlocking. */
+  restoreTabs: boolean;
   /** Working directory, git branch and last exit status under the terminal. */
   contextBar: boolean;
   /** Extra output highlighting rules. */
@@ -81,5 +83,6 @@ export const DEFAULT_TERMINAL_SETTINGS: TerminalSettings = {
   sshIntegration: 'off',
   aiHashPrompt: true,
   contextBar: true,
+  restoreTabs: false,
   highlightRules: [],
 };

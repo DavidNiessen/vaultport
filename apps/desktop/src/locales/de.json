@@ -564,7 +564,9 @@
     "removeRule": "Regel entfernen",
     "invalidPattern": "Ungültiger regulärer Ausdruck",
     "contextBar": "Kontextleiste",
-    "contextBarHint": "Zeigt Arbeitsverzeichnis, Git-Branch und den Status des letzten Befehls unter dem Terminal."
+    "contextBarHint": "Zeigt Arbeitsverzeichnis, Git-Branch und den Status des letzten Befehls unter dem Terminal.",
+    "restoreTabs": "Tabs beim Start wiederherstellen",
+    "restoreTabsHint": "Öffnet die zuletzt offenen Terminal-Tabs und Teilungen nach dem Entsperren wieder. Gespeichert werden nur Host-Verweise und Verzeichnisse, verschlüsselt im Tresor dieses Geräts."
   },
   "sftp": {
     "actions": "Aktionen",

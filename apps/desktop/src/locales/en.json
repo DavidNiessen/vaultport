@@ -564,7 +564,9 @@
     "removeRule": "Remove rule",
     "invalidPattern": "Invalid regular expression",
     "contextBar": "Context bar",
-    "contextBarHint": "Shows the working directory, git branch and the last command's status under the terminal."
+    "contextBarHint": "Shows the working directory, git branch and the last command's status under the terminal.",
+    "restoreTabs": "Reopen tabs on start",
+    "restoreTabsHint": "Reopens the terminal tabs and splits that were open, after you unlock. Only host references and directories are kept, encrypted in this device's vault."
   },
   "sftp": {
     "actions": "Actions",

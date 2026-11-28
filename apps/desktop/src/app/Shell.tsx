@@ -52,6 +52,7 @@ import {
   newTab,
   splitPane,
 } from '../features/terminal/tabActions';
+import { useTabRestore } from '../features/terminal/restore';
 import { WorkspaceView } from '../features/workspaces/WorkspaceView';
 import { SerialDialog } from '../features/terminal/SerialDialog';
 import { GlobalPrompts } from './GlobalPrompts';
@@ -549,5 +550,6 @@ function SftpEntry() {
 export function Shell(props: ShellProps) {
   const bp = useBreakpoint();
   useShortcuts(props.onLock);
+  useTabRestore();
   return bp === 'phone' ? <PhoneShell {...props} /> : <DesktopShell {...props} />;
 }
