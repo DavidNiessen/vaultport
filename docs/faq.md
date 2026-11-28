@@ -63,7 +63,7 @@ Yes, on desktop, if you allow it. Turn on **Settings → AI agents** and add Vau
 
 ## Is autocomplete AI-based?
 
-No. Autocomplete is a deterministic engine based on your history, snippets, paths and built-in command specs. It never uses the AI model.
+No. Autocomplete is a deterministic engine based on your history, snippets, the commands installed on the machine, paths, values such as git branches and npm scripts, and about 300 built-in command specs. It never uses the AI model. The AI is only used when you ask it for a command — see [The terminal](/guide/terminal#ai-in-the-terminal).
 
 ## Which platforms are supported?
 

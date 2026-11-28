@@ -6,7 +6,7 @@ use crate::sessions::{
     self, Input, OpenSessionRequest, PromptResponse, SessionEvent, SessionManager,
 };
 use tauri::ipc::Channel;
-use tauri::{AppHandle, State};
+use tauri::{AppHandle, Manager, State};
 
 const MAX_INPUT: usize = 1024 * 1024;
 
@@ -22,7 +22,26 @@ pub fn session_open(
     if request.cols == 0 || request.rows == 0 || request.cols > 1000 || request.rows > 1000 {
         return Err(CmdError::invalid("invalid terminal size"));
     }
-    let (id, input, sink) = manager.register(events);
+    let host_label = match &request.target {
+        sessions::SessionTarget::Host { host_id } => uuid::Uuid::parse_str(host_id)
+            .ok()
+            .and_then(|u| {
+                app.state::<crate::state::AppState>()
+                    .with_vault(|v| Ok(v.get::<core_model::Host>(&u.to_string())?))
+                    .ok()
+                    .flatten()
+            })
+            .map(|h| {
+                if h.label.is_empty() {
+                    h.address
+                } else {
+                    h.label
+                }
+            }),
+        _ => None,
+    };
+    let info = sessions::SessionInfo::for_target(&request.target, host_label);
+    let (id, input, sink) = manager.register(events, info);
     if let Err(e) = sessions::spawn(&app, id.clone(), request, input, sink) {
         manager.remove(&id);
         return Err(e);

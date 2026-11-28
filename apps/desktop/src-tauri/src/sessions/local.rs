@@ -99,9 +99,22 @@ fn with_integration(app: &tauri::AppHandle, shell: &mut ShellCmd) -> Vec<(String
     launch.env
 }
 
+/// The directory a new local shell starts in: `requested` if it is an existing directory,
+/// else the home directory.
+fn start_dir(requested: Option<&str>) -> Option<std::ffi::OsString> {
+    if let Some(dir) = requested.map(str::trim).filter(|d| !d.is_empty())
+        && std::path::Path::new(dir).is_absolute()
+        && std::path::Path::new(dir).is_dir()
+    {
+        return Some(dir.into());
+    }
+    std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE"))
+}
+
 pub fn spawn(
     app: &tauri::AppHandle,
     id: String,
+    cwd: Option<String>,
     cols: u16,
     rows: u16,
     mut input: mpsc::UnboundedReceiver<Input>,
@@ -130,8 +143,8 @@ pub fn spawn(
     cmd.env("TERM", "xterm-256color");
     cmd.env("COLORTERM", "truecolor");
     cmd.env("TERM_PROGRAM", "vaultport");
-    if let Some(home) = std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")) {
-        cmd.cwd(home);
+    if let Some(dir) = start_dir(cwd.as_deref()) {
+        cmd.cwd(dir);
     }
     let mut child = pair.slave.spawn_command(cmd).map_err(|e| {
         CmdError::internal(format!("could not start the shell {}: {e}", shell.program))
@@ -209,6 +222,17 @@ mod tests {
         assert_eq!(c.args, ["-l"]);
         assert_eq!(shell_cmd("  ", None).program, "/bin/sh");
         assert_eq!(shell_cmd("", Some(String::new())).program, "/bin/sh");
+    }
+
+    #[test]
+    fn start_dir_requires_an_existing_absolute_directory() {
+        let tmp = std::env::temp_dir();
+        let tmp = tmp.to_string_lossy();
+        assert_eq!(start_dir(Some(&tmp)), Some(tmp.as_ref().into()));
+        let home = std::env::var_os("HOME");
+        assert_eq!(start_dir(Some("relative/dir")), home);
+        assert_eq!(start_dir(Some("/definitely/not/here")), home);
+        assert_eq!(start_dir(None), home);
     }
 
     #[test]

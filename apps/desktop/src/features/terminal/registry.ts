@@ -7,7 +7,28 @@ export interface TerminalHandle {
   write: (data: string) => void;
   focus: () => void;
   sessionId: () => string | null;
+  /** The shell's working directory, when it reports one (OSC 7). */
+  cwd: () => string | null;
+  /** Runs a terminal action (from the command palette or a menu). */
+  action: (action: TerminalAction) => void;
 }
+
+/** Actions a terminal pane performs itself. */
+export type TerminalAction =
+  | 'search'
+  | 'clear'
+  | 'historySearch'
+  | 'suggest'
+  | 'aiCommand'
+  | 'composer'
+  | 'prevBlock'
+  | 'nextBlock'
+  | 'copyLastOutput'
+  | 'zoomIn'
+  | 'zoomOut'
+  | 'zoomReset'
+  | 'paste'
+  | 'installIntegration';
 
 export const terminalRegistry = new Map<string, TerminalHandle>();
 

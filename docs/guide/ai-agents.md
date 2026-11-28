@@ -110,9 +110,23 @@ If agent access is turned off, `vaultport mcp` still starts, but only offers a s
 | `delete_path`        | Deletes a file, symlink or empty directory over SFTP (not recursive).                                                                                                           | yes, destructive  |
 | `start_port_forward` | Starts a saved port-forwarding rule.                                                                                                                                            | yes               |
 | `stop_port_forward`  | Stops a running port-forwarding rule.                                                                                                                                           | yes               |
-| `open_terminal`      | Opens an interactive terminal tab for you in Vaultport; the agent cannot read or type into it. Use it to hand over.                                                             | yes               |
+| `open_terminal`      | Opens an interactive terminal tab for you in Vaultport. Use it to hand over.                                                                                                    | yes               |
+| `list_terminals`     | Lists the terminals you have open (SSH, local, serial) with their working directory and last command and exit status.                                                           | no                |
+| `read_terminal`      | Reads the recent commands of one of your terminals with their output and exit status (or the last lines of output without shell integration).                                   | no                |
+| `type_in_terminal`   | Types a command into one of your terminals, where you see it; with `run` it presses Enter and returns the output once the command finishes.                                     | yes, destructive  |
 
-Hosts are referred to by id, label or address. Connections use the host's saved settings — jump hosts, proxy, keys, [host-key verification](/guide/known-hosts) — exactly as if you connected yourself.
+Hosts are referred to by id, label or address; terminals by the id from `list_terminals` or their tab label. Connections use the host's saved settings — jump hosts, proxy, keys, [host-key verification](/guide/known-hosts) — exactly as if you connected yourself.
+
+## Terminals
+
+Agents can see what happens in the terminals you have open — for example to explain an error you just got. Copy a ready-made prompt from a failed command's badge menu (**Copy a prompt for your AI agent**) and paste it into your agent.
+
+- `read_terminal` returns the last commands of a terminal with their output (shortened in the middle when long), exit status and working directory. With [shell integration](/guide/terminal#shell-integration) Vaultport knows where each command starts and ends; without it, the agent gets the last lines of output.
+- `type_in_terminal` always asks you first and shows exactly what will be typed. Vaultport switches to the terminal so you can watch. Without `run`, the command waits on the prompt for you to review and press Enter.
+- Terminals are covered by the host scope: with **Hosts → Selected**, only terminals of the selected hosts are visible, and local shells, ad-hoc connections and serial consoles are hidden.
+- Reading or typing into a local shell, an ad-hoc connection or a serial console **always asks**, whatever **Ask before** says, because they are not saved hosts you scoped agents to. **Allow for this session** covers only the one terminal you approved.
+- `type_in_terminal` refuses while a command is running in that terminal (when Vaultport can tell, with shell integration), so the text cannot end up in a password prompt, an editor or a REPL. It clears whatever is on the prompt before typing.
+- Output is recorded in memory only while the terminal is open (the last 30 commands), and never stored.
 
 ## Approvals
 
@@ -126,10 +140,10 @@ If you do not answer within **5 minutes**, the request is denied.
 
 **Ask before** decides which calls need approval:
 
-| Setting                    | Reads (`list_*`, `read_file`) | Everything that changes something |
-| -------------------------- | ----------------------------- | --------------------------------- |
-| **Every action** (default) | ask                           | ask                               |
-| **Changes only**           | run without asking            | ask                               |
+| Setting                    | Reads (`list_*`, `read_*`) | Everything that changes something |
+| -------------------------- | -------------------------- | --------------------------------- |
+| **Every action** (default) | ask                        | ask                               |
+| **Changes only**           | run without asking         | ask                               |
 
 Actions that change something always need your approval (or an earlier "allow for this session").
 

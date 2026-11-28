@@ -3,6 +3,7 @@ pub mod agent;
 pub mod ai;
 pub mod complete;
 pub mod data;
+pub mod discover;
 pub mod entities;
 pub mod files;
 pub mod forwarding;

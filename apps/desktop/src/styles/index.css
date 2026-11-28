@@ -457,6 +457,67 @@
   background-color: transparent !important;
 }
 
+/* Command blocks (features/terminal/blocks.ts): decorations drawn over the terminal cells. */
+.terminal-host .vp-block-sep {
+  pointer-events: none;
+  border-top: 1px solid color-mix(in oklab, var(--vp-sep, #888888) 35%, transparent);
+  margin-top: -1px;
+}
+.terminal-host .vp-block-badge {
+  pointer-events: auto;
+  cursor: pointer;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 4px;
+  font-family: var(--font-sans, system-ui);
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: color-mix(in oklab, var(--vp-color) 80%, var(--text));
+  opacity: 0.55;
+  transition: opacity 120ms ease;
+}
+.terminal-host .vp-block-badge::before {
+  content: '';
+  position: absolute;
+  inset: 2px 0;
+  z-index: -1;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--vp-color) 14%, transparent);
+}
+.terminal-host .vp-block-badge:hover,
+.terminal-host .vp-block-badge.vp-fail {
+  opacity: 1;
+}
+.terminal-host .vp-block-flash {
+  pointer-events: none;
+  border-left: 2px solid var(--vp-color);
+  background: color-mix(in oklab, var(--vp-color) 10%, transparent);
+  animation: vp-flash 900ms ease-out forwards;
+}
+.terminal-host ~ .vp-bell-flash,
+.vp-bell-flash {
+  background: color-mix(in oklab, var(--text) 8%, transparent);
+  animation: vp-bell 220ms ease-out forwards;
+}
+@keyframes vp-bell {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vp-flash {
+  to {
+    background: transparent;
+    border-left-color: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .terminal-host .vp-block-flash {
+    animation: none;
+  }
+}
+
 /*
  * The living background (components/Ambient.tsx): soft elliptical lights in the preset colours.
  * The outer layer wanders, the inner one turns and stretches; both only animate `transform`.

@@ -12,6 +12,7 @@ import { SFTP_TAB, useApp, type TerminalTab } from '@/stores/app';
 
 import type { QuickConnect } from '../hosts/quickConnect';
 import { useSftpStore } from '../sftp/store';
+import { openLocalTerminal } from './tabActions';
 
 export interface SessionActions {
   connectHost: (h: Host) => void;
@@ -57,18 +58,7 @@ export function useSessions(): SessionActions {
           quick: { host: q.host, port: q.port, username: q.username },
         });
       },
-      openLocal: () => {
-        openTab({
-          id: newId(),
-          kind: 'terminal',
-          title: 'Local',
-          hostId: null,
-          protocol: 'local',
-          sessionId: null,
-          status: 'connecting',
-          unread: false,
-        });
-      },
+      openLocal: () => openLocalTerminal(),
       openSftp: (h) => {
         useSftpStore.getState().setPane('right', { kind: 'remote', hostId: h.id, path: null });
         activate(SFTP_TAB);

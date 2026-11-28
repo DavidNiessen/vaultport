@@ -135,6 +135,12 @@ export const commands = {
 	historyList: (hostId: string | null, limit: number, options?: InvokeOptions) => __TAURI_INVOKE<HistoryItem[]>("history_list", { hostId, limit }, options),
 	/**  Suggestions for the input line at the prompt. */
 	termComplete: (req: CompleteRequest_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<CompletionList_Serialize>("term_complete", { req }, options),
+	/**  The commands found on the machine of a terminal. */
+	termCommands: (req: KnownCommandsRequest_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<KnownCommands>("term_commands", { req }, options),
+	/**  Context for the terminal's status bar, read from the machine the shell runs on. */
+	termContext: (req: TermContextRequest_Deserialize, options?: InvokeOptions) => __TAURI_INVOKE<TermContext_Serialize>("term_context", { req }, options),
+	/**  The bootstrap for loading shell integration into a running bash or zsh. */
+	termIntegrationBootstrap: (options?: InvokeOptions) => __TAURI_INVOKE<IntegrationBootstrap>("term_integration_bootstrap", undefined, options),
 	/**  Lists a directory (`None` = home directory). */
 	fsList: (source: FsSource, path: string | null, options?: InvokeOptions) => __TAURI_INVOKE<FsListing_Serialize>("fs_list", { source, path }, options),
 	/**  Creates a directory. */
@@ -174,8 +180,16 @@ export const commands = {
 	aiCancel: (options?: InvokeOptions) => __TAURI_INVOKE<void>("ai_cancel", undefined, options),
 	/**  Deletes the downloaded model. */
 	aiRemove: (options?: InvokeOptions) => __TAURI_INVOKE<null>("ai_remove", undefined, options),
-	/**  Generates one shell command for a natural-language request. Never executes anything. */
-	aiGenerateCommand: (prompt: string, tabId: string, selection: string | null, options?: InvokeOptions) => __TAURI_INVOKE<AiSuggestion>("ai_generate_command", { prompt, tabId, selection }, options),
+	/**
+	 *  Generates one shell command for a natural-language request. Never executes anything.
+	 *  With `session_id`, the terminal's OS, directory and recent commands are given as context.
+	 */
+	aiGenerateCommand: (prompt: string, sessionId: string | null, selection: string | null, options?: InvokeOptions) => __TAURI_INVOKE<AiSuggestion>("ai_generate_command", { prompt, sessionId, selection }, options),
+	/**
+	 *  Suggests a corrected command for the most recent command of a terminal that failed (by
+	 *  its exit status), from the command and the end of its output. Never executes anything.
+	 */
+	aiFixCommand: (sessionId: string, options?: InvokeOptions) => __TAURI_INVOKE<AiSuggestion>("ai_fix_command", { sessionId }, options),
 	/**  Generates a snippet script from a description. */
 	aiGenerateSnippet: (description: string, options?: InvokeOptions) => __TAURI_INVOKE<string>("ai_generate_snippet", { description }, options),
 	/**  Checks GitHub Releases for a newer, signed version. */
@@ -410,6 +424,8 @@ export type CompleteRequest_Deserialize = {
 	/**  The shell's working directory (from OSC 7), for relative paths. */
 	cwd?: string | null,
 	paths: PathSource,
+	/**  The terminal session, so remote files are read on its own connection. */
+	sessionId?: string | null,
 };
 
 export type CompleteRequest_Serialize = {
@@ -421,6 +437,8 @@ export type CompleteRequest_Serialize = {
 	/**  The shell's working directory (from OSC 7), for relative paths. */
 	cwd: string | null,
 	paths: PathSource,
+	/**  The terminal session, so remote files are read on its own connection. */
+	sessionId: string | null,
 };
 
 export type CompletionItem = CompletionItem_Serialize | CompletionItem_Deserialize;
@@ -757,6 +775,23 @@ export type ImportSummary = {
 	warnings: string[],
 };
 
+/**
+ *  How to load shell integration into a shell that is already running (e.g. over SSH),
+ *  without editing its dotfiles: the UI types [`Self::start`]; the shell turns echo off,
+ *  reports which shell it is and reads lines until a lone `.`; the UI then sends the chunks
+ *  for that shell, which are decoded and evaluated.
+ */
+export type IntegrationBootstrap = {
+	/**  The line to type first (starts with a space so most shells keep it out of history). */
+	start: string,
+	/**  The marker reported back, see [`INTEGRATION_READY`]. */
+	ready: string,
+	/**  Base64 lines of the bash script. */
+	bash: string[],
+	/**  Base64 lines of the zsh script. */
+	zsh: string[],
+};
+
 /**  Identifier of a [`crate::CloudIntegration`]. */
 export type IntegrationId = string;
 
@@ -831,6 +866,31 @@ export type KeyStorage =
  *  Windows Hello, Android Keystore/StrongBox). Never synced.
  */
 { type: "hardware"; platform_ref: string; device: string };
+
+/**
+ *  Names of the commands that exist on the machine of a terminal (for syntax highlighting:
+ *  a command that is neither here nor a function/alias is shown as unknown).
+ */
+export type KnownCommands = {
+	/**  Sorted. Empty while the machine is still being searched. */
+	names: string[],
+	/**  The search finished (an empty list then really means nothing was found). */
+	complete: boolean,
+};
+
+export type KnownCommandsRequest = KnownCommandsRequest_Serialize | KnownCommandsRequest_Deserialize;
+
+export type KnownCommandsRequest_Deserialize = {
+	hostId?: string | null,
+	sessionId?: string | null,
+	paths: PathSource,
+};
+
+export type KnownCommandsRequest_Serialize = {
+	hostId: string | null,
+	sessionId: string | null,
+	paths: PathSource,
+};
 
 /**  A trusted (or revoked) host public key. */
 export type KnownHost = KnownHost_Serialize | KnownHost_Deserialize;
@@ -1145,7 +1205,12 @@ export type SessionTarget_Deserialize =
 /**  An ad-hoc `user@host:port` connection from the omnibox. */
 { type: "quick"; host: string; port?: number | null; username?: string | null } | 
 /**  A local shell (desktop only). */
-{ type: "local" } | 
+{ type: "local"; 
+/**
+ *  Directory to start in (e.g. that of the tab it was opened from). Ignored unless it
+ *  is an existing directory; the home directory is used otherwise.
+ */
+cwd?: string | null } | 
 /**  A serial port. */
 { type: "serial"; path: string; baudRate: number; dataBits: number; stopBits: number; parity: string; flowControl: string };
 
@@ -1156,7 +1221,12 @@ export type SessionTarget_Serialize =
 /**  An ad-hoc `user@host:port` connection from the omnibox. */
 { type: "quick"; host: string; port: number | null; username: string | null } | 
 /**  A local shell (desktop only). */
-{ type: "local" } | 
+{ type: "local"; 
+/**
+ *  Directory to start in (e.g. that of the tab it was opened from). Ignored unless it
+ *  is an existing directory; the home directory is used otherwise.
+ */
+cwd: string | null } | 
 /**  A serial port. */
 { type: "serial"; path: string; baudRate: number; dataBits: number; stopBits: number; parity: string; flowControl: string };
 
@@ -1333,6 +1403,39 @@ export type TelnetConfig_Serialize = {
 	port: number | null,
 	username: string | null,
 	password: SecretRef | null,
+};
+
+/**  What the terminal's context bar shows besides the directory. */
+export type TermContext = TermContext_Serialize | TermContext_Deserialize;
+
+export type TermContextRequest = TermContextRequest_Serialize | TermContextRequest_Deserialize;
+
+export type TermContextRequest_Deserialize = {
+	hostId?: string | null,
+	sessionId?: string | null,
+	paths: PathSource,
+	/**  The shell's working directory (from OSC 7). */
+	cwd: string,
+};
+
+export type TermContextRequest_Serialize = {
+	hostId: string | null,
+	sessionId: string | null,
+	paths: PathSource,
+	/**  The shell's working directory (from OSC 7). */
+	cwd: string,
+};
+
+/**  What the terminal's context bar shows besides the directory. */
+export type TermContext_Deserialize = {
+	/**  The git branch (or short commit id when detached) of the working directory. */
+	gitHead?: string | null,
+};
+
+/**  What the terminal's context bar shows besides the directory. */
+export type TermContext_Serialize = {
+	/**  The git branch (or short commit id when detached) of the working directory. */
+	gitHead: string | null,
 };
 
 /**  Terminal appearance and behaviour. */

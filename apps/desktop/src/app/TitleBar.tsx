@@ -5,10 +5,17 @@
  * is a window drag region; double-clicking it toggles maximize (handled by Tauri).
  */
 import {
+  Bell,
+  CircleCheck,
+  CircleX,
+  Columns2,
+  Copy,
   FolderOpen,
   History,
+  Loader2,
   LayoutGrid,
   PanelRight,
+  Pencil,
   Plus,
   Search,
   SquareTerminal,
@@ -19,9 +26,13 @@ import { useState, type DragEvent, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Kbd, Tooltip } from '@/components/ui/controls';
+import { ContextMenu, type MenuItemDef } from '@/components/ui/overlay';
 import { cn } from '@/lib/cn';
 import { formatShortcut, usePlatform } from '@/lib/platform';
-import { SFTP_TAB, VAULT_TAB, useApp, type Tab } from '@/stores/app';
+import { SFTP_TAB, VAULT_TAB, useApp, type Tab, type TerminalTab } from '@/stores/app';
+
+import { primaryBinding, useKeymap, type ShortcutId } from '../features/palette/shortcuts';
+import { duplicate, requestClose, splitPane } from '../features/terminal/tabActions';
 
 import { LinuxControls, WindowsControls, useWindowControls } from './WindowControls';
 
@@ -37,6 +48,34 @@ function statusColor(tab: Tab): string | null {
     case 'disconnected':
       return 'bg-subtle';
   }
+}
+
+type Activity = NonNullable<TerminalTab['activity']>;
+
+/** A tab's activity; a workspace shows the most important one of its panes. */
+export function activityOf(tab: Tab, tabs: Tab[]): Activity | null {
+  if (tab.kind === 'terminal') return tab.activity ?? null;
+  if (tab.kind !== 'workspace') return null;
+  const all = tab.panes
+    .map((id) => tabs.find((t) => t.id === id))
+    .map((t) => (t?.kind === 'terminal' ? t.activity : undefined));
+  for (const a of ['failed', 'bell', 'running', 'done'] as const) if (all.includes(a)) return a;
+  return null;
+}
+
+function ActivityIcon({ activity }: { activity: Activity }) {
+  const { t } = useTranslation();
+  const label = t(`tabs.activity.${activity}`);
+  const cls = 'size-3.5 shrink-0';
+  return (
+    <span title={label} className="flex">
+      <span className="sr-only">{label}</span>
+      {activity === 'running' ? <Loader2 className={cn(cls, 'text-muted animate-spin')} /> : null}
+      {activity === 'done' ? <CircleCheck className={cn(cls, 'text-success')} /> : null}
+      {activity === 'failed' ? <CircleX className={cn(cls, 'text-danger')} /> : null}
+      {activity === 'bell' ? <Bell className={cn(cls, 'text-warning')} /> : null}
+    </span>
+  );
 }
 
 function TabIcon({ tab }: { tab: Tab }) {
@@ -82,16 +121,33 @@ function PinnedTab({
   );
 }
 
-function SessionTab({ tab, index, active }: { tab: Tab; index: number; active: boolean }) {
+function SessionTab({
+  tab,
+  index,
+  active,
+  activity,
+}: {
+  tab: Tab;
+  index: number;
+  active: boolean;
+  activity: Activity | null;
+}) {
   const { t } = useTranslation();
-  const { activate, closeTab, moveTab } = useApp();
+  const platform = usePlatform();
+  const keymap = useKeymap((s) => s.keymap);
+  const { activate, moveTab, renaming, setRenaming, renameTab } = useApp();
   const [dragOver, setDragOver] = useState(false);
   const dot = statusColor(tab);
+  const editing = renaming === tab.id;
+  const hint = (id: ShortcutId) => {
+    const k = primaryBinding(keymap, id);
+    return k ? formatShortcut(platform, k) : undefined;
+  };
 
   const onAuxClick = (e: MouseEvent) => {
     if (e.button === 1) {
       e.preventDefault();
-      closeTab(tab.id);
+      requestClose(tab.id);
     }
   };
   const onDragStart = (e: DragEvent) => {
@@ -104,49 +160,120 @@ function SessionTab({ tab, index, active }: { tab: Tab; index: number; active: b
     if (!Number.isNaN(from) && from !== index) moveTab(from, index);
   };
 
+  const s = useApp.getState;
+  const items: MenuItemDef[] = [
+    {
+      label: t('tabs.rename'),
+      icon: <Pencil className="size-4" />,
+      shortcut: hint('renameTab'),
+      onSelect: () => setRenaming(tab.id),
+    },
+    ...(tab.kind === 'terminal' || tab.kind === 'workspace'
+      ? [
+          {
+            label: t('shortcuts.splitPane'),
+            icon: <Columns2 className="size-4" />,
+            shortcut: hint('splitPane'),
+            onSelect: () => splitPane(tab.id),
+          },
+        ]
+      : []),
+    ...(tab.kind === 'terminal'
+      ? [
+          {
+            label: t('tabs.duplicate'),
+            icon: <Copy className="size-4" />,
+            shortcut: hint('duplicateTab'),
+            onSelect: () => duplicate(tab.id),
+          },
+        ]
+      : []),
+    { separator: true },
+    {
+      label: t('tabs.closeTab'),
+      icon: <X className="size-4" />,
+      shortcut: hint('closeTab'),
+      onSelect: () => requestClose(tab.id),
+    },
+    { label: t('tabs.closeOthers'), onSelect: () => s().closeOthers(tab.id) },
+    { label: t('tabs.closeRight'), onSelect: () => s().closeToRight(tab.id) },
+    {
+      label: t('tabs.reopen'),
+      shortcut: hint('reopenTab'),
+      disabled: s().closedTabs.length === 0,
+      onSelect: () => s().reopenClosed(),
+    },
+  ];
+
   return (
-    <div
-      role="tab"
-      aria-selected={active}
-      tabIndex={0}
-      draggable
-      onDragStart={onDragStart}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setDragOver(true);
-      }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={onDrop}
-      onClick={() => activate(tab.id)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') activate(tab.id);
-      }}
-      onAuxClick={onAuxClick}
-      title={tab.title}
-      className={cn(
-        'no-drag group relative flex h-8 max-w-56 min-w-28 shrink items-center gap-2 rounded-full pr-1.5 pl-3 text-[13px] font-bold transition-colors duration-150',
-        active ? 'bg-text/[0.1] text-text' : 'text-muted hover:bg-text/[0.06] hover:text-text',
-        dragOver && 'ring-accent ring-2',
-      )}
-    >
-      <TabIcon tab={tab} />
-      <span className="min-w-0 flex-1 truncate">{tab.title}</span>
-      {dot ? <span className={cn('size-1.5 shrink-0 rounded-full', dot)} aria-hidden /> : null}
-      <button
-        type="button"
-        aria-label={t('tabs.close', { title: tab.title })}
-        onClick={(e) => {
-          e.stopPropagation();
-          closeTab(tab.id);
+    <ContextMenu items={items}>
+      <div
+        role="tab"
+        aria-selected={active}
+        tabIndex={0}
+        draggable={!editing}
+        onDragStart={onDragStart}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
         }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={onDrop}
+        onClick={() => activate(tab.id)}
+        onDoubleClick={() => setRenaming(tab.id)}
+        onKeyDown={(e) => {
+          if (editing) return;
+          if (e.key === 'Enter' || e.key === ' ') activate(tab.id);
+          if (e.key === 'F2') setRenaming(tab.id);
+        }}
+        onAuxClick={onAuxClick}
+        title={tab.title}
         className={cn(
-          'text-subtle hover:bg-text/[0.12] hover:text-text flex size-5 shrink-0 items-center justify-center rounded-full transition-opacity focus:opacity-100',
-          active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+          'no-drag group relative flex h-8 max-w-56 min-w-28 shrink items-center gap-2 rounded-full pr-1.5 pl-3 text-[13px] font-bold transition-colors duration-150',
+          active ? 'bg-text/[0.1] text-text' : 'text-muted hover:bg-text/[0.06] hover:text-text',
+          dragOver && 'ring-accent ring-2',
         )}
       >
-        <X className="size-3.5" />
-      </button>
-    </div>
+        <TabIcon tab={tab} />
+        {editing ? (
+          <input
+            autoFocus
+            aria-label={t('tabs.rename')}
+            defaultValue={tab.title}
+            onFocus={(e) => e.currentTarget.select()}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              e.stopPropagation();
+              if (e.key === 'Enter') renameTab(tab.id, e.currentTarget.value);
+              if (e.key === 'Escape') setRenaming(null);
+            }}
+            onBlur={(e) => renameTab(tab.id, e.currentTarget.value)}
+            className="bg-surface-3 text-text focus:border-accent min-w-0 flex-1 rounded border border-transparent px-1 text-[13px] font-semibold outline-none"
+          />
+        ) : (
+          <span className="min-w-0 flex-1 truncate">{tab.title}</span>
+        )}
+        {activity && !(active && activity !== 'running') ? (
+          <ActivityIcon activity={activity} />
+        ) : dot ? (
+          <span className={cn('size-1.5 shrink-0 rounded-full', dot)} aria-hidden />
+        ) : null}
+        <button
+          type="button"
+          aria-label={t('tabs.close', { title: tab.title })}
+          onClick={(e) => {
+            e.stopPropagation();
+            requestClose(tab.id);
+          }}
+          className={cn(
+            'text-subtle hover:bg-text/[0.12] hover:text-text flex size-5 shrink-0 items-center justify-center rounded-full transition-opacity focus:opacity-100',
+            active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100',
+          )}
+        >
+          <X className="size-3.5" />
+        </button>
+      </div>
+    </ContextMenu>
   );
 }
 
@@ -157,6 +284,14 @@ export function TitleBar() {
   const { tabs, activeTab, setNewTabOpen, setPaletteOpen, sidePanelOpen, setSidePanelOpen } =
     useApp();
   const mac = platform.kind === 'macos';
+  const keymap = useKeymap((s) => s.keymap);
+  const fmt = (id: ShortcutId) => {
+    const k = primaryBinding(keymap, id);
+    return k ? formatShortcut(platform, k) : null;
+  };
+  const newTabHint = [t('tabs.new'), fmt('connect') ? `(${fmt('connect') ?? ''})` : '']
+    .filter(Boolean)
+    .join(' ');
   const activeKind = tabs.find((x) => x.id === activeTab)?.kind;
 
   return (
@@ -197,14 +332,20 @@ export function TitleBar() {
             data-tauri-drag-region
             className="flex min-w-0 [scrollbar-width:none] items-center gap-1 overflow-x-auto"
           >
-            {tabs
-              .filter((x) => x.kind !== 'sftp')
-              .map((tab, i) => (
-                <SessionTab key={tab.id} tab={tab} index={i} active={activeTab === tab.id} />
-              ))}
+            {tabs.map((tab, i) =>
+              tab.kind === 'sftp' || (tab.kind === 'terminal' && tab.workspace) ? null : (
+                <SessionTab
+                  key={tab.id}
+                  tab={tab}
+                  index={i}
+                  active={activeTab === tab.id}
+                  activity={activityOf(tab, tabs)}
+                />
+              ),
+            )}
           </div>
         </div>
-        <Tooltip content={`${t('tabs.new')} (${formatShortcut(platform, 'Mod+T')})`}>
+        <Tooltip content={newTabHint}>
           <button
             type="button"
             aria-label={t('tabs.new')}
@@ -226,10 +367,17 @@ export function TitleBar() {
         >
           <Search className="size-4 shrink-0" />
           <span className="hidden flex-1 text-left lg:inline">{t('palette.short')}</span>
-          <Kbd>{formatShortcut(platform, 'Mod+K')}</Kbd>
+          {fmt('palette') ? <Kbd>{fmt('palette')}</Kbd> : null}
         </button>
         {activeKind === 'terminal' || activeKind === 'workspace' ? (
-          <Tooltip content={`${t('terminal.sidePanel')} (${formatShortcut(platform, 'Mod+.')})`}>
+          <Tooltip
+            content={[
+              t('terminal.sidePanel'),
+              fmt('sidePanel') ? `(${fmt('sidePanel') ?? ''})` : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          >
             <button
               type="button"
               aria-label={t('terminal.sidePanel')}

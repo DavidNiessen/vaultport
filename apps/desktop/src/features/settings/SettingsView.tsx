@@ -10,8 +10,11 @@ import {
   Keyboard,
   Monitor,
   Palette,
+  Plus,
+  RotateCcw,
   Shield,
   SquareTerminal,
+  X,
 } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,9 +34,23 @@ import { useApp, type ThemePref } from '@/stores/app';
 
 import { AgentSettingsCard } from '../agents/AgentSettings';
 import { AiSettingsCard } from '../ai/AiSettingsCard';
-import { SHORTCUTS } from '../palette/shortcuts';
+import {
+  SHORTCUTS,
+  SHORTCUTS_DOC,
+  SHORTCUT_GROUPS,
+  bindingFromEvent,
+  conflicts,
+  useKeymap,
+  type ShortcutId,
+  type ShortcutOverrides,
+} from '../palette/shortcuts';
 import { SyncSettings } from '../sync/SyncSettings';
-import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from '../terminal/settings';
+import { isValidPattern } from '../terminal/highlight';
+import {
+  DEFAULT_TERMINAL_SETTINGS,
+  type HighlightRule,
+  type TerminalSettings,
+} from '../terminal/settings';
 import {
   TERMINAL_FONTS,
   TERMINAL_THEMES,
@@ -253,23 +270,95 @@ function Terminal() {
           />
         </Row>
       </Card>
-      <Card title={t('settings.behaviour')}>
+      <Card title={t('settings.suggestions')}>
         {toggle('autocomplete', t('settings.autocomplete'), t('settings.autocompleteHint'))}
-        {toggle('autoReconnect', t('settings.autoReconnect'))}
-        {toggle('copyOnSelect', t('settings.copyOnSelect'))}
-        {toggle('rightClickPaste', t('settings.rightClickPaste'))}
-        {toggle('highlightKeywords', t('settings.highlightKeywords'))}
-        {toggle('cursorBlink', t('settings.cursorBlink'))}
-        {toggle('brightBold', t('settings.brightBold'))}
-        {toggle('optionAsMeta', t('settings.optionAsMeta'))}
-        {toggle('remoteTitles', t('settings.remoteTitles'))}
+        <Row label={t('settings.suggestMode')} description={t('settings.suggestModeHint')}>
+          <Segmented
+            ariaLabel={t('settings.suggestMode')}
+            value={settings.suggestMode}
+            onChange={(v) => update({ suggestMode: v })}
+            options={[
+              { value: 'auto', label: t('settings.suggestAuto') },
+              { value: 'tab', label: t('settings.suggestTab') },
+            ]}
+          />
+        </Row>
+        {toggle('ghostText', t('settings.ghostText'), t('settings.ghostTextHint'))}
+        {toggle(
+          'syntaxHighlight',
+          t('settings.syntaxHighlight'),
+          t('settings.syntaxHighlightHint'),
+        )}
+        {toggle('aiHashPrompt', t('settings.aiHashPrompt'), t('settings.aiHashPromptHint'))}
+      </Card>
+      <Card title={t('settings.commandBlocks')}>
         {toggle(
           'shellIntegration',
           t('settings.shellIntegration'),
           t('settings.shellIntegrationHint'),
         )}
+        <Row label={t('settings.sshIntegration')} description={t('settings.sshIntegrationHint')}>
+          <Select
+            aria-label={t('settings.sshIntegration')}
+            className="w-52"
+            value={settings.sshIntegration}
+            onChange={(e) =>
+              update({ sshIntegration: e.target.value as TerminalSettings['sshIntegration'] })
+            }
+          >
+            <option value="off">{t('settings.sshIntegrationOff')}</option>
+            <option value="auto">{t('settings.sshIntegrationAuto')}</option>
+          </Select>
+        </Row>
+        {toggle('commandBlocks', t('settings.commandBlocks'), t('settings.commandBlocksHint'))}
+        {toggle('contextBar', t('settings.contextBar'), t('settings.contextBarHint'))}
+        <Row label={t('settings.notifyAfter')} description={t('settings.notifyAfterHint')}>
+          <span className="flex items-center gap-2">
+            <Input
+              aria-label={t('settings.notifyAfter')}
+              className="w-20"
+              inputMode="numeric"
+              value={settings.notifyAfterSeconds}
+              onChange={(e) =>
+                update({
+                  notifyAfterSeconds: Math.min(86_400, Math.max(0, Number(e.target.value) || 0)),
+                })
+              }
+            />
+            <span className="text-subtle text-[13px]">{t('settings.seconds')}</span>
+          </span>
+        </Row>
+      </Card>
+      <Card title={t('settings.highlightRules')}>
+        {toggle('highlightKeywords', t('settings.highlightKeywords'))}
+        <HighlightRules
+          rules={settings.highlightRules}
+          onChange={(highlightRules) => update({ highlightRules })}
+        />
+      </Card>
+      <Card title={t('settings.behaviour')}>
+        {toggle('restoreTabs', t('settings.restoreTabs'), t('settings.restoreTabsHint'))}
+        {toggle('autoReconnect', t('settings.autoReconnect'))}
+        {toggle('copyOnSelect', t('settings.copyOnSelect'))}
+        {toggle('rightClickPaste', t('settings.rightClickPaste'))}
+        {toggle('cursorBlink', t('settings.cursorBlink'))}
+        {toggle('brightBold', t('settings.brightBold'))}
+        {toggle('optionAsMeta', t('settings.optionAsMeta'))}
+        {toggle('remoteTitles', t('settings.remoteTitles'))}
         {toggle('importHistory', t('settings.importHistory'), t('settings.execChannelsHint'))}
         {toggle('detectOs', t('settings.detectOs'), t('settings.execChannelsHint'))}
+        <Row label={t('settings.bell')}>
+          <Select
+            aria-label={t('settings.bell')}
+            className="w-32"
+            value={settings.bell}
+            onChange={(e) => update({ bell: e.target.value as TerminalSettings['bell'] })}
+          >
+            <option value="visual">{t('settings.bellVisual')}</option>
+            <option value="sound">{t('settings.bellSound')}</option>
+            <option value="none">{t('settings.bellNone')}</option>
+          </Select>
+        </Row>
         <Row label={t('settings.osc52')} description={t('settings.osc52Hint')}>
           <Select
             aria-label={t('settings.osc52')}
@@ -328,6 +417,72 @@ function Terminal() {
         </Row>
       </Card>
     </>
+  );
+}
+
+/** Editor for the user's own output highlighting rules. */
+function HighlightRules({
+  rules,
+  onChange,
+}: {
+  rules: HighlightRule[];
+  onChange: (rules: HighlightRule[]) => void;
+}) {
+  const { t } = useTranslation();
+  const set = (i: number, patch: Partial<HighlightRule>) =>
+    onChange(rules.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  return (
+    <div className="grid gap-2 py-2">
+      <p className="text-subtle text-[12px]">{t('settings.highlightRulesHint')}</p>
+      {rules.map((r, i) => {
+        const valid = isValidPattern(r.pattern);
+        return (
+          <div key={i} className="flex flex-wrap items-center gap-2">
+            <Input
+              aria-label={t('settings.rulePattern')}
+              placeholder={t('settings.rulePattern')}
+              className={cn('min-w-0 flex-1 font-mono', !valid && r.pattern && 'border-danger')}
+              spellCheck={false}
+              defaultValue={r.pattern}
+              title={!valid && r.pattern ? t('settings.invalidPattern') : undefined}
+              onBlur={(e) => {
+                if (e.target.value !== r.pattern) set(i, { pattern: e.target.value });
+              }}
+            />
+            <input
+              type="color"
+              aria-label={t('settings.ruleColor')}
+              value={r.color}
+              onChange={(e) => set(i, { color: e.target.value })}
+              className="border-border h-9 w-10 cursor-pointer rounded-lg border bg-transparent p-1"
+            />
+            <Switch
+              label={t('settings.ruleCase')}
+              checked={r.caseSensitive}
+              onCheckedChange={(v) => set(i, { caseSensitive: v })}
+            />
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              aria-label={t('settings.removeRule')}
+              onClick={() => onChange(rules.filter((_, j) => j !== i))}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+        );
+      })}
+      <Button
+        variant="ghost"
+        className="justify-self-start"
+        onClick={() =>
+          onChange([...rules, { pattern: '', color: '#f4c15c', caseSensitive: false }])
+        }
+      >
+        <Plus className="size-4" />
+        {t('settings.addRule')}
+      </Button>
+    </div>
   );
 }
 
@@ -449,24 +604,198 @@ function Security({
   );
 }
 
-function Shortcuts() {
-  const { t } = useTranslation();
+function KeyCaps({ binding }: { binding: string }) {
   const platform = usePlatform();
   return (
-    <Card title={t('settings.shortcuts')}>
-      {SHORTCUTS.map((s) => (
-        <Row key={s.id} label={t(s.label)}>
-          <span className="flex gap-1">
-            {formatShortcut(platform, s.keys)
-              .split(/(?<=.)\+|(?=[⌘⌥⇧⌃])/)
-              .filter(Boolean)
-              .map((k, i) => (
-                <Kbd key={`${k}-${String(i)}`}>{k}</Kbd>
-              ))}
+    <span className="flex gap-1">
+      {formatShortcut(platform, binding)
+        .split(/(?<=.)\+|(?=[⌘⌥⇧⌃])/)
+        .filter(Boolean)
+        .map((k, i) => (
+          <Kbd key={`${k}-${String(i)}`}>{k}</Kbd>
+        ))}
+    </span>
+  );
+}
+
+/** Records the next key combination pressed while it has focus. */
+function ShortcutRecorder({
+  onRecord,
+  onCancel,
+}: {
+  onRecord: (binding: string) => void;
+  onCancel: () => void;
+}) {
+  const { t } = useTranslation();
+  const apple = useKeymap((s) => s.apple);
+  const setRecording = useKeymap((s) => s.setRecording);
+  return (
+    <input
+      autoFocus
+      readOnly
+      aria-label={t('settings.shortcutPress')}
+      placeholder={t('settings.shortcutPress')}
+      onFocus={() => setRecording(true)}
+      onBlur={() => {
+        setRecording(false);
+        onCancel();
+      }}
+      onKeyDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.key === 'Escape' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+          onCancel();
+          return;
+        }
+        const binding = bindingFromEvent(e.nativeEvent, apple);
+        if (binding) {
+          setRecording(false);
+          onRecord(binding);
+        }
+      }}
+      className="bg-surface-3 border-accent text-text h-7 w-40 rounded-md border px-2 text-[12px] outline-none"
+    />
+  );
+}
+
+const NO_OVERRIDES: ShortcutOverrides = {};
+
+function Shortcuts() {
+  const { t } = useTranslation();
+  const { settings: overrides, update } = useSettings<ShortcutOverrides>(
+    SHORTCUTS_DOC,
+    NO_OVERRIDES,
+  );
+  const keymap = useKeymap((s) => s.keymap);
+  const apple = useKeymap((s) => s.apple);
+  const [recording, setRecording] = useState<ShortcutId | null>(null);
+  const clashes = conflicts(keymap);
+  const set = (id: ShortcutId, keys: string[]) => update({ ...overrides, [id]: keys });
+  const reset = (id: ShortcutId) => {
+    update(Object.fromEntries(Object.entries(overrides).filter(([k]) => k !== id)));
+  };
+  return (
+    <>
+      <p className="text-muted mb-4 text-[13px]">{t('settings.shortcutsHint')}</p>
+      {SHORTCUT_GROUPS.map((group) => (
+        <Card key={group} title={t(`settings.shortcutGroup.${group}`)}>
+          {SHORTCUTS.filter((s) => s.group === group).map((s) => {
+            const keys = keymap[s.id];
+            const custom = overrides[s.id] !== undefined;
+            const defaults = apple ? s.apple : s.other;
+            return (
+              <Row key={s.id} label={t(s.label)}>
+                <span className="flex flex-wrap items-center justify-end gap-1.5">
+                  {keys.length === 0 && recording !== s.id ? (
+                    <span className="text-subtle text-[12px]">{t('settings.shortcutNone')}</span>
+                  ) : null}
+                  {keys.map((k) => (
+                    <span
+                      key={k}
+                      className={cn(
+                        'group/key flex items-center gap-0.5 rounded-md',
+                        clashes.has(k.toLowerCase()) && 'ring-warning ring-1',
+                      )}
+                      title={
+                        clashes.has(k.toLowerCase())
+                          ? t('settings.shortcutConflict', {
+                              actions: (clashes.get(k.toLowerCase()) ?? [])
+                                .filter((id) => id !== s.id)
+                                .map((id) => t(`shortcuts.${id}`))
+                                .join(', '),
+                            })
+                          : undefined
+                      }
+                    >
+                      <KeyCaps binding={k} />
+                      <button
+                        type="button"
+                        aria-label={t('settings.shortcutRemove', { keys: k })}
+                        onClick={() =>
+                          set(
+                            s.id,
+                            keys.filter((x) => x !== k),
+                          )
+                        }
+                        className="text-subtle hover:text-text flex size-4 items-center justify-center rounded opacity-0 group-hover/key:opacity-100 focus:opacity-100"
+                      >
+                        <X className="size-3" />
+                      </button>
+                    </span>
+                  ))}
+                  {recording === s.id ? (
+                    <ShortcutRecorder
+                      onCancel={() => setRecording(null)}
+                      onRecord={(k) => {
+                        setRecording(null);
+                        if (!keys.includes(k)) set(s.id, [...keys, k]);
+                      }}
+                    />
+                  ) : (
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      aria-label={t('settings.shortcutAdd', { action: t(s.label) })}
+                      title={t('settings.shortcutAdd', { action: t(s.label) })}
+                      onClick={() => setRecording(s.id)}
+                    >
+                      <Plus className="size-3.5" />
+                    </Button>
+                  )}
+                  {custom ? (
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      aria-label={t('settings.shortcutReset')}
+                      title={`${t('settings.shortcutReset')}: ${defaults.join(', ') || t('settings.shortcutNone')}`}
+                      onClick={() => reset(s.id)}
+                    >
+                      <RotateCcw className="size-3.5" />
+                    </Button>
+                  ) : null}
+                </span>
+              </Row>
+            );
+          })}
+        </Card>
+      ))}
+      <Card title={t('settings.shortcutGroup.fixed')}>
+        <Row label={t('settings.shortcutGoTo')}>
+          <KeyCaps binding="Mod+1" />
+        </Row>
+        {apple ? (
+          <>
+            <Row label={t('settings.shortcutLineStartEnd')}>
+              <span className="flex gap-2">
+                <KeyCaps binding="Mod+←" />
+                <KeyCaps binding="Mod+→" />
+              </span>
+            </Row>
+            <Row label={t('settings.shortcutWordJump')}>
+              <span className="flex gap-2">
+                <KeyCaps binding="Alt+←" />
+                <KeyCaps binding="Alt+→" />
+              </span>
+            </Row>
+            <Row label={t('settings.shortcutDeleteLine')}>
+              <KeyCaps binding="Mod+⌫" />
+            </Row>
+          </>
+        ) : null}
+        <Row label={t('settings.shortcutAccept')}>
+          <span className="flex gap-2">
+            <KeyCaps binding="Tab" />
+            <KeyCaps binding="→" />
           </span>
         </Row>
-      ))}
-    </Card>
+      </Card>
+      {Object.keys(overrides).length > 0 ? (
+        <Button variant="ghost" onClick={() => update({})}>
+          <RotateCcw className="size-4" />
+          {t('settings.shortcutResetAll')}
+        </Button>
+      ) : null}
+    </>
   );
 }
 

@@ -2,28 +2,47 @@
 /** ⌘K / Ctrl+K command palette: hosts, open tabs, snippets and app actions. */
 import { Command } from 'cmdk';
 import {
+  ArrowDown,
+  ArrowUp,
   Code2,
+  Columns2,
+  Copy,
+  Eraser,
+  History,
   KeyRound,
   Lock,
   Moon,
+  Pencil,
+  Plug,
   Plus,
+  Search,
   Settings,
+  Sparkles,
+  SquarePen,
   SquareTerminal,
   Sun,
+  Type,
+  Undo2,
   Upload,
+  Wand2,
+  ZoomIn,
+  ZoomOut,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { OsIcon } from '@/components/OsIcon';
+import { Kbd } from '@/components/ui/controls';
 import { Dialog } from '@/components/ui/overlay';
 import { useHosts, useSnippets } from '@/lib/queries';
 import { EMPTY } from '@/lib/empty';
-import { usePlatform } from '@/lib/platform';
+import { formatShortcut, usePlatform } from '@/lib/platform';
 import { VAULT_TAB, useApp } from '@/stores/app';
 
 import { useSessions } from '../terminal/sessions';
-import { sendInput } from '../terminal/registry';
+import { sendInput, terminalRegistry, type TerminalAction } from '../terminal/registry';
+import { activeTerminal as activeTerminalTab, duplicate, splitPane } from '../terminal/tabActions';
+import { primaryBinding, useKeymap, type ShortcutId } from './shortcuts';
 
 const itemCls =
   'flex h-10 items-center gap-3 rounded-lg px-3 text-[13px] data-[selected=true]:bg-surface-3 [&>svg]:size-4 [&>svg]:text-muted';
@@ -41,6 +60,10 @@ export function CommandPalette({ onLock, onImport }: { onLock: () => void; onImp
     theme,
     setTheme,
     select,
+    setNewTabOpen,
+    setRenaming,
+    closedTabs,
+    reopenClosed,
   } = useApp();
   const hosts = useHosts().data ?? EMPTY;
   const snippets = useSnippets().data ?? EMPTY;
@@ -51,13 +74,47 @@ export function CommandPalette({ onLock, onImport }: { onLock: () => void; onImp
     fn();
   };
   const activeTerminal = tabs.find((x) => x.id === activeTab && x.kind === 'terminal');
+  const keymap = useKeymap((st) => st.keymap);
+  const current = tabs.find((x) => x.id === activeTab);
 
-  const action = (label: string, icon: ReactNode, fn: () => void, keywords?: string[]) => (
-    <Command.Item value={label} keywords={keywords} onSelect={run(fn)} className={itemCls}>
-      {icon}
-      {label}
-    </Command.Item>
-  );
+  const action = (
+    label: string,
+    icon: ReactNode,
+    fn: () => void,
+    keywords?: string[],
+    shortcut?: ShortcutId,
+  ) => {
+    const keys = shortcut ? primaryBinding(keymap, shortcut) : undefined;
+    return (
+      <Command.Item
+        key={label}
+        value={label}
+        keywords={keywords}
+        onSelect={run(fn)}
+        className={itemCls}
+      >
+        {icon}
+        <span className="flex-1">{label}</span>
+        {keys ? <Kbd>{formatShortcut(platform, keys)}</Kbd> : null}
+      </Command.Item>
+    );
+  };
+  const term = activeTerminalTab();
+  const termAction = (id: TerminalAction & ShortcutId, icon: ReactNode, keywords?: string[]) =>
+    term
+      ? action(
+          t(`shortcuts.${id}`),
+          icon,
+          () => {
+            const h = terminalRegistry.get(term.id);
+            h?.focus();
+            // Let the palette close and the terminal take focus first.
+            setTimeout(() => h?.action(id), 0);
+          },
+          keywords,
+          id,
+        )
+      : null;
 
   return (
     <Dialog
@@ -129,6 +186,36 @@ export function CommandPalette({ onLock, onImport }: { onLock: () => void; onImp
               ))}
             </Command.Group>
           ) : null}
+          {term ? (
+            <Command.Group
+              heading={t('palette.terminal')}
+              className="text-subtle [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase"
+            >
+              {termAction('historySearch', <History />, ['history', 'reverse'])}
+              {termAction('aiCommand', <Sparkles />, ['ai', 'llm', 'natural language'])}
+              {termAction('composer', <SquarePen />, ['multi-line', 'editor'])}
+              {termAction('search', <Search />, ['find'])}
+              {termAction('clear', <Eraser />, ['cls', 'reset'])}
+              {termAction('prevBlock', <ArrowUp />, ['block', 'jump'])}
+              {termAction('nextBlock', <ArrowDown />, ['block', 'jump'])}
+              {termAction('copyLastOutput', <Copy />, ['block', 'clipboard'])}
+              {term.protocol === 'ssh' || term.protocol === 'mosh'
+                ? action(
+                    t('terminal.installIntegration'),
+                    <Wand2 />,
+                    () => {
+                      const h = terminalRegistry.get(term.id);
+                      h?.focus();
+                      setTimeout(() => h?.action('installIntegration'), 0);
+                    },
+                    ['shell integration', 'blocks', 'warpify'],
+                  )
+                : null}
+              {termAction('zoomIn', <ZoomIn />, ['font', 'bigger'])}
+              {termAction('zoomOut', <ZoomOut />, ['font', 'smaller'])}
+              {termAction('zoomReset', <Type />, ['font'])}
+            </Command.Group>
+          ) : null}
           <Command.Group
             heading={t('palette.actions')}
             className="text-subtle [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase"
@@ -140,10 +227,56 @@ export function CommandPalette({ onLock, onImport }: { onLock: () => void; onImp
               window.dispatchEvent(new CustomEvent('vaultport:new-host'));
             })}
             {platform.localTerminal
-              ? action(t('hosts.terminal'), <SquareTerminal />, () => sessions.openLocal(), [
-                  'local',
-                  'shell',
-                ])
+              ? action(
+                  t('shortcuts.newTab'),
+                  <SquareTerminal />,
+                  () => sessions.openLocal(),
+                  ['local', 'shell'],
+                  'newTab',
+                )
+              : null}
+            {action(
+              t('shortcuts.connect'),
+              <Plug />,
+              () => setNewTabOpen(true),
+              ['ssh', 'host'],
+              'connect',
+            )}
+            {current && current.kind !== 'sftp'
+              ? action(
+                  t('shortcuts.renameTab'),
+                  <Pencil />,
+                  () => setRenaming(current.id),
+                  [],
+                  'renameTab',
+                )
+              : null}
+            {current?.kind === 'terminal' || current?.kind === 'workspace'
+              ? action(
+                  t('shortcuts.splitPane'),
+                  <Columns2 />,
+                  () => splitPane(current.id),
+                  ['split', 'pane'],
+                  'splitPane',
+                )
+              : null}
+            {current?.kind === 'terminal'
+              ? action(
+                  t('shortcuts.duplicateTab'),
+                  <Copy />,
+                  () => duplicate(current.id),
+                  [],
+                  'duplicateTab',
+                )
+              : null}
+            {closedTabs.length > 0
+              ? action(
+                  t('shortcuts.reopenTab'),
+                  <Undo2 />,
+                  () => reopenClosed(),
+                  ['restore', 'undo'],
+                  'reopenTab',
+                )
               : null}
             {action(t('nav.keychain'), <KeyRound />, () => setSection('keychain'))}
             {action(t('nav.snippets'), <Code2 />, () => setSection('snippets'))}

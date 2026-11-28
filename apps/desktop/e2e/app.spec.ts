@@ -76,6 +76,112 @@ test('suggests completions while typing and inserts one with Tab', async ({ page
   await expect.poll(text).toContain('git: command not found');
 });
 
+test('shows commands as blocks, searches history and suggests inline', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'needs a hardware keyboard');
+  await unlock(page);
+  await page
+    .getByRole('button', { name: /router/ })
+    .first()
+    .dblclick();
+  const text = () =>
+    page.evaluate(() => (window as unknown as { __terminalText: () => string }).__terminalText());
+  await expect.poll(text, { timeout: 10_000 }).toContain('Welcome to router');
+
+  // A failing command gets a red badge with its exit status.
+  await page.keyboard.type('false\r');
+  const badge = page.locator('.vp-block-badge.vp-fail').first();
+  await expect(badge).toContainText('✗ 1');
+  // The context bar shows the directory, the git branch and the last exit status.
+  const bar = page.getByTestId('context-bar');
+  await expect(bar).toContainText('~');
+  await expect(bar).toContainText('main');
+  await expect(bar).toContainText('Exit status 1');
+  await badge.click();
+  const menu = page.getByTestId('block-menu');
+  await expect(menu.getByRole('menuitem', { name: 'Run again' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+
+  // A mistyped command offers the closest installed one.
+  await page.locator('.xterm-helper-textarea').first().focus();
+  await page.keyboard.type('gti status\r');
+  const fix = page.getByTestId('did-you-mean');
+  await expect(fix).toContainText('git status');
+  await fix.getByRole('button', { name: 'Run' }).click();
+  await expect(fix).toBeHidden();
+  await expect.poll(text).toContain('$ git status');
+
+  // Ctrl+R searches the command history.
+  await page.locator('.xterm-helper-textarea').first().focus();
+  await page.keyboard.press('Control+r');
+  const search = page.getByTestId('history-search');
+  await search.getByRole('textbox').fill('nginx');
+  await expect(search.getByRole('option', { name: /systemctl status nginx/ })).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(search).toBeHidden();
+  await expect.poll(text).toContain('$ systemctl status nginx');
+  await page.keyboard.press('Control+u');
+
+  // The rest of a matching history command shows in grey; → accepts it.
+  await page.keyboard.type('docker co');
+  await expect(page.getByTestId('ghost-text')).toHaveText('mpose up -d');
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(text).toContain('$ docker compose up -d');
+});
+
+test('searches the terminal output with a match count', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'needs a hardware keyboard');
+  await unlock(page);
+  await page
+    .getByRole('button', { name: /router/ })
+    .first()
+    .dblclick();
+  const text = () =>
+    page.evaluate(() => (window as unknown as { __terminalText: () => string }).__terminalText());
+  await expect.poll(text, { timeout: 10_000 }).toContain('Welcome to router');
+  await page.keyboard.press('Control+Shift+f');
+  const box = page.getByRole('textbox', { name: 'Search output' });
+  await box.fill('router');
+  await expect(page.getByText(/^1\/\d+$/)).toBeVisible();
+  await page.getByRole('button', { name: 'Regular expression' }).click();
+  await box.fill('rout(er|ing)');
+  await expect(page.getByText(/^\d+\/\d+$/)).toBeVisible();
+  await box.fill('nothing-here');
+  await expect(page.getByText('No results')).toBeVisible();
+});
+
+test('opens, closes and reopens terminal tabs from the keyboard', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'needs a hardware keyboard');
+  await unlock(page);
+  const tabs = page.getByRole('tablist', { name: 'Tabs' });
+  await page.keyboard.press('Control+t');
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(1);
+  await page.keyboard.press('Control+t');
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
+  await page.keyboard.press('Control+w');
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(1);
+  await page.keyboard.press('Control+Shift+t');
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
+
+  // Ctrl+Shift+D splits the tab into panes; Ctrl+W closes the focused pane. The session of
+  // the split tab keeps running (its output stays) instead of reconnecting.
+  const text = () =>
+    page.evaluate(() => (window as unknown as { __terminalText: () => string }).__terminalText());
+  await expect.poll(text, { timeout: 10_000 }).toContain('Welcome to localhost');
+  await page.keyboard.type('whoami\r');
+  // The output of whoami on a line of its own (the prompt line may wrap on narrow screens).
+  await expect.poll(text).toContain('\ndeploy\n');
+  await page.keyboard.press('Control+Shift+d');
+  await expect(page.getByRole('button', { name: /Close pane/ })).toHaveCount(2);
+  await page.keyboard.press('Control+w');
+  await expect(page.getByRole('button', { name: /Close pane/ })).toHaveCount(0);
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
+  await expect.poll(text).toContain('\ndeploy\n');
+});
+
 test('creates a snippet', async ({ page, isMobile }) => {
   test.skip(isMobile, 'covered by the desktop layout');
   await unlock(page);

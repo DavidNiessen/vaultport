@@ -6,8 +6,12 @@
 //! * [`scripts`]: small opt-in bash / zsh / fish snippets that make a remote shell emit those
 //!   sequences.
 //! * [`history`]: bash / zsh / fish history import and a frecency-ranked [`HistoryIndex`].
-//! * [`complete`]: the [`Completer`] (history, snippets, command specs and remote paths).
-//! * [`spec`]: the command spec model. The built-in specs for about 60 common commands are in
+//! * [`blocks`]: the output stream split into commands with their output and exit status.
+//! * [`complete`]: the [`Completer`] (history, snippets, command specs, commands found on
+//!   the machine, environment variables and paths).
+//! * [`generators`]: argument values (git branches, npm scripts, make targets, users, SSH
+//!   hosts, services, …) parsed from small files the app reads over the local disk or SFTP.
+//! * [`spec`]: the command spec model. The built-in specs for about 300 common commands are in
 //!   `specs/commands.json`; JSON cannot carry an SPDX header, so note that this file is part
 //!   of this crate and licensed GPL-3.0-or-later like the rest of it.
 //! * [`risk`]: deterministic [`assess_risk`] rating of command lines.
@@ -19,7 +23,9 @@
 
 #![forbid(unsafe_code)]
 
+pub mod blocks;
 pub mod complete;
+pub mod generators;
 pub mod history;
 pub mod risk;
 pub mod scripts;
@@ -28,8 +34,10 @@ pub mod spec;
 pub mod tokenize;
 pub mod vt;
 
+pub use blocks::{Block, BlockRecorder};
 pub use complete::{
-    Completer, Completion, NeedsPaths, PathEntry, PathProvider, Suggestion, SuggestionKind,
+    Completer, Completion, KnownCommand, NeedsPaths, PathEntry, PathProvider, Suggestion,
+    SuggestionKind,
 };
 pub use history::{HistoryEntry, HistoryFormat, HistoryIndex, HistoryItem};
 pub use risk::{Risk, RiskLevel, assess_risk};

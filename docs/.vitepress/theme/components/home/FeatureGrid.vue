@@ -253,7 +253,7 @@ const serviceName = computed(() => SERVICES[service.value]);
             <h3><History :size="18" /> Snippets &amp; autocomplete</h3>
             <p>
               Reusable commands with <code v-pre>{{ variables }}</code>, run in one tab or many, and
-              completion that works offline.
+              offline completion that knows the commands, branches and scripts on the machine.
             </p>
           </div>
         </article>

@@ -88,3 +88,17 @@ path = "fuzz_targets/session_log_reader.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "term_generators"
+path = "fuzz_targets/term_generators.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "command_blocks"
+path = "fuzz_targets/command_blocks.rs"
+test = false
+doc = false
+bench = false

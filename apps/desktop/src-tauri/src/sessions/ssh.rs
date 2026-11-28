@@ -23,7 +23,7 @@ pub fn spawn(
 ) -> CmdResult<()> {
     let app = app.clone();
     tauri::async_runtime::spawn(async move {
-        run(&app, plan, cols, rows, input, &sink).await;
+        run(&app, &id, plan, cols, rows, input, &sink).await;
         super::finish(&app, &id);
     });
     Ok(())
@@ -31,6 +31,7 @@ pub fn spawn(
 
 async fn run(
     app: &tauri::AppHandle,
+    id: &str,
     plan: SshPlan,
     cols: u16,
     rows: u16,
@@ -69,6 +70,9 @@ async fn run(
     };
     sink.status(SessionPhase::Connected);
     super::probe::spawn(app, &conn, plan.host_id, &prefs);
+    if prefs.autocomplete {
+        attach_files(app, id, &conn);
+    }
     let mut rec = Recorder::start(app, plan.host_id, &plan.label, cols, rows);
     if let Some(script) = &plan.startup_script {
         let mut s = script.clone();
@@ -115,6 +119,28 @@ async fn run(
     rec.finish();
     conn.close().await;
     sink.closed(None, false);
+}
+
+/// Opens an SFTP channel on the terminal's own connection so autocomplete can list remote
+/// directories and find commands without a second login. Servers without SFTP just get no
+/// remote suggestions.
+fn attach_files(app: &tauri::AppHandle, id: &str, conn: &ssh_engine::Connection) {
+    let (app, id, conn) = (app.clone(), id.to_owned(), conn.clone());
+    tauri::async_runtime::spawn(async move {
+        match conn.sftp().await {
+            Ok(sftp) => {
+                let completions = app.state::<crate::commands::complete::CompletionState>();
+                let fs = std::sync::Arc::new(sftp_engine::Remote::new(sftp));
+                completions.attach(&id, fs);
+                // The session may have ended (and been detached) while the channel opened:
+                // check after attaching, so a late attach is undone either way.
+                if app.state::<super::SessionManager>().get(&id).is_none() {
+                    completions.detach(&id);
+                }
+            }
+            Err(e) => log::debug!("no SFTP for autocomplete: {e}"),
+        }
+    });
 }
 
 /// Environment for the shell channel: the host's variables, plus the switch that activates

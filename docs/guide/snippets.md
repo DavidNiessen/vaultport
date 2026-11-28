@@ -57,25 +57,31 @@ Vaultport's completion engine is deliberately **not** AI. It is a small, offline
 
 - your command **history** for the host,
 - your **snippets**,
-- **command specs** for about 60 common tools (subcommands and flags of `git`, `docker`, `kubectl`, `systemctl`, `apt`, `terraform` and friends),
-- **paths**: on this computer in local terminals, and on the server through an SFTP session that is already open (for example in the SFTP browser). Completion never opens a connection of its own.
+- the **commands installed on the machine** (everything on `PATH`, the usual tool directories and shell builtins),
+- **command specs** for about 300 tools (subcommands, flags and values of `git`, `docker`, `kubectl`, `systemctl`, `npm`, `cargo`, `gh`, `aws`, `terraform`, macOS tools and many more), matched by prefix or fuzzily,
+- **values from the machine**: git branches, tags and remotes, `npm run` scripts, `make` and `just` targets, users and groups, SSH hosts, systemd units, network interfaces, signals and environment variables,
+- **paths**: on this computer in local terminals, and on the server.
 
-It uses a quote-aware shell tokenizer, never runs anything, and works the same on every platform. You can switch it off in **Settings → Terminal → Autocomplete**.
+On a server, Vaultport reads directories and the few small files it needs (such as `.git/HEAD`, `package.json` or `/etc/passwd`) over an SFTP channel of the terminal's own SSH connection, so no second login is needed and nothing is run on the server. Without SFTP on the server, the rest still works.
+
+It uses a quote-aware shell tokenizer, never runs anything, and works the same on every platform. You can switch it off in **Settings → Terminal → Suggestions**. See [The terminal](/guide/terminal#autocomplete) for inline suggestions, syntax highlighting and the rest of the terminal.
 
 ### Using it
 
 Suggestions appear below the cursor as you type at the prompt:
 
-| Key                         | Action                                          |
-| --------------------------- | ----------------------------------------------- |
-| <kbd>↑</kbd> / <kbd>↓</kbd> | Choose a suggestion                             |
-| <kbd>Tab</kbd>              | Insert it                                       |
-| <kbd>Esc</kbd>              | Close the list                                  |
-| <kbd>Enter</kbd>            | Close the list and run the line as you typed it |
+| Key                              | Action                                          |
+| -------------------------------- | ----------------------------------------------- |
+| <kbd>↑</kbd> / <kbd>↓</kbd>      | Choose a suggestion                             |
+| <kbd>Tab</kbd>                   | Insert it                                       |
+| <kbd>→</kbd> or <kbd>End</kbd>   | Accept the grey inline suggestion from history  |
+| <kbd>Ctrl</kbd>+<kbd>Space</kbd> | Show suggestions now                            |
+| <kbd>Esc</kbd>                   | Close the list                                  |
+| <kbd>Enter</kbd>                 | Close the list and run the line as you typed it |
 
 While the list is closed, <kbd>Tab</kbd> and the arrow keys go to the shell as usual. Inserting a directory keeps the list open for the next level.
 
-Suggestions work best with [shell integration](/guide/hosts-and-groups#terminal-features) turned on: Vaultport then knows exactly where your input starts, which directory you are in, and when a command is running. Without it, the prompt is recognized by its usual ending (`$`, `#`, `%`, `>` or `❯`), and paths only complete from absolute or `~/` paths. Nothing is suggested while a command runs, in full-screen programs such as `vim` or `htop`, or while a workspace broadcasts input to several terminals.
+Suggestions work best with [shell integration](/guide/terminal#shell-integration) (on by default for local shells): Vaultport then knows exactly where your input starts, which directory you are in, and when a command is running. Without it, the prompt is recognized by its usual ending (`$`, `#`, `%`, `>` or `❯`), and paths only complete from absolute or `~/` paths. Nothing is suggested while a command runs, in full-screen programs such as `vim` or `htop`, or while a workspace broadcasts input to several terminals.
 
 ## Risk hints
 

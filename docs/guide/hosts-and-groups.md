@@ -66,19 +66,20 @@ With **Shell integration** on, local bash, zsh and fish shells load Vaultport's 
 
 ## Terminal features
 
-- **Search** the output with <kbd>Mod</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>.
+- **Tabs, autocomplete, syntax highlighting, command blocks, history search and AI**: see [The terminal](/guide/terminal).
+- **Search** the output with <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd> (<kbd>⌘</kbd>+<kbd>F</kbd> on macOS).
 - **Themes**: the original Midnight, Daylight, Ember (production) and Glacier, plus Dracula, Nord, Gruvbox, Catppuccin, Tokyo Night, Solarized, One Dark and more; per host, per group, or globally.
-- **Keyword highlighting** for errors, warnings and IP addresses (optional).
+- **Output highlighting** for errors, warnings, IP and MAC addresses, dates, UUIDs and hashes, plus your own patterns (optional).
 - **OSC 52** clipboard writes from tmux or vim: _Ask_ (default), _Allow_ or _Deny_.
 - **Remote titles**: let programs set the tab title.
 - Copy on select, right-click to paste, Option as Meta key (macOS), cursor style and blink, scrollback size (10 000 lines by default).
-- **Shell integration**: if the remote shell emits the common shell-integration escape sequences (OSC 133 or OSC 633 prompt and command marks, OSC 7 working directory), Vaultport records each command in the host's [history](/guide/snippets#command-history). Password prompts are detected so that what you type there is never recorded.
+- **Shell integration**: if the shell emits the common shell-integration escape sequences (OSC 133 or OSC 633 prompt and command marks, OSC 7 working directory), Vaultport records each command in the host's [history](/guide/snippets#command-history). Password prompts are detected so that what you type there is never recorded.
 
 ## Shell integration, OS detection and history import
 
 These switches are under **Settings → Terminal**.
 
-- **Shell integration** (off by default) loads Vaultport's integration script into [local shells](#the-local-terminal). For SSH sessions it sends the variable `VAULTPORT_SHELL_INTEGRATION=1` with the shell request. The scripts for bash, zsh and fish are in [`crates/term-intel/scripts`](https://github.com/DavidNiessen/vaultport/tree/main/crates/term-intel/scripts). They do nothing unless that variable is set, so you can source one from your remote dotfile (for example `~/.bashrc`). The server must accept the variable (`AcceptEnv VAULTPORT_SHELL_INTEGRATION` in `sshd_config`); otherwise export it yourself before sourcing the script.
+- **Shell integration** (on by default) loads Vaultport's integration script into [local shells](#the-local-terminal); it powers [command blocks](/guide/terminal#command-blocks). For SSH sessions it sends the variable `VAULTPORT_SHELL_INTEGRATION=1` with the shell request, and you can load it into a running bash or zsh from the command palette (**Enable command blocks in this session**) or automatically — see [The terminal](/guide/terminal#shell-integration). The scripts for bash, zsh and fish are in [`crates/term-intel/scripts`](https://github.com/DavidNiessen/vaultport/tree/main/crates/term-intel/scripts). They do nothing unless that variable is set, so you can source one from your remote dotfile (for example `~/.bashrc`). The server must accept the variable (`AcceptEnv VAULTPORT_SHELL_INTEGRATION` in `sshd_config`); otherwise export it yourself before sourcing the script.
 - **Detect remote operating system** (on by default) checks `/etc/os-release` or `uname` after you log in to a saved host whose operating system is not set, and fills it in so the host shows the right icon. An operating system you picked yourself is never changed.
 - **Import remote shell history** (off by default) reads the end of `~/.bash_history`, `~/.zsh_history` and `~/.local/share/fish/fish_history` once per saved host and adds the commands to the host's [history](/guide/snippets#command-history).
 

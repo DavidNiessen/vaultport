@@ -15,7 +15,7 @@ import { cn } from '@/lib/cn';
 import { EMPTY } from '@/lib/empty';
 import type { VaultStatus } from '@/lib/ipc';
 import { isApple, useBreakpoint, usePlatform } from '@/lib/platform';
-import { useGroups, useHosts } from '@/lib/queries';
+import { useGroups, useHosts, useSettings } from '@/lib/queries';
 import { SFTP_TAB, VAULT_TAB, useApp, type Tab } from '@/stores/app';
 
 import { ForwardingView } from '../features/forwarding/ForwardingView';
@@ -29,14 +29,31 @@ import { LogViewer } from '../features/logs/LogViewer';
 import { LogsView } from '../features/logs/LogsView';
 import { CommandPalette } from '../features/palette/CommandPalette';
 import { NewTabDialog } from '../features/palette/NewTabDialog';
-import { SHORTCUTS, matches } from '../features/palette/shortcuts';
+import {
+  SHORTCUTS_DOC,
+  actionFor,
+  useKeymap,
+  type ShortcutOverrides,
+} from '../features/palette/shortcuts';
 import { SettingsView } from '../features/settings/SettingsView';
 import { SftpView } from '../features/sftp/SftpView';
 import { SnippetsView } from '../features/snippets/SnippetsView';
 import { TerminalSidePanel } from '../features/terminal/SidePanel';
-import { TerminalView } from '../features/terminal/TerminalView';
+import { TerminalLayer, TerminalSlot } from '../features/terminal/TerminalLayer';
 import { AgentApprovals } from '../features/agents/AgentApprovals';
 import { useSessions } from '../features/terminal/sessions';
+import {
+  activeTerminal,
+  currentTabId,
+  cycleTab,
+  duplicate,
+  goToTab,
+  moveActive,
+  newTab,
+  requestClose,
+  splitPane,
+} from '../features/terminal/tabActions';
+import { useTabRestore } from '../features/terminal/restore';
 import { WorkspaceView } from '../features/workspaces/WorkspaceView';
 import { SerialDialog } from '../features/terminal/SerialDialog';
 import { GlobalPrompts } from './GlobalPrompts';
@@ -49,51 +66,115 @@ interface ShellProps {
   onLock: () => void;
 }
 
+const NO_OVERRIDES: ShortcutOverrides = {};
+
 function useShortcuts(onLock: () => void) {
   const platform = usePlatform();
-  const app = useApp();
   const sessions = useSessions();
+  const { settings: overrides } = useSettings<ShortcutOverrides>(SHORTCUTS_DOC, NO_OVERRIDES);
+  const apple = isApple(platform);
   useEffect(() => {
-    const apple = isApple(platform);
-    const byId = Object.fromEntries(SHORTCUTS.map((s) => [s.id, s.keys]));
-    const visible = () => [
-      VAULT_TAB,
-      SFTP_TAB,
-      ...useApp
-        .getState()
-        .tabs.filter((x) => !(x.kind === 'terminal' && x.workspace))
-        .map((x) => x.id),
-    ];
+    useKeymap.getState().set(apple, overrides);
+  }, [apple, overrides]);
+  useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const is = (id: string) => matches(e, byId[id] ?? '', apple);
+      if (e.type !== 'keydown' || e.isComposing) return;
+      const { keymap, recording } = useKeymap.getState();
+      if (recording) return;
       const s = useApp.getState();
+      const action = actionFor(e, keymap, apple, 'global');
       let handled = true;
-      if (is('palette')) s.setPaletteOpen(!s.paletteOpen);
-      else if (is('newTab')) s.setNewTabOpen(true);
-      else if (is('jump')) s.setPaletteOpen(true);
-      else if (is('local') && platform.localTerminal) sessions.openLocal();
-      else if (is('closeTab') && s.activeTab !== VAULT_TAB && s.activeTab !== SFTP_TAB)
-        s.closeTab(s.activeTab);
-      else if (is('sidePanel')) s.setSidePanelOpen(!s.sidePanelOpen);
-      else if (is('lock')) onLock();
-      else if (is('settings')) s.setSection('settings');
-      else if (is('broadcast')) {
-        const ws = s.tabs.find((x) => x.id === s.activeTab);
-        if (ws?.kind === 'workspace') s.updateTab(ws.id, { broadcast: !ws.broadcast });
-      } else if (is('splitMode')) {
-        const ws = s.tabs.find((x) => x.id === s.activeTab);
-        if (ws?.kind === 'workspace')
-          s.updateTab(ws.id, { mode: ws.mode === 'split' ? 'focus' : 'split' });
-      } else if (is('nextTab') || is('prevTab')) {
-        const ids = visible();
-        const i = ids.indexOf(s.activeTab);
-        const next = ids[(i + (is('nextTab') ? 1 : ids.length - 1)) % ids.length];
-        if (next) s.activate(next);
-      } else if ((apple ? e.metaKey : e.altKey) && /^[1-9]$/.test(e.key)) {
-        const ids = visible();
-        const target = ids[Number(e.key) - 1];
-        if (target) s.activate(target);
-      } else handled = false;
+      switch (action) {
+        case 'palette':
+          s.setPaletteOpen(!s.paletteOpen);
+          break;
+        case 'newTab':
+          newTab(platform.localTerminal);
+          break;
+        case 'connect':
+          s.setNewTabOpen(true);
+          break;
+        case 'jump':
+          s.setPaletteOpen(true);
+          break;
+        case 'local':
+          if (platform.localTerminal) sessions.openLocal();
+          break;
+        case 'closeTab': {
+          const id = currentTabId();
+          const tab = s.tabs.find((x) => x.id === id);
+          // In a split, Mod+W closes the focused pane, as in other terminal apps.
+          if (tab?.kind === 'workspace' && tab.focused && tab.panes.length > 1) {
+            requestClose(tab.id, tab.focused);
+          } else if (id) requestClose(id);
+          break;
+        }
+        case 'splitPane': {
+          const id = currentTabId();
+          if (id) splitPane(id);
+          break;
+        }
+        case 'nextPane':
+        case 'prevPane': {
+          const tab = s.tabs.find((x) => x.id === s.activeTab);
+          if (tab?.kind === 'workspace') s.cyclePane(tab.id, action === 'nextPane' ? 1 : -1);
+          else handled = false;
+          break;
+        }
+        case 'reopenTab':
+          s.reopenClosed();
+          break;
+        case 'duplicateTab': {
+          const term = activeTerminal();
+          if (term) duplicate(term.id);
+          break;
+        }
+        case 'renameTab': {
+          const id = currentTabId();
+          if (id) s.setRenaming(id);
+          break;
+        }
+        case 'nextTab':
+          cycleTab(1);
+          break;
+        case 'prevTab':
+          cycleTab(-1);
+          break;
+        case 'moveTabLeft':
+          moveActive(-1);
+          break;
+        case 'moveTabRight':
+          moveActive(1);
+          break;
+        case 'sidePanel':
+          s.setSidePanelOpen(!s.sidePanelOpen);
+          break;
+        case 'lock':
+          onLock();
+          break;
+        case 'settings':
+          s.setSection('settings');
+          break;
+        case 'broadcast': {
+          const ws = s.tabs.find((x) => x.id === s.activeTab);
+          if (ws?.kind === 'workspace') s.updateTab(ws.id, { broadcast: !ws.broadcast });
+          break;
+        }
+        case 'splitMode': {
+          const ws = s.tabs.find((x) => x.id === s.activeTab);
+          if (ws?.kind === 'workspace')
+            s.updateTab(ws.id, { mode: ws.mode === 'split' ? 'focus' : 'split' });
+          break;
+        }
+        default: {
+          // Mod+1…9 everywhere, and Alt+1…9 outside Apple platforms as before.
+          const digit = /^Digit([1-9])$/.exec(e.code)?.[1];
+          const mod = apple ? e.metaKey && !e.ctrlKey : e.ctrlKey && !e.metaKey;
+          const alt = !apple && e.altKey && !e.ctrlKey && !e.metaKey;
+          if (digit && !e.shiftKey && ((mod && !e.altKey) || alt)) goToTab(Number(digit));
+          else handled = false;
+        }
+      }
       if (handled) {
         e.preventDefault();
         e.stopPropagation();
@@ -101,7 +182,7 @@ function useShortcuts(onLock: () => void) {
     };
     window.addEventListener('keydown', handler, { capture: true });
     return () => window.removeEventListener('keydown', handler, { capture: true });
-  }, [platform, app.paletteOpen, sessions, onLock]);
+  }, [platform, apple, sessions, onLock]);
 }
 
 function SectionView({
@@ -161,7 +242,9 @@ function SessionArea({ tabs, activeTab }: { tabs: Tab[]; activeTab: string }) {
             aria-hidden={!active}
           >
             <div className="min-w-0 flex-1">
-              {tab.kind === 'terminal' ? <TerminalView tab={tab} active={active} /> : null}
+              {tab.kind === 'terminal' ? (
+                <TerminalSlot id={tab.id} visible={active} className="h-full" />
+              ) : null}
               {tab.kind === 'workspace' ? <WorkspaceView ws={tab} active={active} /> : null}
               {tab.kind === 'log' ? <LogViewer tab={tab} /> : null}
             </div>
@@ -213,6 +296,7 @@ function DesktopShell({ status, onStatus, onLock }: ShellProps) {
           <SftpView />
         </div>
         <SessionArea tabs={tabs} activeTab={activeTab} />
+        <TerminalLayer />
       </main>
       {showInspector && bp !== 'desktop' ? (
         <Sheet open onOpenChange={(o) => !o && select(null)} title="">
@@ -395,6 +479,7 @@ function PhoneShell({ status, onStatus, onLock }: ShellProps) {
           </div>
         ) : null}
         <SessionArea tabs={sessionTabs} activeTab={inSession ? activeTab : ''} />
+        <TerminalLayer />
         {activeTab === SFTP_TAB ? (
           <div className="bg-bg absolute inset-0 flex flex-col">
             <Button variant="ghost" className="m-2 self-start" onClick={() => activate(VAULT_TAB)}>
@@ -470,5 +555,6 @@ function SftpEntry() {
 export function Shell(props: ShellProps) {
   const bp = useBreakpoint();
   useShortcuts(props.onLock);
+  useTabRestore();
   return bp === 'phone' ? <PhoneShell {...props} /> : <DesktopShell {...props} />;
 }

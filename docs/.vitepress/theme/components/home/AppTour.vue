@@ -35,14 +35,14 @@ const CHAPTERS: Chapter[] = [
     title: 'A terminal that floats on light.',
     text: 'The default Pulse theme is see-through: your session sits on a slow, living glow, and so does the side panel with your snippets, history, themes and local AI.',
     points: [
-      'WebGL rendering, truecolor, OSC 7/8/52/133',
-      'Search, ligature fonts and themes',
-      'Autocomplete that never phones home',
+      'Tabs and splits with ⌘/Ctrl+T, D and W, every shortcut rebindable',
+      'Autocomplete from what is installed, with inline suggestions',
+      'Command blocks, syntax highlighting and Ctrl+R history search',
     ],
     image: 'terminal',
     alt: 'A terminal session in the see-through Pulse theme with the snippets side panel open',
     hotspot: { x: 77.6, y: 5, w: 22, h: 46, label: 'Side panel' },
-    link: { text: 'Snippets & autocomplete', href: '/guide/snippets' },
+    link: { text: 'The terminal', href: '/guide/terminal' },
   },
   {
     id: 'vault',
@@ -78,6 +78,7 @@ const CHAPTERS: Chapter[] = [
     points: [
       'Off by default',
       'Per-action approval, read-only mode',
+      'Can read your open terminals, with your OK',
       'Every call in the activity log',
     ],
     image: 'agent',

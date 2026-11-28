@@ -12,10 +12,16 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/controls';
 import { Dialog } from '@/components/ui/overlay';
+import { useApp } from '@/stores/app';
 import { commands, errorMessage, type AgentApprovalRequest, type AgentDecision } from '@/lib/ipc';
 
 import { useSessions } from '../terminal/sessions';
-import { APPROVAL_DONE_EVENT, APPROVAL_EVENT, OPEN_TERMINAL_EVENT } from './events';
+import {
+  APPROVAL_DONE_EVENT,
+  APPROVAL_EVENT,
+  OPEN_TERMINAL_EVENT,
+  SHOW_SESSION_EVENT,
+} from './events';
 
 export function AgentApprovals() {
   const { t } = useTranslation();
@@ -40,6 +46,14 @@ export function AgentApprovals() {
           if (h) sessions.connectHost(h);
         })
         .catch((err: unknown) => toast.error(errorMessage(err)));
+    }).then(keep);
+    void listen<string>(SHOW_SESSION_EVENT, (e) => {
+      const s = useApp.getState();
+      const tab = s.tabs.find((x) => x.kind === 'terminal' && x.sessionId === e.payload);
+      if (!tab) return;
+      const ws = tab.kind === 'terminal' && tab.workspace ? tab.workspace : null;
+      s.activate(ws ?? tab.id);
+      if (ws) s.updateTab(ws, { focused: tab.id });
     }).then(keep);
     return () => {
       cancelled = true;

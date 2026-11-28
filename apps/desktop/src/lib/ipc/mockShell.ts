@@ -15,6 +15,8 @@ interface FakeSession {
   host: string;
   user: string;
   cwd: string;
+  /** Inside an escape sequence sent by the terminal. */
+  escape: boolean;
 }
 
 const sessions = new Map<string, FakeSession>();
@@ -31,8 +33,15 @@ function out(s: FakeSession, text: string) {
   s.channel.onmessage({ type: 'output', data: b64(text) });
 }
 
+/** Shell integration marks, as Vaultport's bash/zsh scripts emit them. */
+const OSC = (body: string) => `\x1b]${body}\x07`;
+
 function prompt(s: FakeSession) {
-  out(s, `\x1b[1;32m${s.user}@${s.host}\x1b[0m:\x1b[1;34m${s.cwd}\x1b[0m$ `);
+  const path = s.cwd === '~' ? `/home/${s.user}` : s.cwd;
+  out(
+    s,
+    `${OSC(`7;file://${s.host}${path}`)}${OSC('133;A')}\x1b[1;32m${s.user}@${s.host}\x1b[0m:\x1b[1;34m${s.cwd}\x1b[0m$ ${OSC('133;B')}`,
+  );
 }
 
 const MOTD = (host: string) =>
@@ -48,9 +57,11 @@ const MOTD = (host: string) =>
     '',
   ].join('\r\n');
 
-function run(s: FakeSession, cmd: string): boolean {
+/** Runs a command line; returns whether the session is still open and the exit status. */
+function run(s: FakeSession, cmd: string): { alive: boolean; exit: number } {
   const c = cmd.trim();
   const [name, ...args] = c.split(/\s+/);
+  let exit = 0;
   switch (name) {
     case '':
       break;
@@ -101,14 +112,20 @@ function run(s: FakeSession, cmd: string): boolean {
     case 'cd':
       s.cwd = args[0] ?? '~';
       break;
+    case 'false':
+      exit = 1;
+      break;
+    case 'sleep':
+      break;
     case 'exit':
     case 'logout':
       out(s, 'logout\r\n');
-      return false;
+      return { alive: false, exit: 0 };
     default:
       out(s, `${name ?? ''}: command not found\r\n`);
+      exit = 127;
   }
-  return true;
+  return { alive: true, exit };
 }
 
 export function mockSessionOpen(
@@ -130,6 +147,7 @@ export function mockSessionOpen(
     host,
     user: req.target.username ?? 'deploy',
     cwd: '~',
+    escape: false,
   };
   sessions.set(id, s);
   setTimeout(() => {
@@ -147,7 +165,10 @@ export function mockSessionWrite(args: Record<string, unknown>): null {
   for (const ch of args.data as string) {
     if (ch === '\r') {
       out(s, '\r\n');
-      const alive = run(s, s.line);
+      const line = s.line;
+      if (line.trim()) out(s, `${OSC(`633;E;${line.replace(/;/g, '\\x3b')}`)}${OSC('133;C')}`);
+      const { alive, exit } = run(s, line);
+      if (line.trim()) out(s, OSC(`133;D;${String(exit)}`));
       s.line = '';
       if (!alive) {
         sessions.delete(args.id as string);
@@ -155,6 +176,14 @@ export function mockSessionWrite(args: Record<string, unknown>): null {
         return null;
       }
       prompt(s);
+    } else if (s.escape) {
+      // Skip the rest of an escape sequence (arrow keys, Delete, …).
+      if (/[A-Za-z~]/.test(ch) && ch !== '[') s.escape = false;
+    } else if (ch === '\x1b') {
+      s.escape = true;
+    } else if (ch === '\x15') {
+      out(s, '\b \b'.repeat(s.line.length));
+      s.line = '';
     } else if (ch === '\x7f') {
       if (s.line.length > 0) {
         s.line = s.line.slice(0, -1);
@@ -178,9 +207,32 @@ export function mockSessionClose(args: Record<string, unknown>): null {
 }
 
 const MOCK_COMMANDS = ['df', 'docker', 'git', 'kubectl', 'ls', 'systemctl', 'uname', 'uptime'];
+/** Commands "installed" on the mock machine (for syntax highlighting). */
+export const MOCK_COMMAND_NAMES = [
+  ...MOCK_COMMANDS,
+  'cd',
+  'clear',
+  'date',
+  'echo',
+  'exit',
+  'false',
+  'help',
+  'sleep',
+  'sudo',
+  'tail',
+  'whoami',
+];
 const MOCK_GIT = ['checkout', 'cherry-pick', 'clone', 'commit', 'pull', 'push', 'status'];
 
-/** A small stand-in for the term-intel completer: commands, then `git` subcommands. */
+/** Commands in the mock history (also offered as inline suggestions). */
+export const MOCK_HISTORY = [
+  'systemctl status nginx',
+  'docker compose up -d',
+  'git push origin main',
+  'tail -f /var/log/nginx/error.log',
+];
+
+/** A small stand-in for the term-intel completer: history, commands, `git` subcommands. */
 export function mockTermComplete(args: Record<string, unknown>) {
   const req = args.req as { line: string; cursor: number };
   const before = req.line.slice(0, req.cursor);
@@ -189,16 +241,27 @@ export function mockTermComplete(args: Record<string, unknown>) {
   const pool =
     words.length === 1 ? MOCK_COMMANDS : words.length === 2 && words[0] === 'git' ? MOCK_GIT : [];
   const kind = words.length === 1 ? 'command' : 'subcommand';
+  const history = MOCK_HISTORY.filter((h) => h.startsWith(before) && h !== before).map((h) => ({
+    text: h,
+    label: h,
+    description: null,
+    kind: 'history',
+    deleteBefore: before.length,
+    deleteAfter: 0,
+  }));
   return {
-    items: pool
-      .filter((w) => w.startsWith(current) && w !== current)
-      .map((w) => ({
-        text: w,
-        label: w,
-        description: null,
-        kind,
-        deleteBefore: current.length,
-        deleteAfter: 0,
-      })),
+    items: [
+      ...pool
+        .filter((w) => w.startsWith(current) && w !== current)
+        .map((w) => ({
+          text: w,
+          label: w,
+          description: null,
+          kind,
+          deleteBefore: current.length,
+          deleteAfter: 0,
+        })),
+      ...history,
+    ],
   };
 }

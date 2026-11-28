@@ -81,6 +81,8 @@ export function readInput(buf: BufferLike, mark: InputMark | null): InputLine | 
     if (end < 0) return null;
     before = before.slice(end);
   }
+  // Cells a shell cleared by writing spaces are not trimmed by xterm; they are not input.
+  after = after.replace(/\s+$/, '');
   return { line: before + after, cursor: before.length };
 }
 
