@@ -842,7 +842,11 @@
     "context": {
       "copyPath": "Copy the path",
       "ok": "OK"
-    }
+    },
+    "searchNone": "No results",
+    "searchCase": "Match case",
+    "searchWord": "Whole word",
+    "searchRegex": "Regular expression"
   },
   "window": {
     "close": "Close",

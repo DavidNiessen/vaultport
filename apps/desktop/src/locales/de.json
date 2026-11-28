@@ -842,7 +842,11 @@
     "context": {
       "copyPath": "Pfad kopieren",
       "ok": "OK"
-    }
+    },
+    "searchNone": "Keine Treffer",
+    "searchCase": "Groß-/Kleinschreibung",
+    "searchWord": "Ganzes Wort",
+    "searchRegex": "Regulärer Ausdruck"
   },
   "window": {
     "close": "Schließen",

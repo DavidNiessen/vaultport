@@ -96,6 +96,12 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   const [prompt, setPrompt] = useState<PendingPrompt | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchOpts, setSearchOpts] = useState({
+    caseSensitive: false,
+    regex: false,
+    wholeWord: false,
+  });
+  const [searchResults, setSearchResults] = useState<{ index: number; count: number } | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [closedReason, setClosedReason] = useState<string | null>(null);
   const [ghost, setGhost] = useState<GhostView | null>(null);
@@ -181,6 +187,9 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     });
     const fit = new FitAddon();
     const search = new SearchAddon();
+    search.onDidChangeResults(({ resultIndex, resultCount }) =>
+      setSearchResults({ index: resultIndex, count: resultCount }),
+    );
     term.loadAddon(fit);
     term.loadAddon(search);
     term.loadAddon(new Unicode11Addon());
@@ -815,22 +824,35 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   }, [active]);
 
   const runSearch = useCallback(
-    (dir: 'next' | 'prev') => {
+    (dir: 'next' | 'prev' | 'live', term = searchTerm, options = searchOpts) => {
       const s = searchRef.current;
-      if (!s || !searchTerm) return;
+      if (!s) return;
+      if (!term) {
+        s.clearDecorations();
+        setSearchResults(null);
+        return;
+      }
+      const color = solidColor(match) ?? '#888888';
       const opts = {
-        caseSensitive: false,
+        ...options,
+        // Typing searches from the current match instead of jumping to the next one.
+        incremental: dir === 'live',
         decorations: {
-          matchOverviewRuler: '#888',
-          activeMatchColorOverviewRuler: match,
-          matchBackground: `${match}55`,
-          activeMatchBackground: match,
+          matchOverviewRuler: '#888888',
+          activeMatchColorOverviewRuler: color,
+          matchBackground: `${color}55`,
+          activeMatchBackground: color,
         },
       };
-      if (dir === 'next') s.findNext(searchTerm, opts);
-      else s.findPrevious(searchTerm, opts);
+      try {
+        if (dir === 'prev') s.findPrevious(term, opts);
+        else s.findNext(term, opts);
+      } catch {
+        // An incomplete regular expression while typing.
+        setSearchResults({ index: -1, count: 0 });
+      }
     },
-    [searchTerm, match],
+    [searchTerm, searchOpts, match],
   );
 
   const respond = (accept: boolean, extra?: { remember?: boolean; answers?: string[] }) => {
@@ -860,17 +882,61 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
             autoFocus
             aria-label={t('terminal.search')}
             placeholder={t('terminal.search')}
-            className="h-8 w-48"
+            className="h-8 w-48 font-mono"
+            spellCheck={false}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              runSearch('live', e.target.value);
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') runSearch(e.shiftKey ? 'prev' : 'next');
               if (e.key === 'Escape') {
+                searchRef.current?.clearDecorations();
                 setSearchOpen(false);
                 termRef.current?.focus();
               }
             }}
           />
+          <span
+            className="text-subtle min-w-12 text-center text-[11px] tabular-nums"
+            aria-live="polite"
+          >
+            {searchTerm && searchResults
+              ? searchResults.count === 0
+                ? t('terminal.searchNone')
+                : `${String(searchResults.index + 1)}/${String(searchResults.count)}`
+              : ''}
+          </span>
+          {(
+            [
+              ['caseSensitive', 'Aa', t('terminal.searchCase')],
+              ['wholeWord', 'ab', t('terminal.searchWord')],
+              ['regex', '.*', t('terminal.searchRegex')],
+            ] as const
+          ).map(([key, label, title]) => (
+            <button
+              key={key}
+              type="button"
+              title={title}
+              aria-label={title}
+              aria-pressed={searchOpts[key]}
+              onClick={() => {
+                const next = { ...searchOpts, [key]: !searchOpts[key] };
+                setSearchOpts(next);
+                runSearch('live', searchTerm, next);
+              }}
+              className={cn(
+                'flex h-7 min-w-7 items-center justify-center rounded-md px-1 font-mono text-[12px]',
+                searchOpts[key]
+                  ? 'bg-accent-soft text-accent-text'
+                  : 'text-muted hover:bg-surface-3',
+                key === 'wholeWord' && 'underline decoration-dotted underline-offset-2',
+              )}
+            >
+              {label}
+            </button>
+          ))}
           <Button
             size="icon-sm"
             variant="ghost"
@@ -894,6 +960,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
             onClick={() => {
               searchRef.current?.clearDecorations();
               setSearchOpen(false);
+              termRef.current?.focus();
             }}
           >
             <X className="size-4" />

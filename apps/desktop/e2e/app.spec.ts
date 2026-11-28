@@ -132,6 +132,27 @@ test('shows commands as blocks, searches history and suggests inline', async ({
   await expect.poll(text).toContain('$ docker compose up -d');
 });
 
+test('searches the terminal output with a match count', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'needs a hardware keyboard');
+  await unlock(page);
+  await page
+    .getByRole('button', { name: /router/ })
+    .first()
+    .dblclick();
+  const text = () =>
+    page.evaluate(() => (window as unknown as { __terminalText: () => string }).__terminalText());
+  await expect.poll(text, { timeout: 10_000 }).toContain('Welcome to router');
+  await page.keyboard.press('Control+Shift+f');
+  const box = page.getByRole('textbox', { name: 'Search output' });
+  await box.fill('router');
+  await expect(page.getByText(/^1\/\d+$/)).toBeVisible();
+  await page.getByRole('button', { name: 'Regular expression' }).click();
+  await box.fill('rout(er|ing)');
+  await expect(page.getByText(/^\d+\/\d+$/)).toBeVisible();
+  await box.fill('nothing-here');
+  await expect(page.getByText('No results')).toBeVisible();
+});
+
 test('opens, closes and reopens terminal tabs from the keyboard', async ({ page, isMobile }) => {
   test.skip(isMobile, 'needs a hardware keyboard');
   await unlock(page);
