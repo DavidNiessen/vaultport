@@ -45,7 +45,12 @@ import {
   type ShortcutOverrides,
 } from '../palette/shortcuts';
 import { SyncSettings } from '../sync/SyncSettings';
-import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from '../terminal/settings';
+import { isValidPattern } from '../terminal/highlight';
+import {
+  DEFAULT_TERMINAL_SETTINGS,
+  type HighlightRule,
+  type TerminalSettings,
+} from '../terminal/settings';
 import {
   TERMINAL_FONTS,
   TERMINAL_THEMES,
@@ -265,21 +270,79 @@ function Terminal() {
           />
         </Row>
       </Card>
-      <Card title={t('settings.behaviour')}>
+      <Card title={t('settings.suggestions')}>
         {toggle('autocomplete', t('settings.autocomplete'), t('settings.autocompleteHint'))}
-        {toggle('autoReconnect', t('settings.autoReconnect'))}
-        {toggle('copyOnSelect', t('settings.copyOnSelect'))}
-        {toggle('rightClickPaste', t('settings.rightClickPaste'))}
-        {toggle('highlightKeywords', t('settings.highlightKeywords'))}
-        {toggle('cursorBlink', t('settings.cursorBlink'))}
-        {toggle('brightBold', t('settings.brightBold'))}
-        {toggle('optionAsMeta', t('settings.optionAsMeta'))}
-        {toggle('remoteTitles', t('settings.remoteTitles'))}
+        <Row label={t('settings.suggestMode')} description={t('settings.suggestModeHint')}>
+          <Segmented
+            ariaLabel={t('settings.suggestMode')}
+            value={settings.suggestMode}
+            onChange={(v) => update({ suggestMode: v })}
+            options={[
+              { value: 'auto', label: t('settings.suggestAuto') },
+              { value: 'tab', label: t('settings.suggestTab') },
+            ]}
+          />
+        </Row>
+        {toggle('ghostText', t('settings.ghostText'), t('settings.ghostTextHint'))}
+        {toggle(
+          'syntaxHighlight',
+          t('settings.syntaxHighlight'),
+          t('settings.syntaxHighlightHint'),
+        )}
+        {toggle('aiHashPrompt', t('settings.aiHashPrompt'), t('settings.aiHashPromptHint'))}
+      </Card>
+      <Card title={t('settings.commandBlocks')}>
         {toggle(
           'shellIntegration',
           t('settings.shellIntegration'),
           t('settings.shellIntegrationHint'),
         )}
+        <Row label={t('settings.sshIntegration')} description={t('settings.sshIntegrationHint')}>
+          <Select
+            aria-label={t('settings.sshIntegration')}
+            className="w-52"
+            value={settings.sshIntegration}
+            onChange={(e) =>
+              update({ sshIntegration: e.target.value as TerminalSettings['sshIntegration'] })
+            }
+          >
+            <option value="off">{t('settings.sshIntegrationOff')}</option>
+            <option value="auto">{t('settings.sshIntegrationAuto')}</option>
+          </Select>
+        </Row>
+        {toggle('commandBlocks', t('settings.commandBlocks'), t('settings.commandBlocksHint'))}
+        <Row label={t('settings.notifyAfter')} description={t('settings.notifyAfterHint')}>
+          <span className="flex items-center gap-2">
+            <Input
+              aria-label={t('settings.notifyAfter')}
+              className="w-20"
+              inputMode="numeric"
+              value={settings.notifyAfterSeconds}
+              onChange={(e) =>
+                update({
+                  notifyAfterSeconds: Math.min(86_400, Math.max(0, Number(e.target.value) || 0)),
+                })
+              }
+            />
+            <span className="text-subtle text-[13px]">{t('settings.seconds')}</span>
+          </span>
+        </Row>
+      </Card>
+      <Card title={t('settings.highlightRules')}>
+        {toggle('highlightKeywords', t('settings.highlightKeywords'))}
+        <HighlightRules
+          rules={settings.highlightRules}
+          onChange={(highlightRules) => update({ highlightRules })}
+        />
+      </Card>
+      <Card title={t('settings.behaviour')}>
+        {toggle('autoReconnect', t('settings.autoReconnect'))}
+        {toggle('copyOnSelect', t('settings.copyOnSelect'))}
+        {toggle('rightClickPaste', t('settings.rightClickPaste'))}
+        {toggle('cursorBlink', t('settings.cursorBlink'))}
+        {toggle('brightBold', t('settings.brightBold'))}
+        {toggle('optionAsMeta', t('settings.optionAsMeta'))}
+        {toggle('remoteTitles', t('settings.remoteTitles'))}
         {toggle('importHistory', t('settings.importHistory'), t('settings.execChannelsHint'))}
         {toggle('detectOs', t('settings.detectOs'), t('settings.execChannelsHint'))}
         <Row label={t('settings.osc52')} description={t('settings.osc52Hint')}>
@@ -340,6 +403,72 @@ function Terminal() {
         </Row>
       </Card>
     </>
+  );
+}
+
+/** Editor for the user's own output highlighting rules. */
+function HighlightRules({
+  rules,
+  onChange,
+}: {
+  rules: HighlightRule[];
+  onChange: (rules: HighlightRule[]) => void;
+}) {
+  const { t } = useTranslation();
+  const set = (i: number, patch: Partial<HighlightRule>) =>
+    onChange(rules.map((r, j) => (j === i ? { ...r, ...patch } : r)));
+  return (
+    <div className="grid gap-2 py-2">
+      <p className="text-subtle text-[12px]">{t('settings.highlightRulesHint')}</p>
+      {rules.map((r, i) => {
+        const valid = isValidPattern(r.pattern);
+        return (
+          <div key={i} className="flex flex-wrap items-center gap-2">
+            <Input
+              aria-label={t('settings.rulePattern')}
+              placeholder={t('settings.rulePattern')}
+              className={cn('min-w-0 flex-1 font-mono', !valid && r.pattern && 'border-danger')}
+              spellCheck={false}
+              defaultValue={r.pattern}
+              title={!valid && r.pattern ? t('settings.invalidPattern') : undefined}
+              onBlur={(e) => {
+                if (e.target.value !== r.pattern) set(i, { pattern: e.target.value });
+              }}
+            />
+            <input
+              type="color"
+              aria-label={t('settings.ruleColor')}
+              value={r.color}
+              onChange={(e) => set(i, { color: e.target.value })}
+              className="border-border h-9 w-10 cursor-pointer rounded-lg border bg-transparent p-1"
+            />
+            <Switch
+              label={t('settings.ruleCase')}
+              checked={r.caseSensitive}
+              onCheckedChange={(v) => set(i, { caseSensitive: v })}
+            />
+            <Button
+              size="icon-sm"
+              variant="ghost"
+              aria-label={t('settings.removeRule')}
+              onClick={() => onChange(rules.filter((_, j) => j !== i))}
+            >
+              <X className="size-4" />
+            </Button>
+          </div>
+        );
+      })}
+      <Button
+        variant="ghost"
+        className="justify-self-start"
+        onClick={() =>
+          onChange([...rules, { pattern: '', color: '#f4c15c', caseSensitive: false }])
+        }
+      >
+        <Plus className="size-4" />
+        {t('settings.addRule')}
+      </Button>
+    </div>
   );
 }
 

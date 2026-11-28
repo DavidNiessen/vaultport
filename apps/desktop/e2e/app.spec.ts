@@ -76,6 +76,62 @@ test('suggests completions while typing and inserts one with Tab', async ({ page
   await expect.poll(text).toContain('git: command not found');
 });
 
+test('shows commands as blocks, searches history and suggests inline', async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, 'needs a hardware keyboard');
+  await unlock(page);
+  await page
+    .getByRole('button', { name: /router/ })
+    .first()
+    .dblclick();
+  const text = () =>
+    page.evaluate(() => (window as unknown as { __terminalText: () => string }).__terminalText());
+  await expect.poll(text, { timeout: 10_000 }).toContain('Welcome to router');
+
+  // A failing command gets a red badge with its exit status.
+  await page.keyboard.type('false\r');
+  const badge = page.locator('.vp-block-badge.vp-fail').first();
+  await expect(badge).toContainText('✗ 1');
+  await badge.click();
+  const menu = page.getByTestId('block-menu');
+  await expect(menu.getByRole('menuitem', { name: 'Run again' })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+
+  // Ctrl+R searches the command history.
+  await page.locator('.xterm-helper-textarea').first().focus();
+  await page.keyboard.press('Control+r');
+  const search = page.getByTestId('history-search');
+  await search.getByRole('textbox').fill('nginx');
+  await expect(search.getByRole('option', { name: /systemctl status nginx/ })).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(search).toBeHidden();
+  await expect.poll(text).toContain('$ systemctl status nginx');
+  await page.keyboard.press('Control+u');
+
+  // The rest of a matching history command shows in grey; → accepts it.
+  await page.keyboard.type('docker co');
+  await expect(page.getByTestId('ghost-text')).toHaveText('mpose up -d');
+  await page.keyboard.press('ArrowRight');
+  await expect.poll(text).toContain('$ docker compose up -d');
+});
+
+test('opens, closes and reopens terminal tabs from the keyboard', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'needs a hardware keyboard');
+  await unlock(page);
+  const tabs = page.getByRole('tablist', { name: 'Tabs' });
+  await page.keyboard.press('Control+t');
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(1);
+  await page.keyboard.press('Control+t');
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
+  await page.keyboard.press('Control+w');
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(1);
+  await page.keyboard.press('Control+Shift+t');
+  await expect(tabs.getByRole('tab', { name: /Local/ })).toHaveCount(2);
+});
+
 test('creates a snippet', async ({ page, isMobile }) => {
   test.skip(isMobile, 'covered by the desktop layout');
   await unlock(page);

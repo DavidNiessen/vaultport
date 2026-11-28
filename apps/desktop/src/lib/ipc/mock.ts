@@ -24,7 +24,14 @@ import type {
   HostConfig,
 } from './index';
 import { emptyConfig } from './index';
-import { mockSessionClose, mockSessionOpen, mockSessionWrite, mockTermComplete } from './mockShell';
+import {
+  MOCK_COMMAND_NAMES,
+  MOCK_HISTORY,
+  mockSessionClose,
+  mockSessionOpen,
+  mockSessionWrite,
+  mockTermComplete,
+} from './mockShell';
 
 type Handler = (args: Record<string, unknown>) => unknown;
 
@@ -365,8 +372,25 @@ const handlers: Record<string, Handler> = {
   forward_status: () => [],
   transfer_list: () => [],
   sync_list_targets: () => [],
-  history_list: () => [],
+  history_list: () => MOCK_HISTORY.map((command, i) => ({ command, count: 12 - i * 3 })),
   term_complete: mockTermComplete,
+  term_commands: () => ({ names: MOCK_COMMAND_NAMES, complete: true }),
+  term_integration_bootstrap: () => ({
+    start: ' true\r',
+    ready: 'VaultportReady',
+    bash: [],
+    zsh: [],
+  }),
+  ai_generate_command: (a) => ({
+    command: `find . -type f -size +100M  # ${String(a.prompt).slice(0, 40)}`,
+    explanation: 'Lists files larger than 100 MB below the current directory.',
+    risk: 'low',
+  }),
+  ai_fix_command: () => ({
+    command: 'git push --set-upstream origin main',
+    explanation: 'The branch has no upstream yet; set it while pushing.',
+    risk: 'low',
+  }),
   ai_status: () => ({
     state: 'notInstalled',
     modelName: 'Qwen2.5-Coder-1.5B-Instruct (Q4_K_M)',

@@ -534,7 +534,35 @@
     "shortcutLineStartEnd": "Zeilenanfang / -ende",
     "shortcutWordJump": "Vorheriges / nächstes Wort",
     "shortcutDeleteLine": "Bis Zeilenanfang löschen",
-    "shortcutAccept": "Vorschlag übernehmen"
+    "shortcutAccept": "Vorschlag übernehmen",
+    "suggestions": "Vorschläge",
+    "suggestMode": "Vorschläge anzeigen",
+    "suggestModeHint": "Beim Tippen oder erst mit Tab (Strg+Leertaste öffnet sie ebenfalls).",
+    "suggestAuto": "Beim Tippen",
+    "suggestTab": "Mit Tab",
+    "ghostText": "Inline-Vorschlag aus dem Verlauf",
+    "ghostTextHint": "Zeigt den Rest eines passenden Befehls in Grau; → oder Ende übernimmt ihn, Strg+→ (⌥→ unter macOS) ein Wort.",
+    "syntaxHighlight": "Befehlszeile hervorheben",
+    "syntaxHighlightHint": "Färbt Befehle, Optionen, Zeichenketten und Variablen beim Tippen; nicht installierte Befehle werden rot.",
+    "commandBlocks": "Befehlsblöcke",
+    "commandBlocksHint": "Trennlinien, Exit-Status und Dauer je Befehl, Springen zwischen Befehlen und Kopieren ihrer Ausgabe. Braucht die Shell-Integration.",
+    "notifyAfter": "Bei langen Befehlen benachrichtigen",
+    "notifyAfterHint": "Wenn ein Befehl, der mindestens so lange lief, fertig wird, während du woanders bist. 0 schaltet es aus.",
+    "seconds": "Sekunden",
+    "sshIntegration": "Shell-Integration über SSH",
+    "sshIntegrationHint": "Lädt sie nach der Anmeldung in bash und zsh, ohne Dateien auf dem Server zu ändern. Die einzeilige Ladeanweisung ist im Terminal sichtbar.",
+    "sshIntegrationOff": "Auf Anfrage (Befehlspalette)",
+    "sshIntegrationAuto": "Automatisch",
+    "aiHashPrompt": "KI mit # fragen",
+    "aiHashPromptHint": "„# was du willst“ und Enter fragt die lokale KI nach einem Befehl, statt einen Kommentar auszuführen.",
+    "highlightRules": "Eigene Hervorhebungen in der Ausgabe",
+    "highlightRulesHint": "Reguläre Ausdrücke, die in der Terminalausgabe eingefärbt werden – zusätzlich zu Fehlern, Warnungen, IP-Adressen, Datumsangaben und IDs.",
+    "addRule": "Regel hinzufügen",
+    "rulePattern": "Muster",
+    "ruleColor": "Farbe",
+    "ruleCase": "Groß-/Kleinschreibung beachten",
+    "removeRule": "Regel entfernen",
+    "invalidPattern": "Ungültiger regulärer Ausdruck"
   },
   "sftp": {
     "actions": "Aktionen",
@@ -720,7 +748,7 @@
   "terminal": {
     "autocomplete": {
       "label": "Vorschläge",
-      "hint": "Tab zum Einfügen · ↑↓ zum Auswählen · Esc zum Schließen",
+      "hint": "Tab übernimmt · ↑↓ wählt · → übernimmt den grauen Vorschlag · Esc schließt",
       "kind": {
         "path": "Pfad",
         "value": "Wert",
@@ -750,7 +778,59 @@
     "sidePanel": "Seitenleiste",
     "themeQuickOnly": "Speichere diese Verbindung als Host, um ihr Farbschema anzupassen.",
     "themes": "Farbschemata",
-    "installIntegration": "Befehlsblöcke in dieser Sitzung aktivieren"
+    "installIntegration": "Befehlsblöcke in dieser Sitzung aktivieren",
+    "insert": "Einfügen",
+    "run": "Ausführen",
+    "historySearch": {
+      "title": "Befehlsverlauf",
+      "placeholder": "Ausgeführte Befehle durchsuchen…",
+      "count_one": "{{count}} Treffer",
+      "count_other": "{{count}} Treffer",
+      "thisSession": "diese Sitzung"
+    },
+    "ai": {
+      "title": "KI nach einem Befehl fragen",
+      "placeholder": "Beschreibe, was du tun willst, z. B. „Dateien über 1 GB finden“",
+      "disabled": "Die lokale KI ist aus. Schalte sie unter Einstellungen → Lokale KI ein, um Befehle aus einer Beschreibung zu erhalten; das Modell läuft auf diesem Gerät.",
+      "openSettings": "Einstellungen öffnen",
+      "fixing": "Sehe mir den letzten fehlgeschlagenen Befehl an…",
+      "local": "Auf diesem Gerät erzeugt · wird nie ohne dich ausgeführt",
+      "risk": {
+        "low": "Geringes Risiko",
+        "medium": "Mittleres Risiko",
+        "high": "Hohes Risiko",
+        "critical": "Kritisch"
+      }
+    },
+    "composer": {
+      "title": "Befehlseditor",
+      "hint": "Mehrzeilige Befehle werden am Stück eingefügt."
+    },
+    "block": {
+      "menu": "Befehlsaktionen",
+      "noStatus": "Kein Exit-Status",
+      "exit": "Exit-Status {{code}}",
+      "copyCommand": "Befehl kopieren",
+      "copyOutput": "Ausgabe kopieren",
+      "copyBoth": "Befehl und Ausgabe kopieren",
+      "rerun": "Erneut ausführen",
+      "fix": "Mit KI korrigieren",
+      "explain": "Prompt für deinen KI-Agenten kopieren",
+      "failedIn": "Ein Befehl ist in {{title}} fehlgeschlagen (Exit {{code}})",
+      "finishedIn": "Ein Befehl in {{title}} ist fertig",
+      "show": "Anzeigen",
+      "noBlocks": "Noch keine abgeschlossenen Befehle. Befehlsblöcke brauchen die Shell-Integration.",
+      "copied": "Kopiert",
+      "jumpToCommand": "Zum Befehl springen",
+      "agentPrompt": "Nutze in Vaultport read_terminal für das Terminal „{{title}}“ (ID {{id}}) und erkläre, warum `{{command}}` fehlgeschlagen ist und wie man es behebt.",
+      "agentPromptCopied": "Prompt kopiert: füge ihn in Claude Code, Cursor oder einen anderen mit Vaultport verbundenen Agenten ein"
+    },
+    "integration": {
+      "already": "Die Shell-Integration ist in dieser Sitzung bereits aktiv",
+      "noAnswer": "Die Shell hat nicht geantwortet. Die Shell-Integration funktioniert mit bash und zsh an einer Eingabeaufforderung.",
+      "unsupported": "Diese Shell wird noch nicht unterstützt (bash und zsh schon)",
+      "enabled": "Befehlsblöcke sind für diese {{shell}}-Sitzung aktiv"
+    }
   },
   "window": {
     "close": "Schließen",

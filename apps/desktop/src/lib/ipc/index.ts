@@ -23,6 +23,7 @@ export type KeyAlgorithm = B.KeyAlgorithm;
 export type Snippet = B.Snippet_Serialize;
 export type CompletionItem = B.CompletionItem_Serialize;
 export type CompletionKind = B.CompletionKind;
+export type AiSuggestion = B.AiSuggestion;
 export type PathSource = B.PathSource;
 export type SnippetPackage = B.SnippetPackage_Serialize;
 export type PortForwardRule = B.PortForwardRule_Serialize;

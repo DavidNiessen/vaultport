@@ -12,7 +12,8 @@ import { Unicode11Addon } from '@xterm/addon-unicode11';
 import { WebLinksAddon } from '@xterm/addon-web-links';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { Terminal } from '@xterm/xterm';
-import { ChevronDown, ChevronUp, Loader2, RotateCw, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowUpToLine, ChevronDown, ChevronUp, Loader2, RotateCw, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -27,10 +28,22 @@ import { useHosts, useSettings } from '@/lib/queries';
 import { useApp, type TerminalTab } from '@/stores/app';
 
 import { AccessoryBar } from './AccessoryBar';
-import { AutocompletePopup } from './autocomplete/AutocompletePopup';
-import { attachAutocomplete, type Autocomplete, type PopupView } from './autocomplete/controller';
+import { AiCommandBar, type AiRequest } from './AiCommandBar';
+import { AutocompletePopup, GhostText } from './autocomplete/AutocompletePopup';
+import {
+  attachAutocomplete,
+  type Autocomplete,
+  type GhostView,
+  type PopupView,
+} from './autocomplete/controller';
+import { BlockMenu, type BlockMenuView } from './BlockMenu';
+import { attachBlocks, blockText, formatDuration, type Block, type BlockTracker } from './blocks';
+import { Composer } from './Composer';
+import { HistorySearch } from './HistorySearch';
+import { attachInputHighlight, solidColor, type InputHighlighter } from './inputHighlight';
+import { DEFAULT_AI_SETTINGS, type AiSettings } from '../ai/settings';
 import { AuthPromptDialog, HostKeyDialog, type PendingPrompt } from './Prompts';
-import { highlightKeywords } from './highlight';
+import { compileRules, highlightKeywords, type Rule } from './highlight';
 import { DEFAULT_TERMINAL_SETTINGS, type TerminalSettings } from './settings';
 import { minimumContrast, terminalBackdrop, themeColors } from './themes';
 import { terminalRegistry, type TerminalAction } from './registry';
@@ -40,9 +53,18 @@ import { actionFor, useKeymap } from '../palette/shortcuts';
 /** Where path suggestions can be listed for this tab. */
 function pathSource(tab: TerminalTab): PathSource {
   if (tab.protocol === 'local') return 'local';
-  if ((tab.protocol === 'ssh' || tab.protocol === 'mosh') && tab.hostId) return 'remote';
+  // Remote files are read over an SFTP channel of the session's own connection.
+  if (tab.protocol === 'ssh' || tab.protocol === 'mosh') return 'remote';
   return 'none';
 }
+
+/** Keys that clear the line being edited (end of line, then kill to its start). */
+const CLEAR_LINE = '\x05\x15';
+
+type Overlay =
+  | { kind: 'history'; query: string; session: string[] }
+  | { kind: 'ai'; request: AiRequest; selection: string }
+  | { kind: 'composer'; initial: string };
 
 function decodeBase64(b64: string): Uint8Array {
   const bin = atob(b64);
@@ -66,6 +88,27 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   const [searchTerm, setSearchTerm] = useState('');
   const [attempt, setAttempt] = useState(0);
   const [closedReason, setClosedReason] = useState<string | null>(null);
+  const [ghost, setGhost] = useState<GhostView | null>(null);
+  const [overlay, setOverlay] = useState<Overlay | null>(null);
+  const [blockMenu, setBlockMenu] = useState<BlockMenuView | null>(null);
+  const [sticky, setSticky] = useState<{ id: number; command: string } | null>(null);
+  const blocksRef = useRef<BlockTracker | null>(null);
+  const highlightRef = useRef<InputHighlighter | null>(null);
+  /** Commands that exist on the machine (null: not known yet). */
+  const knownRef = useRef<Set<string> | null>(null);
+  /** Resolves when the shell answers the integration bootstrap. */
+  const readyRef = useRef<((shell: string) => void) | null>(null);
+  const { settings: ai } = useSettings<AiSettings>('ai', DEFAULT_AI_SETTINGS);
+  const aiRef = useRef(ai);
+  useEffect(() => {
+    aiRef.current = ai;
+  }, [ai]);
+  const agents = useQuery({
+    queryKey: ['agentStatus'],
+    queryFn: () => commands.agentStatus(),
+    staleTime: 30_000,
+  });
+  const agentsEnabled = agents.data?.settings.enabled ?? false;
   const updateTab = useApp((s) => s.updateTab);
   const theme = useApp((s) => s.theme);
   const scheme = useColorScheme(theme);
@@ -74,12 +117,17 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   const host = hosts.find((h) => h.id === tab.hostId);
   const { settings } = useSettings<TerminalSettings>('terminal', DEFAULT_TERMINAL_SETTINGS);
   const settingsRef = useRef(settings);
+  /** The user's output highlighting rules, compiled. */
+  const rulesRef = useRef<Rule[]>([]);
   useEffect(() => {
     settingsRef.current = settings;
+    rulesRef.current = compileRules(settings.highlightRules);
   }, [settings]);
 
   /** Runs a terminal action; returns `false` when it does not apply right now. */
   const runActionRef = useRef<(action: TerminalAction, e?: KeyboardEvent) => boolean>(() => false);
+  /** Called when a command block finishes (kept current by an effect). */
+  const blockFinishedRef = useRef<(b: Block) => void>(() => undefined);
 
   const themeId = host?.config.terminal.theme ?? settings.theme;
   const preset = useApp((s) => s.preset);
@@ -107,6 +155,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
       drawBoldTextInBrightColors: settingsRef.current.brightBold,
       macOptionIsMeta: settingsRef.current.optionAsMeta,
       rightClickSelectsWord: false,
+      overviewRuler: { width: 8 },
       theme: themeColors(themeId, scheme, preset),
       linkHandler: {
         activate: (_e, uri) => {
@@ -191,10 +240,13 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     const ac = attachAutocomplete(term, {
       // Other panes have different lines, so completing while broadcasting would garble them.
       enabled: () => settingsRef.current.autocomplete && !broadcastPanes(),
+      mode: () => settingsRef.current.suggestMode,
+      ghost: () => settingsRef.current.ghostText,
       request: async (input, cwd) =>
         (
           await commands.termComplete({
             hostId: tab.hostId ?? null,
+            sessionId: sessionRef.current,
             line: input.line,
             cursor: input.cursor,
             cwd,
@@ -203,11 +255,67 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         ).items,
       send,
       onView: setAcView,
+      onGhost: setGhost,
       root: () => rootRef.current,
     });
     acRef.current = ac;
+
+    const colors = () => {
+      const th = term.options.theme ?? {};
+      return {
+        ok: solidColor(th.green) ?? '#5fd69b',
+        fail: solidColor(th.red) ?? '#f2687a',
+        separator: solidColor(th.foreground) ?? '#888888',
+      };
+    };
+    const blocks = attachBlocks(term, {
+      enabled: () => settingsRef.current.commandBlocks,
+      colors,
+      onFinished: (b) => blockFinishedRef.current(b),
+      onBadge: (b, rect) => {
+        const root = rootRef.current?.getBoundingClientRect();
+        if (!root) return;
+        setBlockMenu({ block: b, left: rect.right - root.left, top: rect.bottom - root.top + 4 });
+      },
+    });
+    blocksRef.current = blocks;
+    const highlighter = attachInputHighlight(term, {
+      enabled: () => settingsRef.current.syntaxHighlight,
+      ac,
+      known: (name) => knownRef.current?.has(name) ?? null,
+    });
+    highlightRef.current = highlighter;
+    // The answer to the shell integration bootstrap, and freezing colours of a line that runs.
+    term.parser.registerOscHandler(633, (data) => {
+      const ready = 'P;VaultportReady=';
+      if (data.startsWith(ready)) {
+        readyRef.current?.(data.slice(ready.length));
+        readyRef.current = null;
+        return true;
+      }
+      return false;
+    });
+    term.parser.registerOscHandler(133, (data) => {
+      // Keep the colours of a line that runs, or that was abandoned for a new prompt.
+      if (data.startsWith('C') || data.startsWith('A')) highlighter.freeze();
+      return false;
+    });
+    const updateSticky = () => {
+      const b = settingsRef.current.commandBlocks ? blocks.stickyAt() : null;
+      setSticky((cur) =>
+        b ? (cur?.id === b.id ? cur : { id: b.id, command: b.command }) : cur ? null : cur,
+      );
+    };
+    term.onScroll(updateSticky);
+    term.onWriteParsed(() => {
+      if (term.buffer.active.viewportY !== term.buffer.active.baseY) updateSticky();
+    });
+
     term.onData((data) => {
       ac.noteInput(data);
+      // Enter: the line as coloured now is the command that runs.
+      if (data === '\r') highlighter.freeze();
+      else highlighter.noteTyping();
       send(data);
     });
     term.onBinary((data) => {
@@ -226,6 +334,28 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     term.attachCustomKeyEventHandler((e) => {
       if (ac.handleKey(e)) return false;
       if (e.type !== 'keydown') return true;
+      // `# what you want` + Enter asks the local AI instead of running a comment.
+      if (
+        e.key === 'Enter' &&
+        !e.shiftKey &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        aiRef.current.enabled &&
+        settingsRef.current.aiHashPrompt
+      ) {
+        const line = ac.input()?.line.trim() ?? '';
+        if (/^#\s*\S/.test(line) && ac.phase() !== 'running') {
+          e.preventDefault();
+          send(CLEAR_LINE);
+          setOverlay({
+            kind: 'ai',
+            request: { mode: 'ask', prompt: line.replace(/^#\s*/, '') },
+            selection: '',
+          });
+          return false;
+        }
+      }
       const { keymap, apple, recording } = useKeymap.getState();
       if (recording) return true;
       const action = actionFor(e, keymap, apple, 'terminal');
@@ -275,6 +405,10 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     requestAnimationFrame(() => fit.fit());
     return () => {
       ro.disconnect();
+      highlighter.dispose();
+      blocks.dispose();
+      blocksRef.current = null;
+      highlightRef.current = null;
       ac.dispose();
       acRef.current = null;
       terminalRegistry.delete(tab.id);
@@ -284,9 +418,121 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
     // eslint-disable-next-line react-hooks/exhaustive-deps -- created once per tab
   }, [tab.id]);
 
+  /** Writes to this terminal's session only (never broadcast). */
+  const writeSession = useCallback((data: string) => {
+    const id = sessionRef.current;
+    if (id) void commands.sessionWrite(id, data).catch(() => undefined);
+  }, []);
+
+  /** Replaces the line at the prompt with `text`, and runs it when `run` is set. */
+  const putLine = useCallback(
+    (text: string, run: boolean) => {
+      const term = termRef.current;
+      setOverlay(null);
+      term?.focus();
+      writeSession(CLEAR_LINE);
+      if (text.includes('\n')) {
+        // Bracketed paste keeps a multi-line command together.
+        term?.paste(text);
+        if (run) setTimeout(() => writeSession('\r'), 30);
+      } else {
+        writeSession(run ? `${text}\r` : text);
+      }
+    },
+    [writeSession],
+  );
+
+  /** Loads shell integration into the running bash or zsh (see `term_integration_bootstrap`). */
+  const installIntegration = useCallback(
+    async (quiet: boolean) => {
+      if (blocksRef.current?.active()) {
+        if (!quiet) toast.success(t('terminal.integration.already'));
+        return;
+      }
+      try {
+        const b = await commands.termIntegrationBootstrap();
+        const shell = await new Promise<string | null>((resolve) => {
+          readyRef.current = resolve;
+          setTimeout(() => {
+            if (readyRef.current === resolve) {
+              readyRef.current = null;
+              resolve(null);
+            }
+          }, 6000);
+          writeSession(b.start);
+        });
+        if (shell === null) {
+          if (!quiet) toast.error(t('terminal.integration.noAnswer'));
+          return;
+        }
+        const lines = shell === 'bash' ? b.bash : shell === 'zsh' ? b.zsh : [];
+        writeSession(`${lines.map((l) => `${l}\n`).join('')}.\n`);
+        if (lines.length === 0) {
+          if (!quiet) toast.error(t('terminal.integration.unsupported'));
+        } else if (!quiet) toast.success(t('terminal.integration.enabled', { shell }));
+      } catch (e) {
+        if (!quiet) toast.error(errorMessage(e));
+      }
+    },
+    [t, writeSession],
+  );
+
+  /** Fetches the commands on the machine, for highlighting unknown ones. */
+  const loadKnownCommands = useCallback(async () => {
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const id = sessionRef.current;
+      const res = await commands
+        .termCommands({ hostId: tab.hostId ?? null, sessionId: id, paths: pathSource(tab) })
+        .catch(() => null);
+      if (res?.complete) {
+        const set = new Set(res.names);
+        // Commands the user ran before are known too (aliases and functions included).
+        const history = await commands.historyList(tab.hostId ?? null, 500).catch(() => []);
+        for (const h of history) {
+          const first = /^\s*(?:\w+=\S*\s+)*(\S+)/.exec(h.command)?.[1];
+          if (first) set.add(first);
+        }
+        for (const b of blocksRef.current?.blocks() ?? []) {
+          const first = b.command.trim().split(/\s+/)[0];
+          if (first && b.exit === 0) set.add(first);
+        }
+        knownRef.current = set;
+        return;
+      }
+      if (pathSource(tab) === 'none') return;
+      await new Promise((r) => setTimeout(r, 1500 + attempt * 1000));
+    }
+  }, [tab]);
+
+  const onBlockFinished = (b: Block) => {
+    const first = b.command.trim().split(/\s+/)[0];
+    if (first && b.exit === 0) knownRef.current?.add(first);
+    const secs = settingsRef.current.notifyAfterSeconds;
+    const ms = b.startedAt !== null && b.finishedAt !== null ? b.finishedAt - b.startedAt : 0;
+    const away = !document.hasFocus() || useApp.getState().activeTab !== tab.id || !active;
+    if (secs > 0 && ms >= secs * 1000 && away) {
+      const failed = b.exit !== null && b.exit !== 0;
+      const title = failed
+        ? t('terminal.block.failedIn', { title: tab.title, code: b.exit ?? 1 })
+        : t('terminal.block.finishedIn', { title: tab.title });
+      const description = `${b.command} · ${formatDuration(ms)}`;
+      const show = {
+        label: t('terminal.block.show'),
+        onClick: () => useApp.getState().activate(tab.id),
+      };
+      if (failed) toast.error(title, { description, action: show });
+      else toast.success(title, { description, action: show });
+    }
+  };
+
+  const currentLine = () => acRef.current?.input()?.line ?? '';
+  const selection = () =>
+    aiRef.current.useSelection ? (termRef.current?.getSelection() ?? '') : '';
+
   const runAction = (action: TerminalAction): boolean => {
     const term = termRef.current;
     if (!term) return false;
+    const atPrompt = term.buffer.active.type === 'normal' && acRef.current?.phase() !== 'running';
     switch (action) {
       case 'search':
         setSearchOpen(true);
@@ -311,6 +557,54 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
           })
           .catch(() => undefined);
         return true;
+      case 'suggest':
+        if (!atPrompt) return false;
+        acRef.current?.open();
+        return true;
+      case 'historySearch':
+        // Full-screen programs and running commands keep their own Ctrl+R.
+        if (!atPrompt) return false;
+        acRef.current?.close();
+        setOverlay({
+          kind: 'history',
+          query: currentLine().trim(),
+          session: (blocksRef.current?.blocks() ?? []).map((b) => b.command).filter(Boolean),
+        });
+        return true;
+      case 'aiCommand':
+        if (!atPrompt) return false;
+        acRef.current?.close();
+        setOverlay({ kind: 'ai', request: { mode: 'ask', prompt: '' }, selection: selection() });
+        return true;
+      case 'composer':
+        if (!atPrompt) return false;
+        acRef.current?.close();
+        setOverlay({ kind: 'composer', initial: currentLine() });
+        return true;
+      case 'prevBlock':
+      case 'nextBlock': {
+        const tracker = blocksRef.current;
+        const b = tracker?.step(action === 'prevBlock' ? -1 : 1);
+        if (!tracker || !b) {
+          if (action === 'nextBlock' && tracker?.active()) term.scrollToBottom();
+          return tracker?.active() ?? false;
+        }
+        tracker.reveal(b);
+        return true;
+      }
+      case 'copyLastOutput': {
+        const tracker = blocksRef.current;
+        const b = tracker?.last();
+        if (!tracker || !b) {
+          toast(t('terminal.block.noBlocks'));
+          return true;
+        }
+        void writeText(tracker.outputOf(b)).then(() => toast.success(t('terminal.block.copied')));
+        return true;
+      }
+      case 'installIntegration':
+        void installIntegration(false);
+        return true;
       default:
         return false;
     }
@@ -318,6 +612,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
 
   useEffect(() => {
     runActionRef.current = runAction;
+    blockFinishedRef.current = onBlockFinished;
   });
 
   // Live theme / font updates.
@@ -347,7 +642,7 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         case 'output': {
           const bytes = decodeBase64(ev.data);
           term.write(bytes);
-          if (settingsRef.current.highlightKeywords) highlightKeywords(term);
+          if (settingsRef.current.highlightKeywords) highlightKeywords(term, rulesRef.current);
           if (!document.hasFocus() || useApp.getState().activeTab !== tab.id) {
             updateTab(tab.id, { unread: true });
           }
@@ -356,6 +651,18 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         case 'status':
           if (ev.status === 'connected') {
             updateTab(tab.id, { status: 'connected' });
+            setTimeout(() => {
+              if (disposed) return;
+              void loadKnownCommands();
+              if (
+                (tab.protocol === 'ssh' || tab.protocol === 'mosh') &&
+                settingsRef.current.sshIntegration === 'auto' &&
+                !blocksRef.current?.active() &&
+                term.buffer.active.type === 'normal'
+              ) {
+                void installIntegration(true);
+              }
+            }, 1500);
             const initial = useApp.getState().tabs.find((x) => x.id === tab.id);
             if (initial?.kind === 'terminal' && initial.initialInput) {
               const text = initial.initialInput;
@@ -478,7 +785,10 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
   };
 
   const background = terminalBackdrop(themeId, scheme, preset);
-
+  const closeOverlay = () => {
+    setOverlay(null);
+    requestAnimationFrame(() => termRef.current?.focus());
+  };
   return (
     <div ref={rootRef} className="relative flex h-full min-h-0 flex-col" style={{ background }}>
       {searchOpen ? (
@@ -543,11 +853,107 @@ export function TerminalView({ tab, active }: { tab: TerminalTab; active: boolea
         }}
       />
 
-      {acView ? (
+      {sticky && !searchOpen ? (
+        <button
+          type="button"
+          data-testid="sticky-command"
+          onClick={() => {
+            const b = blocksRef.current?.blocks().find((x) => x.id === sticky.id);
+            if (b) blocksRef.current?.reveal(b);
+          }}
+          className="bg-surface-2/90 border-border text-muted hover:text-text absolute top-0 right-4 left-2 z-10 flex h-7 items-center gap-2 truncate rounded-b-lg border border-t-0 px-3 text-left font-mono text-[12px] shadow-[var(--shadow)] backdrop-blur-md"
+          title={t('terminal.block.jumpToCommand')}
+        >
+          <ArrowUpToLine className="size-3.5 shrink-0" aria-hidden />
+          <span className="truncate">{sticky.command}</span>
+        </button>
+      ) : null}
+
+      {ghost && !overlay ? (
+        <GhostText
+          {...ghost}
+          fontFamily={`'${settings.fontFamily}', 'JetBrains Mono', monospace`}
+          fontSize={fontSize}
+          color={themeColors(themeId, scheme, preset).foreground ?? '#888888'}
+        />
+      ) : null}
+
+      {acView && !overlay ? (
         <AutocompletePopup
           view={acView}
           onPick={(i) => acRef.current?.pick(i)}
           onHover={(i) => acRef.current?.hover(i)}
+        />
+      ) : null}
+
+      {overlay?.kind === 'history' ? (
+        <HistorySearch
+          hostId={tab.hostId}
+          sessionCommands={overlay.session}
+          initialQuery={overlay.query}
+          onInsert={(c) => putLine(c, false)}
+          onRun={(c) => putLine(c, true)}
+          onClose={closeOverlay}
+        />
+      ) : null}
+      {overlay?.kind === 'ai' ? (
+        <AiCommandBar
+          request={overlay.request}
+          enabled={ai.enabled}
+          sessionId={tab.sessionId}
+          selection={overlay.selection}
+          onInsert={(c) => putLine(c, false)}
+          onRun={(c) => putLine(c, true)}
+          onClose={closeOverlay}
+          onOpenSettings={() => {
+            closeOverlay();
+            useApp.getState().setSection('settings');
+          }}
+        />
+      ) : null}
+      {overlay?.kind === 'composer' ? (
+        <Composer
+          initial={overlay.initial}
+          fontFamily={`'${settings.fontFamily}', 'JetBrains Mono', monospace`}
+          onInsert={(c) => putLine(c, false)}
+          onRun={(c) => putLine(c, true)}
+          onClose={closeOverlay}
+        />
+      ) : null}
+      {blockMenu ? (
+        <BlockMenu
+          view={blockMenu}
+          aiEnabled={ai.enabled}
+          agentsEnabled={agentsEnabled}
+          onClose={() => {
+            setBlockMenu(null);
+            termRef.current?.focus();
+          }}
+          onCopyCommand={() => void writeText(blockMenu.block.command)}
+          onCopyOutput={() =>
+            void writeText(blocksRef.current?.outputOf(blockMenu.block) ?? '').then(() =>
+              toast.success(t('terminal.block.copied')),
+            )
+          }
+          onCopyBoth={() =>
+            void writeText(
+              blockText(
+                blockMenu.block.command,
+                blocksRef.current?.outputOf(blockMenu.block) ?? '',
+              ),
+            ).then(() => toast.success(t('terminal.block.copied')))
+          }
+          onRerun={() => putLine(blockMenu.block.command, true)}
+          onFix={() => setOverlay({ kind: 'ai', request: { mode: 'fix' }, selection: '' })}
+          onExplain={() =>
+            void writeText(
+              t('terminal.block.agentPrompt', {
+                title: tab.title,
+                id: tab.sessionId ?? '',
+                command: blockMenu.block.command,
+              }),
+            ).then(() => toast.success(t('terminal.block.agentPromptCopied')))
+          }
         />
       ) : null}
 
